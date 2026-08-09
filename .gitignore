@@ -1,0 +1,66 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# Playwright
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
+
+# backend runtime data
+/backend/uploads/
+/backend/dist/
+/backend/prisma/dev.db
+/backend/prisma/dev.db-journal
+
+# misc
+/_SOURCE_DUMP.txt
+/_SRC_*.txt
+/FULL_PROJECT_CODE.txt
+/NOVA_AI_COMPLETE_SOURCE_CODE.md
+
+# runtime logs
+*.log
+*.err
+/backend/backend_out*.txt
