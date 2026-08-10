@@ -64,3 +64,6 @@ node_modules/
 *.log
 *.err
 /backend/backend_out*.txt
+
+.vercel
+.env*

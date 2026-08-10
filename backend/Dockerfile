@@ -20,13 +20,12 @@ RUN adduser -S nova -u 1001
 COPY --from=builder --chown=nova:nova /app/dist ./dist
 COPY --from=builder --chown=nova:nova /app/node_modules ./node_modules
 COPY --from=builder --chown=nova:nova /app/prisma ./prisma
+COPY --from=builder --chown=nova:nova /app/scripts ./scripts
 COPY --from=builder --chown=nova:nova /app/package.json ./
-
-USER nova
 
 EXPOSE 8080
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:8080/api/v1/health || exit 1
 
-CMD ["node", "dist/main.js"]
+CMD ["sh", "-c", "mkdir -p /app/data && npx prisma db push --skip-generate && node scripts/cleanup-test-users.js; node dist/main.js"]

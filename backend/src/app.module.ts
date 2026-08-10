@@ -15,7 +15,7 @@ import { HealthModule } from './modules/health/health.module';
 import { WebSocketModule } from './modules/websocket/websocket.module';
 import { SecurityModule } from './modules/security/security.module';
 import { AiRouterModule } from './modules/ai-router/ai-router.module';
-import { UploadsModule } from './modules/uploads/uploads.module';
+import { MediaModule } from './modules/media/media.module';
 import { LearningModule } from './modules/learning/learning.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { SecurityMiddleware } from './common/middleware/security.middleware';
@@ -51,7 +51,7 @@ import { ProviderFallbackService } from './common/services/provider-fallback.ser
     SecurityModule,
     AiRouterModule,
     AdminModule,
-    UploadsModule,
+    MediaModule,
     LearningModule,
   ],
   providers: [SecurityMiddleware, AuditService, ReputationService, WalletService, SearchService, NovaAiOsService, RagService, AiIntegrationService, ProviderFallbackService],

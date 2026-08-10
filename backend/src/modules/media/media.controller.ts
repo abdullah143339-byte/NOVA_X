@@ -11,7 +11,7 @@ import { ApiTags, ApiBearerAuth, ApiConsumes, ApiOperation } from '@nestjs/swagg
 import { ConfigService } from '@nestjs/config';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/user.decorator';
-import { UploadsService } from './uploads.service';
+import { UploadsService } from './media.service';
 import { ApiResponseDto } from '../../common/dto/api-response.dto';
 
 const MAX_FILE_SIZE = 500 * 1024 * 1024;
