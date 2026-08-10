@@ -14,6 +14,11 @@ export class LocalDiskStorageProvider implements IStorageProvider {
   constructor(private configService: ConfigService) {}
 
   async uploadFile(file: Express.Multer.File, req: Request): Promise<{ url: string; key: string }> {
+    const appUrl = this.configService.get<string>('APP_URL');
+    if (appUrl) {
+      const url = `${appUrl.replace(/\/$/, '')}/uploads/${file.filename}`;
+      return { url, key: file.filename };
+    }
     const port = this.configService.get<number>('APP_PORT') || 8080;
     const host = req.headers.host || `localhost:${port}`;
     const protocol = req.protocol || 'http';
@@ -25,7 +30,7 @@ export class LocalDiskStorageProvider implements IStorageProvider {
   async deleteFile(key: string): Promise<void> {
     const fs = await import('fs');
     const path = await import('path');
-    const filePath = path.join(process.cwd(), 'uploads', key);
+    const filePath = path.join(process.cwd(), 'data', 'uploads', key);
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
     }

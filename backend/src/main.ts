@@ -15,6 +15,7 @@ async function bootstrap() {
   const logger = new Logger('Bootstrap');
 
   app.setGlobalPrefix('api/v1');
+  (app.getHttpAdapter().getInstance() as express.Express).set('trust proxy', true);
 
   // Multi-instance scaling: use Redis-backed Socket.io adapter when REDIS_URL is set.
   const redisUrl = configService.get<string>('REDIS_URL');
@@ -79,7 +80,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
 
-  const uploadsDir = join(process.cwd(), 'uploads');
+  const uploadsDir = join(process.cwd(), 'data', 'uploads');
   const fs = await import('fs');
   if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir, { recursive: true });

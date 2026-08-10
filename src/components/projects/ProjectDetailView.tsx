@@ -24,7 +24,6 @@ import {
   Users,
   CheckCircle2,
   Circle,
-  Star,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import GlassCard from "@/components/ui/GlassCard";
@@ -32,58 +31,13 @@ import Button from "@/components/ui/Button";
 import { Modal } from "@/components/admin/AdminShared";
 import { useAuth } from "@/providers/AuthProvider";
 import api from "@/lib/api";
-import {
-  seedShowcaseProjects,
-  normalizePostToProject,
-  isoHoursAgo,
-  COMMENTS_POOL,
-  CREATOR_POOL,
-  hashSeed,
-  pickFrom,
-  extractPost,
-} from "@/components/projects/data";
+import { normalizePostToProject, extractPost, extractPostList, parseTags } from "@/components/projects/data";
 import { findSimilarProjects } from "@/components/projects/ai";
 import type { ProjectRow, ProjectCommentRow } from "@/components/projects/types";
 import { StatusPill, VerifiedBadge, ProjectAvatar, TechChips, TagChips, type ProjectSocial } from "@/components/projects/ProjectShared";
 import { ProjectAIAssistant } from "@/components/projects/ProjectAIAssistant";
 import { ShareSheet } from "@/components/projects/ShareSheet";
 import { CommentsPanel } from "@/components/projects/CommentsPanel";
-
-function seedComments(project: ProjectRow): ProjectCommentRow[] {
-  const seed = hashSeed(`comments:${project.id}`);
-  const count = 2 + (seed % 3);
-  const out: ProjectCommentRow[] = [];
-  for (let i = 0; i < count; i += 1) {
-    const s = (seed * 31 + i * 17) >>> 0;
-    const author = pickFrom(CREATOR_POOL, s);
-    out.push({
-      id: `c-${project.id}-${i}`,
-      user: { name: author.name, username: author.username, avatar: author.avatar },
-      content: COMMENTS_POOL[(seed + i) % COMMENTS_POOL.length],
-      createdAt: isoHoursAgo(3 + i * 9),
-      likes: (seed + i * 7) % 40,
-    });
-  }
-  return out;
-}
-
-function seedReviews(project: ProjectRow): { id: string; user: { name: string; username: string; avatar: string }; rating: number; content: string; createdAt: string }[] {
-  const seed = hashSeed(`reviews:${project.id}`);
-  const count = 1 + (seed % 3);
-  const out: { id: string; user: { name: string; username: string; avatar: string }; rating: number; content: string; createdAt: string }[] = [];
-  for (let i = 0; i < count; i += 1) {
-    const s = (seed * 13 + i * 29) >>> 0;
-    const author = pickFrom(CREATOR_POOL, s + i);
-    out.push({
-      id: `r-${project.id}-${i}`,
-      user: { name: author.name, username: author.username, avatar: author.avatar },
-      rating: 4 + (s % 2),
-      content: COMMENTS_POOL[(s + i * 5) % COMMENTS_POOL.length],
-      createdAt: isoHoursAgo(6 + i * 12),
-    });
-  }
-  return out;
-}
 
 function normalizeComment(raw: {
   id: string;
@@ -113,9 +67,7 @@ export function ProjectDetailView({ id }: { id: string }) {
   const [notFound, setNotFound] = useState(false);
   const [social, setSocial] = useState<ProjectSocial>({ liked: false, bookmarked: false, followed: false });
   const [comments, setComments] = useState<ProjectCommentRow[]>([]);
-  const [reviews, setReviews] = useState<{ id: string; user: { name: string; username: string; avatar: string }; rating: number; content: string; createdAt: string }[]>([]);
   const [addingComment, setAddingComment] = useState(false);
-  const [activePanel, setActivePanel] = useState<"comments" | "reviews">("comments");
   const [shareOpen, setShareOpen] = useState(false);
   const [aiOpen, setAiOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
@@ -137,45 +89,53 @@ export function ProjectDetailView({ id }: { id: string }) {
     let mounted = true;
     const raf = requestAnimationFrame(() => {
       async function load() {
-        const pool = seedShowcaseProjects(24);
-        let found = pool.find((p) => p.id === id) || null;
-        let postBacked = false;
-        if (!found && user) {
-          try {
-            const res = await api.getPost(id);
-            const post = extractPost(res.data);
-            if (post) {
-              found = normalizePostToProject(post);
-              postBacked = true;
-            }
-          } catch {
-            found = null;
+        if (!user) {
+          if (mounted) {
+            setLoading(false);
+            setNotFound(true);
           }
-        }
-        if (!mounted) return;
-        if (!found) {
-          setLoading(false);
-          setNotFound(true);
           return;
         }
-        const viewed = { ...found, stats: { ...found.stats, views: found.stats.views + 1 } };
-        setProject(viewed);
-        setSocial({ liked: false, bookmarked: false, followed: Boolean(viewed.creator.isFollowed) });
-        setRelated(findSimilarProjects(viewed, pool));
-        if (postBacked && viewed.postId) {
-          try {
-            const cres = await api.getPostComments(viewed.postId);
-            const cdata = cres.data as { data?: { id: string; content?: string; createdAt?: string; author?: { id?: string; username?: string; displayName?: string; avatar?: string } }[] };
-            const items = Array.isArray(cdata?.data) ? cdata.data.map(normalizeComment) : [];
-            if (mounted) setComments(items);
-          } catch {
-            if (mounted) setComments([]);
+        try {
+          const res = await api.getPost(id);
+          const post = extractPost(res.data);
+          if (!post || !parseTags(post.tags).includes("project")) {
+            if (mounted) {
+              setLoading(false);
+              setNotFound(true);
+            }
+            return;
           }
-        } else {
-          if (mounted) setComments(seedComments(viewed));
+          const found = normalizePostToProject(post);
+          const viewed = { ...found, stats: { ...found.stats, views: found.stats.views + 1 } };
+          if (mounted) setProject(viewed);
+          if (mounted) setSocial({ liked: false, bookmarked: false, followed: Boolean(viewed.creator.isFollowed) });
+          if (viewed.postId) {
+            try {
+              const cres = await api.getPostComments(viewed.postId);
+              const cdata = cres.data as { data?: { id: string; content?: string; createdAt?: string; author?: { id?: string; username?: string; displayName?: string; avatar?: string } }[] };
+              const items = Array.isArray(cdata?.data) ? cdata.data.map(normalizeComment) : [];
+              if (mounted) setComments(items);
+            } catch {
+              if (mounted) setComments([]);
+            }
+          }
+          try {
+            const pres = await api.getUserPosts(user.id);
+            const pool = extractPostList(pres.data)
+              .filter((p) => parseTags(p.tags).includes("project"))
+              .map((p) => normalizePostToProject(p));
+            if (mounted) setRelated(findSimilarProjects(viewed, pool));
+          } catch {
+            if (mounted) setRelated([]);
+          }
+          if (mounted) setLoading(false);
+        } catch {
+          if (mounted) {
+            setLoading(false);
+            setNotFound(true);
+          }
         }
-        if (mounted) setReviews(seedReviews(viewed));
-        if (mounted) setLoading(false);
       }
       void load();
     });
@@ -265,7 +225,7 @@ export function ProjectDetailView({ id }: { id: string }) {
     }
   }
 
-  const isOwner = Boolean(user && project && project.source === "post" && project.postId);
+  const isOwner = Boolean(user && project && project.creator.id && project.creator.id === user.id);
 
   if (loading) {
     return (
@@ -441,12 +401,13 @@ export function ProjectDetailView({ id }: { id: string }) {
 
           {project.gallery.length > 0 && (
             <GlassCard>
-              <h2 className="font-bold text-foreground mb-3">Gallery</h2>
+              <h2 className="font-bold text-foreground mb-3">Screenshots</h2>
               <div className="grid grid-cols-2 gap-3">
                 {project.gallery.map((g, i) => (
-                  <div key={i} className={cn("relative rounded-xl aspect-video overflow-hidden bg-gradient-to-br", g)}>
-                    <div className="absolute inset-0 opacity-30 [background-image:radial-gradient(circle_at_1px_1px,white_1px,transparent_0)] [background-size:14px_14px]" />
-                    <span className="absolute bottom-2 left-2 text-[11px] text-white/80 font-medium">Screenshot {i + 1}</span>
+                  <div key={i} className="relative rounded-xl aspect-video overflow-hidden bg-muted">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={g} alt={`Screenshot ${i + 1}`} className="absolute inset-0 w-full h-full object-cover" />
+                    <span className="absolute bottom-2 left-2 text-[11px] text-white/90 font-medium drop-shadow">Screenshot {i + 1}</span>
                   </div>
                 ))}
               </div>
@@ -608,53 +569,7 @@ export function ProjectDetailView({ id }: { id: string }) {
 
       <div id="comments-section" className="scroll-mt-24">
         <GlassCard>
-          <div className="flex items-center gap-1 mb-4 border-b border-border pb-3">
-            <button
-              type="button"
-              onClick={() => setActivePanel("comments")}
-              className={cn(
-                "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all",
-                activePanel === "comments" ? "bg-gradient-primary text-white" : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              <MessageSquare className="w-3.5 h-3.5" /> Comments ({comments.length})
-            </button>
-            <button
-              type="button"
-              onClick={() => setActivePanel("reviews")}
-              className={cn(
-                "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all",
-                activePanel === "reviews" ? "bg-gradient-primary text-white" : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              <Star className="w-3.5 h-3.5" /> Reviews ({reviews.length})
-            </button>
-          </div>
-          {activePanel === "comments" ? (
-            <CommentsPanel comments={comments} adding={addingComment} onAdd={addComment} onLike={likeComment} />
-          ) : (
-            <div className="space-y-3">
-              {reviews.length === 0 && <p className="text-center py-8 text-sm text-muted-foreground">No reviews yet.</p>}
-              {reviews.map((r) => (
-                <div key={r.id} className="flex gap-3">
-                  <ProjectAvatar avatar={r.user.avatar} name={r.user.name} size={9} />
-                  <div className="flex-1 min-w-0 glass rounded-xl px-3 py-2.5">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-semibold text-foreground">{r.user.name}</span>
-                      <span className="text-[11px] text-muted-foreground">@{r.user.username}</span>
-                      <span className="flex items-center gap-0.5 ml-auto">
-                        {Array.from({ length: 5 }).map((_, i) => (
-                          <Star key={i} className={cn("w-3 h-3", i < r.rating ? "text-amber-400 fill-amber-400" : "text-muted-foreground/30")} />
-                        ))}
-                      </span>
-                    </div>
-                    <p className="text-sm text-foreground/90 mt-1">{r.content}</p>
-                    <p className="text-[11px] text-muted-foreground mt-1.5">{new Date(r.createdAt).toLocaleDateString()}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          <CommentsPanel comments={comments} adding={addingComment} onAdd={addComment} onLike={likeComment} />
         </GlassCard>
       </div>
 

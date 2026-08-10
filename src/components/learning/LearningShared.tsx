@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import {
-  Home,
   FolderOpen,
   NotebookPen,
   Video,
@@ -22,7 +21,6 @@ import type { Subject, TaskPriority, FileKind } from "./types";
 export const LEARNING_BASE = "/dashboard/learning";
 
 export const learningTabs = [
-  { label: "Hub", href: LEARNING_BASE, icon: Home, exact: true },
   { label: "Subjects", href: `${LEARNING_BASE}/subjects`, icon: FolderOpen },
   { label: "Notes", href: `${LEARNING_BASE}/notes`, icon: NotebookPen },
   { label: "Lectures", href: `${LEARNING_BASE}/lectures`, icon: Video },
@@ -38,8 +36,7 @@ export function LearningNav() {
   return (
     <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 [scrollbar-width:none]">
       {learningTabs.map((tab) => {
-        const active = tab.exact ? pathname === tab.href : pathname.startsWith(tab.href);
-        const Icon = tab.icon;
+        const active = "exact" in tab && tab.exact ? pathname === tab.href : pathname.startsWith(tab.href);        const Icon = tab.icon;
         return (
           <Link
             key={tab.label}

@@ -14,7 +14,7 @@ import { ProjectSectionRow } from "@/components/projects/ProjectSections";
 import { ProjectAIAssistant } from "@/components/projects/ProjectAIAssistant";
 import { ShareSheet } from "@/components/projects/ShareSheet";
 import { useSocialMap } from "@/components/projects/ProjectShared";
-import { seedShowcaseProjects, normalizePostToProject, sectionSort, extractPostList, parseTags, posMod } from "@/components/projects/data";
+import { normalizePostToProject, sectionSort, extractPostList, parseTags, posMod } from "@/components/projects/data";
 import type { ProjectRow, ProjectStatus, ProjectSection } from "@/components/projects/types";
 
 function filterProjects(projects: ProjectRow[], search: string, category: string, status: ProjectStatus | "ALL"): ProjectRow[] {
@@ -56,9 +56,8 @@ export default function ProjectsPage() {
   useEffect(() => {
     let mounted = true;
     const raf = requestAnimationFrame(() => {
-      const seed = seedShowcaseProjects(12);
       async function load() {
-        let merged = seed;
+        let merged: ProjectRow[] = [];
         if (user) {
           try {
             const res = await api.getUserPosts(user.id);
@@ -66,9 +65,9 @@ export default function ProjectsPage() {
             const postProjects = items
               .filter((p) => parseTags(p.tags).includes("project"))
               .map((p) => normalizePostToProject(p));
-            merged = [...seed, ...postProjects];
+            merged = postProjects;
           } catch {
-            merged = seed;
+            merged = [];
           }
         }
         if (!mounted) return;

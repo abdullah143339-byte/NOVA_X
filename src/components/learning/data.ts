@@ -1,16 +1,12 @@
 import type {
   LearningState,
-  Subject,
-  Lecture,
-  Note,
-  LearningFile,
-  StudyTask,
   StudyStats,
   SubjectColor,
   FileKind,
 } from "./types";
 
-const STORAGE_KEY = "nova_learning_v1";
+const STORAGE_KEY = "nova_learning_v2";
+const LEGACY_STORAGE_KEY = "nova_learning_v1";
 
 export const SUBJECT_COLORS: Record<SubjectColor, string> = {
   violet: "#6C63FF",
@@ -139,176 +135,27 @@ export function computeStats(state: LearningState): StudyStats {
   };
 }
 
-function seed(): LearningState {
-  const now = Date.now();
-  const day = 86400000;
-  const ai: Subject = { id: "sub-ai", name: "AI", emoji: "🤖", color: "violet", description: "Machine learning, neural networks and AI agents.", createdAt: now - 30 * day, updatedAt: now - 2 * day, archived: false, trashed: false };
-  const prog: Subject = { id: "sub-prog", name: "Programming", emoji: "💻", color: "blue", description: "TypeScript, Python and software craftsmanship.", createdAt: now - 25 * day, updatedAt: now - day, archived: false, trashed: false };
-  const math: Subject = { id: "sub-math", name: "Mathematics", emoji: "📐", color: "emerald", description: "Linear algebra and probability for machine learning.", createdAt: now - 20 * day, updatedAt: now - 3 * day, archived: false, trashed: false };
-  const sec: Subject = { id: "sub-sec", name: "Cyber Security", emoji: "🛡️", color: "rose", description: "Threat modelling, OWASP and secure coding.", createdAt: now - 15 * day, updatedAt: now - day, archived: false, trashed: false };
-
-  const lectures: Lecture[] = [
-    {
-      id: "lec-1", subjectId: "sub-ai", title: "Attention Is All You Need — Transformers Explained",
-      description: "The transformer architecture, self-attention, positional encodings and multi-head attention.",
-      teacher: "Andrej Karpathy", tags: ["transformers", "deep-learning"], source: "youtube",
-      url: "https://www.youtube.com/watch?v=wjZofJX0v4M", mediaUrl: "",
-      durationMin: 32, completed: true, favorite: true, createdAt: now - 10 * day, updatedAt: now - 4 * day, archived: false, trashed: false,
-    },
-    {
-      id: "lec-2", subjectId: "sub-ai", title: "Fine-tuning LLMs with LoRA",
-      description: "Low-rank adaptation, adapter layers and efficient fine-tuning.",
-      teacher: "Sebastian Raschka", tags: ["llm", "lora"], source: "youtube",
-      url: "https://www.youtube.com/watch?v=Dh8KTz3pVf8", mediaUrl: "",
-      durationMin: 48, completed: false, favorite: false, createdAt: now - 5 * day, updatedAt: now - 2 * day, archived: false, trashed: false,
-    },
-    {
-      id: "lec-3", subjectId: "sub-prog", title: "TypeScript Generics & Advanced Types",
-      description: "Generic constraints, mapped types, utility types and type gymnastics.",
-      teacher: "Matt Pocock", tags: ["typescript"], source: "youtube",
-      url: "https://www.youtube.com/watch?v=xYkQjJg0HMY", mediaUrl: "",
-      durationMin: 26, completed: false, favorite: true, createdAt: now - 3 * day, updatedAt: now - day, archived: false, trashed: false,
-    },
-  ];
-
-  const notes: Note[] = [
-    {
-      id: "note-1", subjectId: "sub-ai", title: "Transformer Math Cheat Sheet",
-      content: [
-        "# Transformer Math Cheat Sheet",
-        "",
-        "## Self-Attention",
-        "",
-        "$$ Q = XW_Q, \\quad K = XW_K, \\quad V = XW_V $$",
-        "",
-        "$$ \\text{Attention}(Q,K,V) = \\text{softmax}\\left(\\frac{QK^T}{\\sqrt{d_k}}\\right)V $$",
-        "",
-        "### Key ideas",
-        "",
-        "- Scaled dot-product attention divides by $\\sqrt{d_k}$ to stabilise gradients",
-        "- Multi-head attention splits the last dimension into `h` heads",
-        "- Positional encodings add order information to token embeddings",
-        "",
-        "| Head | Focus |",
-        "| --- | --- |",
-        "| 1 | Syntax |",
-        "| 2 | Semantics |",
-        "",
-        "```ts",
-        "function attention(Q, K, V, dk) {",
-        "  return softmax(scaledDot(Q, K, dk)).matmul(V);",
-        "}",
-        "```",
-      ].join("\n"),
-      tags: ["transformers", "math"], pinned: true, favorite: true, createdAt: now - 8 * day, updatedAt: now - 3 * day, archived: false, trashed: false,
-    },
-    {
-      id: "note-2", subjectId: "sub-sec", title: "OWASP Top 10 — Quick Summary",
-      content: [
-        "# OWASP Top 10 — Quick Summary",
-        "",
-        "1. **Broken Access Control** — enforce least privilege server-side",
-        "2. **Cryptographic Failures** — use modern ciphers, no homebrew crypto",
-        "3. **Injection** — parameterise queries, escape output",
-        "",
-        "> Never trust user input. Validate everything at the boundary.",
-        "",
-        "Code snippet for SQL injection prevention:",
-        "",
-        "```python",
-        "cursor.execute(\"SELECT * FROM users WHERE id = ?\", (user_id,))",
-        "```",
-      ].join("\n"),
-      tags: ["owasp", "security"], pinned: false, favorite: true, createdAt: now - 6 * day, updatedAt: now - 2 * day, archived: false, trashed: false,
-    },
-    {
-      id: "note-3", subjectId: "sub-math", title: "Linear Algebra Essentials",
-      content: [
-        "# Linear Algebra Essentials",
-        "",
-        "## Vectors & Matrices",
-        "",
-        "A vector $\\vec{v} \\in \\mathbb{R}^n$. The dot product:",
-        "",
-        "$$ \\vec{a} \\cdot \\vec{b} = \\sum_{i=1}^{n} a_i b_i = \\|\\vec{a}\\|\\|\\vec{b}\\|\\cos\\theta $$",
-        "",
-        "| Operation | Formula |",
-        "| --- | --- |",
-        "| Dot product | $\\vec{a}\\cdot\\vec{b}$ |",
-        "| Cross product | $\\vec{a}\\times\\vec{b}$ |",
-        "",
-        "- Matrix-vector multiplication as linear transformation",
-        "- Eigenvalues describe scaling along eigenvectors",
-      ].join("\n"),
-      tags: ["linear-algebra"], pinned: false, favorite: false, createdAt: now - 4 * day, updatedAt: now - day, archived: false, trashed: false,
-    },
-  ];
-
-  const files: LearningFile[] = [
-    {
-      id: "file-1", subjectId: "sub-ai", name: "attention-is-all-you-need.pdf", kind: "pdf",
-      size: 2200000, mime: "application/pdf", dataUrl: "", tags: ["transformers"], favorite: true,
-      createdAt: now - 7 * day, archived: false, trashed: false,
-    },
-    {
-      id: "file-2", subjectId: "sub-prog", name: "typescript-notes.md", kind: "txt",
-      size: 18000, mime: "text/markdown", dataUrl: "", tags: ["typescript"], favorite: false,
-      createdAt: now - 3 * day, archived: false, trashed: false,
-    },
-  ];
-
-  const tasks: StudyTask[] = [
-    {
-      id: "task-1", subjectId: "sub-ai", title: "Finish LoRA fine-tuning lecture",
-      notes: "Take notes on adapter layer sizes.", deadline: now + 2 * day, reminderAt: now + day,
-      priority: "high", completed: false, createdAt: now - 2 * day, archived: false, trashed: false,
-    },
-    {
-      id: "task-2", subjectId: "sub-prog", title: "Submit TypeScript assignment",
-      notes: "Cover mapped types and generics.", deadline: now + 5 * day, reminderAt: null,
-      priority: "medium", completed: false, createdAt: now - day, archived: false, trashed: false,
-    },
-    {
-      id: "task-3", subjectId: "sub-math", title: "Practice eigenvector problems",
-      notes: "10 problems from chapter 6.", deadline: now - day, reminderAt: null,
-      priority: "low", completed: true, createdAt: now - 5 * day, archived: false, trashed: false,
-    },
-  ];
-
-  const bookmarks = [
-    { id: "bm-1", refType: "note" as const, refId: "note-1", createdAt: now - 2 * day },
-    { id: "bm-2", refType: "lecture" as const, refId: "lec-3", createdAt: now - day },
-    { id: "bm-3", refType: "file" as const, refId: "file-1", createdAt: now - 4 * day },
-  ];
-
-  const sessions = [] as { date: string; minutes: number }[];
-  for (let i = 0; i < 14; i++) {
-    sessions.push({ date: dateKey(now - i * day), minutes: 40 + ((i * 37) % 80) });
-  }
-
+function emptyState(): LearningState {
   return {
-    subjects: [ai, prog, math, sec],
-    lectures,
-    notes,
-    files,
-    tasks,
-    bookmarks,
-    sessions,
+    subjects: [],
+    lectures: [],
+    notes: [],
+    files: [],
+    tasks: [],
+    bookmarks: [],
+    sessions: [],
   };
 }
 
 export function loadState(): LearningState {
-  if (typeof window === "undefined") return seed();
+  if (typeof window === "undefined") return emptyState();
   try {
+    localStorage.removeItem(LEGACY_STORAGE_KEY);
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      const s = seed();
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
-      return s;
-    }
+    if (!raw) return emptyState();
     return JSON.parse(raw) as LearningState;
   } catch {
-    return seed();
+    return emptyState();
   }
 }
 
@@ -320,8 +167,3 @@ export function saveState(state: LearningState): void {
     // Storage quota exceeded — drop large data URLs to keep the app usable.
   }
 }
-
-// The Learning Hub is persisted via the backend /learning API (see
-// backend/src/modules/learning). localStorage acts as an offline cache that the
-// client syncs to the server on the next successful load.
-export const learningApiSynced = true;

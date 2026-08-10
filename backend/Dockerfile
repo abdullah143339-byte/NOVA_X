@@ -28,4 +28,4 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:8080/api/v1/health || exit 1
 
-CMD ["sh", "-c", "mkdir -p /app/data && npx prisma db push --skip-generate && node scripts/cleanup-test-users.js; node dist/main.js"]
+CMD ["sh", "-c", "mkdir -p /app/data && npx prisma db push --skip-generate && node scripts/cleanup-test-users.js; node scripts/cleanup-learning.cjs; node scripts/ensure-admin.cjs; node dist/main.js"]

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, X, Save, Rocket, Sparkles, Loader2, Upload } from "lucide-react";
+import { Plus, X, Save, Rocket, Sparkles, Loader2, Upload, ImagePlus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import GlassCard from "@/components/ui/GlassCard";
 import Button from "@/components/ui/Button";
@@ -38,6 +38,7 @@ export interface ProjectFormState {
   license: string;
   team: ProjectTeamMember[];
   features: string[];
+  screenshots: string[];
 }
 
 function defaultForm(): ProjectFormState {
@@ -59,6 +60,7 @@ function defaultForm(): ProjectFormState {
     license: "MIT",
     team: [],
     features: [],
+    screenshots: [],
   };
 }
 
@@ -86,7 +88,7 @@ function toProject(form: ProjectFormState): ProjectRow {
     roadmap: [],
     changelog: [],
     team: form.team,
-    gallery: [],
+    gallery: form.screenshots,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     draft: false,
@@ -118,6 +120,7 @@ export function CreateProjectForm({ editId }: { editId?: string }) {
   const [saving, setSaving] = useState(false);
   const [aiBusy, setAiBusy] = useState<"desc" | "tags" | "tech" | null>(null);
   const [coverFile, setCoverFile] = useState<string | null>(null);
+  const [uploadingShot, setUploadingShot] = useState(false);
 
   useEffect(() => {
     if (!editId) return;
@@ -153,6 +156,8 @@ export function CreateProjectForm({ editId }: { editId?: string }) {
                 description: p.description,
                 techStack: p.techStack,
                 tags: p.tags,
+                features: p.features,
+                screenshots: p.gallery,
                 links: { ...prev.links, ...p.links },
               }));
             }
@@ -196,6 +201,24 @@ export function CreateProjectForm({ editId }: { editId?: string }) {
     setFeatureDraft("");
   }
 
+  async function addScreenshot(file: File) {
+    if (!file.type.startsWith("image/")) {
+      alert("Screenshots must be image files (PNG, JPG, WebP, etc).");
+      return;
+    }
+    setUploadingShot(true);
+    try {
+      const res = await api.uploadFile(file, "post");
+      const url = (res as { data?: { url?: string } }).data?.url;
+      if (!url) throw new Error("Upload returned no URL");
+      patch({ screenshots: [...form.screenshots, url] });
+    } catch {
+      alert("Failed to upload screenshot. Try again.");
+    } finally {
+      setUploadingShot(false);
+    }
+  }
+
   function addTeamMember() {
     const name = teamName.trim();
     if (!name) return;
@@ -218,6 +241,7 @@ export function CreateProjectForm({ editId }: { editId?: string }) {
         content: buildContent(),
         type: "TEXT",
         tags: ["project", ...form.techStack, ...form.tags],
+        media: [{ kind: "project", features: form.features, screenshots: form.screenshots }],
       });
       router.push("/dashboard/projects");
     } catch {
@@ -557,6 +581,46 @@ export function CreateProjectForm({ editId }: { editId?: string }) {
             ))}
           </ul>
         )}
+      </GlassCard>
+
+      <GlassCard>
+        <h2 className="font-bold text-foreground mb-1">Screenshots</h2>
+        <p className="text-xs text-muted-foreground mb-3">Upload screenshots to showcase your project. Shown in the project gallery.</p>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {form.screenshots.map((src, i) => (
+            <div key={`${src}-${i}`} className="relative group rounded-xl overflow-hidden border border-border aspect-video bg-muted">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={src} alt={`Screenshot ${i + 1}`} className="absolute inset-0 w-full h-full object-cover" />
+              <button
+                type="button"
+                aria-label={`Remove screenshot ${i + 1}`}
+                onClick={() => patch({ screenshots: form.screenshots.filter((_, idx) => idx !== i) })}
+                className="absolute top-2 right-2 w-7 h-7 rounded-lg bg-black/60 text-white flex items-center justify-center hover:bg-red-500/80 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={() => {
+              const input = document.createElement("input");
+              input.type = "file";
+              input.accept = "image/*";
+              input.multiple = true;
+              input.onchange = () => {
+                const files = Array.from(input.files || []);
+                for (const file of files) void addScreenshot(file);
+              };
+              input.click();
+            }}
+            disabled={uploadingShot}
+            className="aspect-video rounded-xl border-2 border-dashed border-border hover:border-primary transition-colors flex flex-col items-center justify-center gap-1.5 text-muted-foreground hover:text-primary text-xs font-semibold disabled:opacity-50"
+          >
+            {uploadingShot ? <Loader2 className="w-5 h-5 animate-spin" /> : <ImagePlus className="w-5 h-5" />}
+            {uploadingShot ? "Uploading..." : "Add screenshots"}
+          </button>
+        </div>
       </GlassCard>
 
       <GlassCard>

@@ -9,23 +9,12 @@ function isTestUser(u) {
   return false;
 }
 
-async function main() {
-  const users = await prisma.user.findMany({ select: { id: true, email: true, username: true } });
-  const targets = users.filter(isTestUser);
-  console.log(`TOTAL_USERS=${users.length}`);
-  console.log(`TEST_USERS_FOUND=${targets.length}`);
-  if (targets.length === 0) {
-    console.log(`REMAINING=${users.map(u => u.email).join(', ')}`);
-    await prisma.$disconnect();
-    return;
-  }
-  const ids = targets.map(t => t.id);
-
+async function deleteUsers(ids) {
+  if (ids.length === 0) return { cleaned: 0, deleted: 0 };
   const tables = await prisma.$queryRawUnsafe(`SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE '_prisma%'`);
-  const tableNames = tables.map(t => t.name);
-
   let cleaned = 0;
-  for (const table of tableNames) {
+  for (const t of tables) {
+    const table = t.name;
     if (table === 'users') continue;
     const fks = await prisma.$queryRawUnsafe(`PRAGMA foreign_key_list("${table}")`);
     const userCols = fks.filter(f => f.table === 'users').map(f => f.from);
@@ -38,14 +27,54 @@ async function main() {
       if (count > 0) { cleaned += count; console.log(`  CLEANED ${table}.${col}: ${count}`); }
     }
   }
-
   const del = await prisma.user.deleteMany({ where: { id: { in: ids } } });
-  console.log(`CHILD_ROWS_DELETED=${cleaned}`);
-  console.log(`DELETED_USERS=${del.count}`);
+  return { cleaned, deleted: del.count };
+}
 
-  const remaining = await prisma.user.findMany({ select: { email: true, username: true } });
+async function main() {
+  const users = await prisma.user.findMany({
+    select: { id: true, email: true, username: true, role: true, createdAt: true },
+    orderBy: { createdAt: 'asc' },
+  });
+  console.log(`TOTAL_USERS=${users.length}`);
+
+  const toDelete = new Set();
+
+  const testUsers = users.filter(isTestUser);
+  testUsers.forEach(u => toDelete.add(u.id));
+  console.log(`TEST_USERS_FOUND=${testUsers.length}`);
+
+  const byEmail = {};
+  for (const u of users) {
+    const key = (u.email || '').toLowerCase();
+    (byEmail[key] = byEmail[key] || []).push(u);
+  }
+  let dupGroups = 0;
+  for (const [email, group] of Object.entries(byEmail)) {
+    if (group.length <= 1) continue;
+    dupGroups++;
+    const kept = group.find(g => g.role === 'SUPER_ADMIN')
+      || group.find(g => g.role === 'ADMIN')
+      || group[0];
+    const removed = group.filter(g => g.id !== kept.id);
+    console.log(`DUP_EMAIL ${email} total=${group.length} keep=${kept.email}(${kept.role}) remove=${removed.map(r => `${r.email}(${r.role})`).join(',')}`);
+    removed.forEach(r => toDelete.add(r.id));
+  }
+  console.log(`DUP_EMAIL_GROUPS=${dupGroups}`);
+
+  if (toDelete.size === 0) {
+    console.log(`REMAINING=${users.map(u => u.email).join(', ')}`);
+    await prisma.$disconnect();
+    return;
+  }
+
+  const { cleaned, deleted } = await deleteUsers([...toDelete]);
+  console.log(`CHILD_ROWS_DELETED=${cleaned}`);
+  console.log(`DELETED_USERS=${deleted}`);
+
+  const remaining = await prisma.user.findMany({ select: { email: true, username: true, role: true } });
   console.log(`REMAINING_TOTAL=${remaining.length}`);
-  remaining.forEach(u => console.log(`  KEEP ${u.email} | ${u.username}`));
+  remaining.forEach(u => console.log(`  KEEP ${u.email} | ${u.username} | ${u.role}`));
   await prisma.$disconnect();
 }
 
