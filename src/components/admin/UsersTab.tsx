@@ -6,7 +6,7 @@ import { useAuth } from "@/providers/AuthProvider";
 import api from "@/lib/api";
 import { useAdmin } from "./AdminProvider";
 import { RoleBadge, StatusBadge, SearchBox, SectionHeading, AdminSkeleton, EmptyRow, downloadTextFile, toCsv } from "./AdminShared";
-import { seedAdminUsers, formatDate, can } from "./data";
+import { formatDate, can } from "./data";
 import type { AdminUserRow, ApiEnvelope, RawRow } from "./types";
 
 const ROLE_FILTERS = ["All roles", "SUPER_ADMIN", "ADMIN", "MODERATOR", "CONTENT_ADMIN", "MARKETPLACE_ADMIN", "SUPPORT_ADMIN", "COMMUNITY_ADMIN", "SECURITY_ADMIN", "AI_ADMIN", "ANALYTICS_ADMIN", "CREATOR", "INSTRUCTOR", "USER"];
@@ -36,7 +36,6 @@ export default function UsersTab() {
   const { notify, addAuditAction } = useAdmin();
   const [users, setUsers] = useState<AdminUserRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [usedFallback, setUsedFallback] = useState(false);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("All roles");
   const [statusFilter, setStatusFilter] = useState("All statuses");
@@ -47,18 +46,11 @@ export default function UsersTab() {
       .then((res: ApiEnvelope) => {
         if (!mounted) return;
         const raw = (res?.data?.users ?? res?.data?.items) as RawRow[] | undefined;
-        const normalized = normalize(raw ?? []);
-        if (normalized.length > 0) {
-          setUsers(normalized);
-        } else {
-          setUsers(seedAdminUsers(44));
-          setUsedFallback(true);
-        }
+        setUsers(normalize(raw ?? []));
       })
       .catch(() => {
         if (!mounted) return;
-        setUsers(seedAdminUsers(44));
-        setUsedFallback(true);
+        setUsers([]);
       })
       .finally(() => mounted && setLoading(false));
     return () => {
@@ -94,16 +86,27 @@ export default function UsersTab() {
     });
   };
 
-  const handleWarn = (u: AdminUserRow) => {
-    notify(`⚠️ Warning sent to @${u.username}`, "info");
-    auditFor("WARN_USER", u.id);
+  const handleWarn = async (u: AdminUserRow) => {
+    try {
+      await api.adminWarnUser(u.id, "Warning from moderators");
+      notify(`Warning sent to @${u.username}`, "success");
+      auditFor("WARN_USER", u.id);
+    } catch {
+      notify(`Could not warn @${u.username}`, "error");
+    }
   };
 
-  const handleSuspend = (u: AdminUserRow) => {
+  const handleSuspend = async (u: AdminUserRow) => {
     const suspending = u.status !== "SUSPENDED";
-    setUsers((prev) => prev.map((x) => (x.id === u.id ? { ...x, status: suspending ? "SUSPENDED" : "ACTIVE", isSuspended: suspending } : x)));
-    notify(`${suspending ? "Suspended" : "Re-activated"} @${u.username}`, "success");
-    auditFor(suspending ? "SUSPEND_USER" : "REACTIVATE_USER", u.id);
+    try {
+      if (suspending) await api.adminSuspendUser(u.id);
+      else await api.adminUnbanUser(u.id);
+      setUsers((prev) => prev.map((x) => (x.id === u.id ? { ...x, status: suspending ? "SUSPENDED" : "ACTIVE", isSuspended: suspending } : x)));
+      notify(`${suspending ? "Suspended" : "Re-activated"} @${u.username}`, "success");
+      auditFor(suspending ? "SUSPEND_USER" : "REACTIVATE_USER", u.id);
+    } catch {
+      notify(`Could not ${suspending ? "suspend" : "re-activate"} @${u.username}`, "error");
+    }
   };
 
   const handleBanToggle = async (u: AdminUserRow) => {
@@ -119,9 +122,7 @@ export default function UsersTab() {
       notify(`${banning ? "Banned" : "Unbanned"} @${u.username}`, "success");
       auditFor(banning ? "BAN_USER" : "UNBAN_USER", u.id);
     } catch {
-      setUsers((prev) => prev.map((x) => (x.id === u.id ? { ...x, status: banning ? "BANNED" : "ACTIVE", isSuspended: banning } : x)));
-      notify(`${banning ? "Banned" : "Unbanned"} @${u.username} (local demo)`, "success");
-      auditFor(banning ? "BAN_USER" : "UNBAN_USER", u.id);
+      notify(`Could not ${banning ? "ban" : "unban"} @${u.username}`, "error");
     }
   };
 
@@ -137,16 +138,19 @@ export default function UsersTab() {
       notify(`User @${u.username} deleted`, "success");
       auditFor("DELETE_USER", u.id);
     } catch {
-      setUsers((prev) => prev.filter((x) => x.id !== u.id));
-      notify(`User @${u.username} deleted (local demo)`, "success");
-      auditFor("DELETE_USER", u.id);
+      notify(`Could not delete @${u.username}`, "error");
     }
   };
 
-  const handleRoleChange = (u: AdminUserRow, role: string) => {
-    setUsers((prev) => prev.map((x) => (x.id === u.id ? { ...x, role } : x)));
-    notify(`Role of @${u.username} set to ${role}`, "success");
-    auditFor("ROLE_UPDATED", u.id);
+  const handleRoleChange = async (u: AdminUserRow, role: string) => {
+    try {
+      await api.adminUpdateUserRole(u.id, role);
+      setUsers((prev) => prev.map((x) => (x.id === u.id ? { ...x, role } : x)));
+      notify(`Role of @${u.username} set to ${role}`, "success");
+      auditFor("ROLE_UPDATED", u.id);
+    } catch {
+      notify(`Could not update role of @${u.username}`, "error");
+    }
   };
 
   const handleExport = () => {
@@ -163,7 +167,7 @@ export default function UsersTab() {
       <SectionHeading
         icon={<Users className="w-4 h-4 text-primary" />}
         title="User Management"
-        subtitle={usedFallback ? "Seeded demo user directory (backend /admin/users unavailable)" : "All platform users"}
+        subtitle="All platform users"
         action={
           <button onClick={handleExport} className="inline-flex items-center gap-1.5 h-9 px-3 rounded-xl border border-border text-xs font-medium text-foreground hover:bg-muted transition-all">
             <Download className="w-3.5 h-3.5" /> Export

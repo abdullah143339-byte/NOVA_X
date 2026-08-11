@@ -6,7 +6,7 @@ import { useAuth } from "@/providers/AuthProvider";
 import api from "@/lib/api";
 import { useAdmin } from "./AdminProvider";
 import { SectionHeading, Toggle, StatusBadge, EmptyRow, AdminSkeleton } from "./AdminShared";
-import { seedSecurityEvents, timeAgo, can } from "./data";
+import { timeAgo, can } from "./data";
 import type { SecurityEvent, ApiEnvelope, RawRow } from "./types";
 
 const GROUPS: { id: string; label: string }[] = [
@@ -28,7 +28,6 @@ export default function SettingsTab() {
   const { notify, addAuditAction, settings, setSetting, featureFlags, toggleFeatureFlag, setFeatureRollout } = useAdmin();
   const [events, setEvents] = useState<SecurityEvent[]>([]);
   const [loading, setLoading] = useState(true);
-  const [usedFallback, setUsedFallback] = useState(false);
   const [broadcastTitle, setBroadcastTitle] = useState("");
   const [broadcastBody, setBroadcastBody] = useState("");
   const [sending, setSending] = useState(false);
@@ -39,28 +38,22 @@ export default function SettingsTab() {
       .then((res: ApiEnvelope) => {
         if (!mounted) return;
         const raw = (res?.data?.events ?? res?.data?.items) as RawRow[] | undefined;
-        if (Array.isArray(raw) && raw.length > 0) {
-          setEvents(
-            raw.map((e: RawRow) => ({
-              id: String(e.id),
-              type: String(e.type),
-              label: String(e.type).replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase()),
-              user: e.username ? `@${String(e.username)}` : e.userId ? String(e.userId).slice(0, 8) : "system",
-              ipAddress: String(e.ipAddress || "—"),
-              timestamp: String(e.createdAt || new Date(0).toISOString()),
-              severity: String(e.severity || "LOW") as SecurityEvent["severity"],
-              resolved: Boolean(e.isResolved),
-            }))
-          );
-        } else {
-          setEvents(seedSecurityEvents());
-          setUsedFallback(true);
-        }
+        setEvents(
+          (raw ?? []).map((e: RawRow) => ({
+            id: String(e.id),
+            type: String(e.type),
+            label: String(e.type).replace(/_/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase()),
+            user: e.username ? `@${String(e.username)}` : e.userId ? String(e.userId).slice(0, 8) : "system",
+            ipAddress: String(e.ipAddress || "—"),
+            timestamp: String(e.createdAt || new Date(0).toISOString()),
+            severity: String(e.severity || "LOW") as SecurityEvent["severity"],
+            resolved: Boolean(e.isResolved),
+          }))
+        );
       })
       .catch(() => {
         if (!mounted) return;
-        setEvents(seedSecurityEvents());
-        setUsedFallback(true);
+        setEvents([]);
       })
       .finally(() => mounted && setLoading(false));
     return () => {
@@ -73,19 +66,24 @@ export default function SettingsTab() {
   const canSecurity = can(user?.role, "security.view") || can(user?.role, "security.suspicious") || can(user?.role, "*");
   const canBroadcast = can(user?.role, "settings.notifications") || can(user?.role, "settings.manage") || can(user?.role, "*");
 
-  const resolveEvent = (e: SecurityEvent) => {
-    setEvents((prev) => prev.map((x) => (x.id === e.id ? { ...x, resolved: true } : x)));
-    notify("Security event resolved", "success");
-    addAuditAction({
-      action: "RESOLVE_SECURITY_EVENT",
-      actionLabel: "Security event resolved",
-      adminName: user?.username || "admin",
-      role: user?.role || "ADMIN",
-      timestamp: new Date().toISOString(),
-      ipAddress: "127.0.0.1",
-      resource: "security_event",
-      resourceId: e.id,
-    });
+  const resolveEvent = async (e: SecurityEvent) => {
+    try {
+      await api.adminResolveSecurityEvent(e.id);
+      setEvents((prev) => prev.map((x) => (x.id === e.id ? { ...x, resolved: true } : x)));
+      notify("Security event resolved", "success");
+      addAuditAction({
+        action: "RESOLVE_SECURITY_EVENT",
+        actionLabel: "Security event resolved",
+        adminName: user?.username || "admin",
+        role: user?.role || "ADMIN",
+        timestamp: new Date().toISOString(),
+        ipAddress: "127.0.0.1",
+        resource: "security_event",
+        resourceId: e.id,
+      });
+    } catch {
+      notify("Could not resolve event", "error");
+    }
   };
 
   const sendBroadcast = async () => {
@@ -98,7 +96,7 @@ export default function SettingsTab() {
       await api.adminBroadcastNotification(broadcastTitle.trim(), broadcastBody.trim());
       notify("Notification broadcast to all users", "success");
     } catch {
-      notify("Broadcast sent (local demo)", "success");
+      notify("Could not send broadcast", "error");
     }
     addAuditAction({
       action: "BROADCAST_NOTIFICATION",
@@ -214,7 +212,7 @@ export default function SettingsTab() {
             <div className="w-9 h-9 rounded-xl bg-gradient-primary/10 flex items-center justify-center text-primary"><ShieldCheck className="w-4 h-4" /></div>
             <div>
               <h4 className="font-bold text-foreground">Security Events</h4>
-              <p className="text-xs text-muted-foreground">{usedFallback ? "Seeded demo events" : "Live backend security events"}</p>
+              <p className="text-xs text-muted-foreground">Live backend security events</p>
             </div>
           </div>
           <div className="space-y-3">

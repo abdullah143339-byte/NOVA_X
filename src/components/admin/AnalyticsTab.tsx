@@ -6,7 +6,7 @@ import { useAuth } from "@/providers/AuthProvider";
 import api from "@/lib/api";
 import { useAdmin } from "./AdminProvider";
 import { SectionHeading, AdminSkeleton, StatCard, downloadTextFile, toCsv } from "./AdminShared";
-import { seedAnalytics, formatMoney, formatCount, can } from "./data";
+import { formatMoney, formatCount, can } from "./data";
 import type { AnalyticsData, SeriesPoint, ApiEnvelope, RawSeries } from "./types";
 
 function AreaChart({ data, color, height = 160 }: { data: SeriesPoint[]; color: string; height?: number }) {
@@ -80,7 +80,6 @@ export default function AnalyticsTab() {
   const { notify } = useAdmin();
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [usedFallback, setUsedFallback] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -88,25 +87,19 @@ export default function AnalyticsTab() {
       .then((res: ApiEnvelope) => {
         if (!mounted) return;
         const series = (res?.data?.series as RawSeries[] | undefined) ?? [];
-        if (series.length > 0) {
-          setAnalytics({
-            revenue: series.map((s) => ({ label: String(s.date).slice(5), value: Math.round(Number(s.revenue ?? 0)) })),
-            newUsers: series.map((s) => ({ label: String(s.date).slice(5), value: Number(s.newUsers ?? 0) })),
-            activeUsers: series.map((s) => ({ label: String(s.date).slice(5), value: Number(s.newMessages ?? 0) + Number(s.reactions ?? 0) + Number(s.follows ?? 0) })),
-            traffic: series.map((s) => ({ label: String(s.date).slice(5), value: Number(s.views ?? 0) })),
-            gmv: series.map((s) => ({ label: String(s.date).slice(5), value: Math.round(Number(s.revenue ?? 0)) })),
-            aiRequests: series.map((s) => ({ label: String(s.date).slice(5), value: Number(s.aiMessages ?? 0) })),
-            growth: series.map((s) => ({ label: String(s.date).slice(5), value: Number(s.newUsers ?? 0) })),
-          });
-        } else {
-          setAnalytics(seedAnalytics());
-          setUsedFallback(true);
-        }
+        setAnalytics({
+          revenue: series.map((s) => ({ label: String(s.date).slice(5), value: Math.round(Number(s.revenue ?? 0)) })),
+          newUsers: series.map((s) => ({ label: String(s.date).slice(5), value: Number(s.newUsers ?? 0) })),
+          activeUsers: series.map((s) => ({ label: String(s.date).slice(5), value: Number(s.newMessages ?? 0) + Number(s.reactions ?? 0) + Number(s.follows ?? 0) })),
+          traffic: series.map((s) => ({ label: String(s.date).slice(5), value: Number(s.views ?? 0) })),
+          gmv: series.map((s) => ({ label: String(s.date).slice(5), value: Math.round(Number(s.revenue ?? 0)) })),
+          aiRequests: series.map((s) => ({ label: String(s.date).slice(5), value: Number(s.aiMessages ?? 0) })),
+          growth: series.map((s) => ({ label: String(s.date).slice(5), value: Number(s.newUsers ?? 0) })),
+        });
       })
       .catch(() => {
         if (!mounted) return;
-        setAnalytics(seedAnalytics());
-        setUsedFallback(true);
+        setAnalytics(null);
       })
       .finally(() => mounted && setLoading(false));
     return () => {
@@ -148,7 +141,7 @@ export default function AnalyticsTab() {
       <SectionHeading
         icon={<BarChart3 className="w-4 h-4 text-primary" />}
         title="Platform Analytics"
-        subtitle={usedFallback ? "Seeded demo analytics (30 days)" : "Live platform metrics (30 days)"}
+        subtitle="Live platform metrics (30 days)"
         action={
           canExport ? (
             <button onClick={exportCsv} className="flex items-center gap-2 h-9 px-4 rounded-xl bg-gradient-primary text-white text-sm font-medium hover:opacity-90 transition-all">

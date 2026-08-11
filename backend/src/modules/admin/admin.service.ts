@@ -691,6 +691,33 @@ export class AdminService {
     };
   }
 
+  // ===== AUDIT LOGS =====
+
+  async getAuditLogs(page = 1, limit = 50) {
+    const skip = (page - 1) * limit;
+    const [logs, total] = await Promise.all([
+      this.prisma.auditLog.findMany({
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.auditLog.count(),
+    ]);
+
+    const adminIds = [...new Set(logs.map((l) => l.userId).filter((id): id is string => !!id))];
+    const admins = adminIds.length
+      ? await this.prisma.user.findMany({ where: { id: { in: adminIds } }, select: { id: true, username: true } })
+      : [];
+    const adminMap = new Map(admins.map((u) => [u.id, u.username]));
+
+    return {
+      logs: logs.map((l) => ({ ...l, adminUsername: l.userId ? (adminMap.get(l.userId) ?? null) : null })),
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
   // ===== SECURITY =====
 
   async getSecurityEvents(page = 1, limit = 50) {

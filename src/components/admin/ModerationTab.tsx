@@ -6,7 +6,7 @@ import { useAuth } from "@/providers/AuthProvider";
 import api from "@/lib/api";
 import { useAdmin } from "./AdminProvider";
 import { SectionHeading, StatusBadge, EmptyRow, AdminSkeleton } from "./AdminShared";
-import { seedModPosts, seedReels, seedStories, seedComments, seedReports, timeAgo, can } from "./data";
+import { timeAgo, can } from "./data";
 import type { ModPostRow, StoryRow, CommentRow, ReportRow, ApiEnvelope, RawRow } from "./types";
 
 type SubTab = "posts" | "reels" | "stories" | "comments" | "reports";
@@ -24,50 +24,83 @@ export default function ModerationTab() {
   const { notify, addAuditAction } = useAdmin();
   const [sub, setSub] = useState<SubTab>("posts");
   const [posts, setPosts] = useState<ModPostRow[]>([]);
-  const [postsLoading, setPostsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [reels, setReels] = useState<ModPostRow[]>([]);
   const [stories, setStories] = useState<StoryRow[]>([]);
   const [comments, setComments] = useState<CommentRow[]>([]);
   const [reports, setReports] = useState<ReportRow[]>([]);
 
   useEffect(() => {
-    const raf = requestAnimationFrame(() => {
-      setReels(seedReels());
-      setStories(seedStories());
-      setComments(seedComments());
-      setReports(seedReports());
-    });
-    return () => cancelAnimationFrame(raf);
-  }, []);
-
-  useEffect(() => {
     let mounted = true;
-    api.adminGetAllPosts(1, 60)
-      .then((res: ApiEnvelope) => {
+    Promise.all([api.adminGetAllPosts(1, 60), api.adminGetReels(1, 60), api.adminGetStories(1, 60), api.adminGetComments(1, 60), api.adminGetReports(1, 60)])
+      .then(([postsRes, reelsRes, storiesRes, commentsRes, reportsRes]: ApiEnvelope[]) => {
         if (!mounted) return;
-        const raw = (res?.data?.posts ?? res?.data?.items) as RawRow[] | undefined;
-        if (Array.isArray(raw) && raw.length > 0) {
-          setPosts(
-            raw.map((p: RawRow) => ({
-              id: String(p.id),
-              content: String(p.content || p.text || "No content"),
-              type: (String(p.type) === "VIDEO" ? "VIDEO" : (p.media as unknown[] | undefined)?.length ? "IMAGE" : "TEXT") as ModPostRow["type"],
-              author: `@${(p.author as { username?: string } | undefined)?.username || (p.user as { username?: string } | undefined)?.username || "unknown"}`,
-              createdAt: String(p.createdAt || new Date(0).toISOString()),
-              reactions: Number(p.reactionsCount ?? p.reactionCount ?? 0),
-              comments: Number(p._count?.comments ?? 0),
-              status: "APPROVED",
-            }))
-          );
-        } else {
-          setPosts(seedModPosts());
-        }
+        const rawPosts = (postsRes?.data?.posts ?? postsRes?.data?.items) as RawRow[] | undefined;
+        setPosts(
+          (rawPosts ?? []).map((p: RawRow) => ({
+            id: String(p.id),
+            content: String(p.content || p.title || "No content"),
+            type: (String(p.type) === "VIDEO" ? "VIDEO" : (p.media as unknown[] | undefined)?.length ? "IMAGE" : "TEXT") as ModPostRow["type"],
+            author: `@${(p.author as { username?: string } | undefined)?.username || (p.user as { username?: string } | undefined)?.username || "unknown"}`,
+            createdAt: String(p.createdAt || new Date(0).toISOString()),
+            reactions: Number(p.reactionsCount ?? p.reactionCount ?? 0),
+            comments: Number(p._count?.comments ?? p.commentsCount ?? 0),
+            status: "APPROVED",
+          }))
+        );
+        const rawReels = (reelsRes?.data?.reels ?? reelsRes?.data?.items) as RawRow[] | undefined;
+        setReels(
+          (rawReels ?? []).map((p: RawRow) => ({
+            id: String(p.id),
+            content: String(p.content || p.title || "No content"),
+            type: "VIDEO" as const,
+            author: `@${(p.author as { username?: string } | undefined)?.username || "unknown"}`,
+            createdAt: String(p.createdAt || new Date(0).toISOString()),
+            reactions: Number(p.reactionsCount ?? p.reactionCount ?? 0),
+            comments: Number(p._count?.comments ?? p.commentsCount ?? 0),
+            status: "APPROVED",
+          }))
+        );
+        const rawStories = (storiesRes?.data?.stories ?? storiesRes?.data?.items) as RawRow[] | undefined;
+        setStories(
+          (rawStories ?? []).map((s: RawRow) => ({
+            id: String(s.id),
+            author: `@${(s.author as { username?: string } | undefined)?.username || "unknown"}`,
+            mediaType: (String(s.type) === "VIDEO" ? "VIDEO" : "IMAGE") as StoryRow["mediaType"],
+            createdAt: String(s.createdAt || new Date(0).toISOString()),
+            views: Number(s.viewCount ?? s.views ?? 0),
+            status: "APPROVED",
+          }))
+        );
+        const rawComments = (commentsRes?.data?.comments ?? commentsRes?.data?.items) as RawRow[] | undefined;
+        setComments(
+          (rawComments ?? []).map((c: RawRow) => ({
+            id: String(c.id),
+            author: `@${(c.author as { username?: string } | undefined)?.username || "unknown"}`,
+            content: String(c.content || "No content"),
+            postTitle: String((c.post as { content?: string } | undefined)?.content || "Post").slice(0, 42),
+            createdAt: String(c.createdAt || new Date(0).toISOString()),
+            likes: Number(c.reactionsCount ?? 0),
+            status: "APPROVED",
+          }))
+        );
+        const rawReports = (reportsRes?.data?.reports ?? reportsRes?.data?.items) as RawRow[] | undefined;
+        setReports(
+          (rawReports ?? []).map((r: RawRow) => ({
+            id: String(r.id),
+            type: (String(r.targetType || "POST").toUpperCase()) as ReportRow["type"],
+            reason: String(r.reason || r.description || "No reason").replace(/_/g, " "),
+            targetLabel: String(r.targetId || "—").slice(0, 24),
+            reporter: r.reporterUsername ? `@${String(r.reporterUsername)}` : String(r.reporterId || "system").slice(0, 8),
+            timestamp: String(r.createdAt || new Date(0).toISOString()),
+            status: (String(r.status || "PENDING") === "UNDER_REVIEW" ? "REVIEWING" : String(r.status || "PENDING") === "DISMISSED" ? "REJECTED" : String(r.status || "PENDING")) as ReportRow["status"],
+          }))
+        );
       })
       .catch(() => {
         if (!mounted) return;
-        setPosts(seedModPosts());
       })
-      .finally(() => mounted && setPostsLoading(false));
+      .finally(() => mounted && setLoading(false));
     return () => {
       mounted = false;
     };
@@ -105,6 +138,74 @@ export default function ModerationTab() {
     if (list === "reports") setReports((prev) => prev.filter((x) => x.id !== id));
   };
 
+  const run = async (fn: () => Promise<unknown>, failMsg: string) => {
+    try {
+      await fn();
+      return true;
+    } catch {
+      notify(failMsg, "error");
+      return false;
+    }
+  };
+
+  const approve = async (list: SubTab, id: string) => {
+    if (list === "comments") {
+      setStatus(list, id, "APPROVED");
+      notify("Comment approved", "success");
+      return;
+    }
+    const ok = await run(() => api.adminPublishPost(id), "Could not approve content");
+    if (ok) {
+      setStatus(list, id, "APPROVED");
+      notify("Content approved", "success");
+      audit("APPROVE_CONTENT", "Content approved", list === "posts" ? "post" : list === "reels" ? "reel" : "story", id);
+    }
+  };
+
+  const reject = async (list: SubTab, id: string) => {
+    if (list === "comments") {
+      setStatus(list, id, "REJECTED");
+      notify("Comment rejected", "info");
+      return;
+    }
+    const ok = await run(() => api.adminDeletePost(id), "Could not reject content");
+    if (ok) {
+      remove(list, id);
+      notify("Content rejected", "info");
+      audit("REJECT_CONTENT", "Content rejected", list === "posts" ? "post" : list === "reels" ? "reel" : "story", id);
+    }
+  };
+
+  const deleteContent = async (list: SubTab, id: string) => {
+    const ok = await run(
+      () => (list === "comments" ? api.adminDeleteComment(id) : api.adminDeletePost(id)),
+      "Could not remove content"
+    );
+    if (ok) {
+      remove(list, id);
+      notify("Content removed", "success");
+      audit("DELETE_CONTENT", "Content removed", list === "posts" ? "post" : list === "reels" ? "reel" : list === "stories" ? "story" : "comment", id);
+    }
+  };
+
+  const resolve = async (id: string) => {
+    const ok = await run(() => api.adminResolveReport(id, "Action taken"), "Could not resolve report");
+    if (ok) {
+      setStatus("reports", id, "RESOLVED");
+      notify("Report resolved", "success");
+      audit("RESOLVE_REPORT", "Report resolved", "report", id);
+    }
+  };
+
+  const dismiss = async (id: string) => {
+    const ok = await run(() => api.adminDismissReport(id), "Could not dismiss report");
+    if (ok) {
+      setStatus("reports", id, "REJECTED");
+      notify("Report dismissed", "info");
+      audit("DISMISS_REPORT", "Report dismissed", "report", id);
+    }
+  };
+
   const counts = useMemo(
     () => ({
       posts: posts.filter((p) => p.status === "PENDING").length,
@@ -118,7 +219,7 @@ export default function ModerationTab() {
 
   const tabs = SUB_TABS.filter((t) => can(user?.role, t.perm) || can(user?.role, "moderation.view"));
 
-  if (postsLoading && sub === "posts") return <AdminSkeleton rows={5} />;
+  if (loading && sub === "posts") return <AdminSkeleton rows={5} />;
 
   return (
     <div className="space-y-4">
@@ -153,9 +254,9 @@ export default function ModerationTab() {
           resource="post"
           canApprove={canApprove}
           canDelete={canDelete}
-          onApprove={(id) => { setStatus("posts", id, "APPROVED"); notify("Post approved", "success"); audit("APPROVE_POST", "Post approved", "post", id); }}
-          onReject={(id) => { setStatus("posts", id, "REJECTED"); notify("Post rejected", "info"); audit("REJECT_POST", "Post rejected", "post", id); }}
-          onDelete={(id) => { remove("posts", id); notify("Post removed", "success"); audit("DELETE_POST", "Post removed", "post", id); }}
+          onApprove={(id) => approve("posts", id)}
+          onReject={(id) => reject("posts", id)}
+          onDelete={(id) => deleteContent("posts", id)}
           columns={["Content", "Author", "Reactions", "Comments", "Status", "Actions"]}
           contentKey="content"
         />
@@ -166,9 +267,9 @@ export default function ModerationTab() {
           resource="reel"
           canApprove={canApprove}
           canDelete={canDelete}
-          onApprove={(id) => { setStatus("reels", id, "APPROVED"); notify("Reel approved", "success"); audit("APPROVE_REEL", "Reel approved", "reel", id); }}
-          onReject={(id) => { setStatus("reels", id, "REJECTED"); notify("Reel rejected", "info"); audit("REJECT_REEL", "Reel rejected", "reel", id); }}
-          onDelete={(id) => { remove("reels", id); notify("Reel removed", "success"); audit("DELETE_REEL", "Reel removed", "reel", id); }}
+          onApprove={(id) => approve("reels", id)}
+          onReject={(id) => reject("reels", id)}
+          onDelete={(id) => deleteContent("reels", id)}
           columns={["Reel", "Author", "Reactions", "Comments", "Status", "Actions"]}
           contentKey="content"
         />
@@ -178,9 +279,9 @@ export default function ModerationTab() {
           rows={stories}
           canApprove={canApprove}
           canDelete={canDelete}
-          onApprove={(id) => { setStatus("stories", id, "APPROVED"); notify("Story approved", "success"); audit("APPROVE_STORY", "Story approved", "story", id); }}
-          onReject={(id) => { setStatus("stories", id, "REJECTED"); notify("Story rejected", "info"); audit("REJECT_STORY", "Story rejected", "story", id); }}
-          onDelete={(id) => { remove("stories", id); notify("Story removed", "success"); audit("DELETE_STORY", "Story removed", "story", id); }}
+          onApprove={(id) => approve("stories", id)}
+          onReject={(id) => reject("stories", id)}
+          onDelete={(id) => deleteContent("stories", id)}
         />
       )}
       {sub === "comments" && (
@@ -188,16 +289,16 @@ export default function ModerationTab() {
           rows={comments}
           canApprove={canApprove}
           canDelete={canDelete}
-          onApprove={(id) => { setStatus("comments", id, "APPROVED"); notify("Comment approved", "success"); audit("APPROVE_COMMENT", "Comment approved", "comment", id); }}
-          onReject={(id) => { setStatus("comments", id, "REJECTED"); notify("Comment rejected", "info"); audit("REJECT_COMMENT", "Comment rejected", "comment", id); }}
-          onDelete={(id) => { remove("comments", id); notify("Comment removed", "success"); audit("DELETE_COMMENT", "Comment removed", "comment", id); }}
+          onApprove={(id) => approve("comments", id)}
+          onReject={(id) => reject("comments", id)}
+          onDelete={(id) => deleteContent("comments", id)}
         />
       )}
       {sub === "reports" && (
         <ReportList
           rows={reports}
-          onResolve={(id) => { setStatus("reports", id, "RESOLVED"); notify("Report resolved", "success"); audit("RESOLVE_REPORT", "Report resolved", "report", id); }}
-          onReject={(id) => { setStatus("reports", id, "REJECTED"); notify("Report dismissed", "info"); audit("DISMISS_REPORT", "Report dismissed", "report", id); }}
+          onResolve={(id) => resolve(id)}
+          onReject={(id) => dismiss(id)}
         />
       )}
     </div>

@@ -6,7 +6,7 @@ import { useAuth } from "@/providers/AuthProvider";
 import api from "@/lib/api";
 import { useAdmin } from "./AdminProvider";
 import { SearchBox, SectionHeading, StatusBadge, EmptyRow, AdminSkeleton, Modal } from "./AdminShared";
-import { seedCommunities, formatDate, can } from "./data";
+import { formatDate, can } from "./data";
 import type { CommunityRow, ApiEnvelope, RawRow } from "./types";
 
 export default function CommunitiesTab() {
@@ -14,7 +14,6 @@ export default function CommunitiesTab() {
   const { notify, addAuditAction } = useAdmin();
   const [communities, setCommunities] = useState<CommunityRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [usedFallback, setUsedFallback] = useState(false);
   const [search, setSearch] = useState("");
   const [transfer, setTransfer] = useState<CommunityRow | null>(null);
   const [transferTo, setTransferTo] = useState("");
@@ -25,31 +24,25 @@ export default function CommunitiesTab() {
       .then((res: ApiEnvelope) => {
         if (!mounted) return;
         const raw = (res?.data?.communities ?? res?.data?.items) as RawRow[] | undefined;
-        if (Array.isArray(raw) && raw.length > 0) {
-          setCommunities(
-            raw.map((c: RawRow) => ({
-              id: String(c.id),
-              name: String(c.name || "Untitled"),
-              slug: String(c.slug || c.id),
-              category: String(c.category || "General"),
-              description: String(c.description || ""),
-              membersCount: Number(c._count?.members ?? c.memberCount ?? 0),
-              postsCount: Number(c.postsCount ?? 0),
-              owner: `@${(c.members as { user?: { username?: string } }[] | undefined)?.[0]?.user?.username || "owner"}`,
-              createdAt: String(c.createdAt || new Date(0).toISOString()),
-              status: "ACTIVE",
-              featured: false,
-            }))
-          );
-        } else {
-          setCommunities(seedCommunities());
-          setUsedFallback(true);
-        }
+        setCommunities(
+          (raw ?? []).map((c: RawRow) => ({
+            id: String(c.id),
+            name: String(c.name || "Untitled"),
+            slug: String(c.slug || c.id),
+            category: String(c.category || "General"),
+            description: String(c.description || ""),
+            membersCount: Number(c._count?.members ?? c.memberCount ?? 0),
+            postsCount: Number(c.postsCount ?? 0),
+            owner: `@${(c.members as { user?: { username?: string } }[] | undefined)?.[0]?.user?.username || "owner"}`,
+            createdAt: String(c.createdAt || new Date(0).toISOString()),
+            status: "ACTIVE",
+            featured: false,
+          }))
+        );
       })
       .catch(() => {
         if (!mounted) return;
-        setCommunities(seedCommunities());
-        setUsedFallback(true);
+        setCommunities([]);
       })
       .finally(() => mounted && setLoading(false));
     return () => {
@@ -100,9 +93,7 @@ export default function CommunitiesTab() {
       notify(`Community ${c.name} deleted`, "success");
       audit("DELETE_COMMUNITY", `Community ${c.name} deleted`, c.id);
     } catch {
-      setCommunities((prev) => prev.filter((x) => x.id !== c.id));
-      notify(`Community ${c.name} deleted (local demo)`, "success");
-      audit("DELETE_COMMUNITY", `Community ${c.name} deleted`, c.id);
+      notify(`Could not delete community ${c.name}`, "error");
     }
   };
 
@@ -121,7 +112,7 @@ export default function CommunitiesTab() {
       <SectionHeading
         icon={<Globe className="w-4 h-4 text-primary" />}
         title="Community Management"
-        subtitle={usedFallback ? "Seeded demo communities (backend /admin/communities unavailable)" : "All communities on the platform"}
+        subtitle="All communities on the platform"
       />
       <SearchBox value={search} onChange={setSearch} placeholder="Search by name, category or owner..." className="max-w-md" />
 

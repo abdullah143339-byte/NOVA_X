@@ -6,7 +6,7 @@ import { useAuth } from "@/providers/AuthProvider";
 import api from "@/lib/api";
 import { useAdmin } from "./AdminProvider";
 import { SectionHeading, EmptyRow, AdminSkeleton, downloadTextFile, toCsv } from "./AdminShared";
-import { seedAuditLogs, timeAgo, can } from "./data";
+import { timeAgo, can } from "./data";
 import type { AuditLogItem, ApiEnvelope, RawRow } from "./types";
 
 const ACTION_STYLE: Record<string, string> = {
@@ -34,7 +34,6 @@ export default function AuditLogsTab() {
   const { notify } = useAdmin();
   const [logs, setLogs] = useState<AuditLogItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [usedFallback, setUsedFallback] = useState(false);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("ALL");
 
@@ -43,31 +42,25 @@ export default function AuditLogsTab() {
     api.adminGetAllAuditLogs(1, 100)
       .then((res: ApiEnvelope) => {
         if (!mounted) return;
-        const raw = (res?.data?.items ?? res?.data) as RawRow[] | undefined;
-        if (Array.isArray(raw) && raw.length > 0) {
-          setLogs(
-            raw.map((l: RawRow) => ({
-              id: String(l.id),
-              action: String(l.action),
-              actionLabel: humanizeAction(String(l.action)),
-              adminName: l.userId ? String(l.userId).slice(0, 8) : "system",
-              role: "SYSTEM",
-              timestamp: String(l.createdAt || new Date(0).toISOString()),
-              ipAddress: String(l.ipAddress || "—"),
-              resource: String(l.resource || "system"),
-              resourceId: l.resourceId ? String(l.resourceId) : undefined,
-              details: l.newValues ? JSON.stringify(l.newValues) : undefined,
-            }))
-          );
-        } else {
-          setLogs(seedAuditLogs());
-          setUsedFallback(true);
-        }
+        const raw = (res?.data?.logs ?? res?.data?.items ?? res?.data) as RawRow[] | undefined;
+        setLogs(
+          (raw ?? []).map((l: RawRow) => ({
+            id: String(l.id),
+            action: String(l.action),
+            actionLabel: humanizeAction(String(l.action)),
+            adminName: l.adminUsername ? String(l.adminUsername) : l.userId ? String(l.userId).slice(0, 8) : "system",
+            role: "SYSTEM",
+            timestamp: String(l.createdAt || new Date(0).toISOString()),
+            ipAddress: String(l.ipAddress || "—"),
+            resource: String(l.resource || "system"),
+            resourceId: l.resourceId ? String(l.resourceId) : undefined,
+            details: l.newValues ? JSON.stringify(l.newValues) : undefined,
+          }))
+        );
       })
       .catch(() => {
         if (!mounted) return;
-        setLogs(seedAuditLogs());
-        setUsedFallback(true);
+        setLogs([]);
       })
       .finally(() => mounted && setLoading(false));
     return () => {
@@ -106,7 +99,7 @@ export default function AuditLogsTab() {
       <SectionHeading
         icon={<ScrollText className="w-4 h-4 text-primary" />}
         title="Audit Logs"
-        subtitle={usedFallback ? "Seeded demo audit trail" : "Live backend audit trail"}
+        subtitle="Live backend audit trail"
         action={
           canExport ? (
             <button onClick={exportCsv} className="flex items-center gap-2 h-9 px-4 rounded-xl bg-gradient-primary text-white text-sm font-medium hover:opacity-90 transition-all">

@@ -281,6 +281,15 @@ export class AdminController {
     return { success: true, data };
   }
 
+  // ===== AUDIT LOGS =====
+
+  @Get('audit-logs')
+  @ApiOperation({ summary: 'Get all audit log entries' })
+  async getAuditLogs(@Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number, @Query('limit', new DefaultValuePipe(50), ParseIntPipe) limit: number) {
+    const data = await this.adminService.getAuditLogs(page, limit);
+    return { success: true, data };
+  }
+
   // ===== SECURITY =====
 
   @Get('security/events')

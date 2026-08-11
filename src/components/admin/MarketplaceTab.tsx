@@ -6,7 +6,7 @@ import { useAuth } from "@/providers/AuthProvider";
 import api from "@/lib/api";
 import { useAdmin } from "./AdminProvider";
 import { SectionHeading, StatusBadge, EmptyRow, AdminSkeleton } from "./AdminShared";
-import { seedMarketplaceProducts, seedOrders, seedCoupons, seedRefunds, seedReviews, formatMoney, formatDate, timeAgo, can } from "./data";
+import { formatMoney, formatDate, timeAgo, can } from "./data";
 import type { MarketplaceProductRow, OrderRow, CouponRow, RefundRow, ReviewRow, ApiEnvelope, RawRow } from "./types";
 
 type SubTab = "products" | "orders" | "coupons" | "refunds" | "reviews";
@@ -39,81 +39,73 @@ export default function MarketplaceTab() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const raf = requestAnimationFrame(() => {
-      setCoupons(seedCoupons());
-      setRefunds(seedRefunds());
-    });
-    return () => cancelAnimationFrame(raf);
-  }, []);
-
-  useEffect(() => {
     let mounted = true;
     Promise.all([api.adminGetMarketplaceItems(1, 60), api.adminGetOrders(1, 60), api.adminGetReviews(1, 60)])
       .then(([itemsRes, ordersRes, reviewsRes]: ApiEnvelope[]) => {
         if (!mounted) return;
         const items = (itemsRes?.data?.items ?? itemsRes?.data) as RawRow[] | undefined;
-        if (Array.isArray(items) && items.length > 0) {
-          setProducts(
-            items.map((p: RawRow) => ({
-              id: String(p.id),
-              title: String(p.title || "Untitled"),
-              category: String(p.category || "General"),
-              price: Number(p.price ?? 0),
-              type: (String(p.type) === "SERVICE" ? "SERVICE" : String(p.type) === "COURSE" ? "COURSE" : String(p.type) === "HARDWARE" ? "PRODUCT" : "DIGITAL") as MarketplaceProductRow["type"],
-              seller: `@${(p.seller as { username?: string } | undefined)?.username || "unknown"}`,
-              status: PRODUCT_STATUS_MAP[String(p.status)] ?? "ACTIVE",
-              rating: Number(p.rating ?? 0),
-              sales: Number(p.salesCount ?? p._count?.purchases ?? 0),
-              stock: Number(p.stock ?? -1),
-              featured: Boolean(p.isFeatured),
-            }))
-          );
-        } else {
-          setProducts(seedMarketplaceProducts());
-        }
+        setProducts(
+          (items ?? []).map((p: RawRow) => ({
+            id: String(p.id),
+            title: String(p.title || "Untitled"),
+            category: String(p.category || "General"),
+            price: Number(p.price ?? 0),
+            type: (String(p.type) === "SERVICE" ? "SERVICE" : String(p.type) === "COURSE" ? "COURSE" : String(p.type) === "HARDWARE" ? "PRODUCT" : "DIGITAL") as MarketplaceProductRow["type"],
+            seller: `@${(p.seller as { username?: string } | undefined)?.username || "unknown"}`,
+            status: PRODUCT_STATUS_MAP[String(p.status)] ?? "ACTIVE",
+            rating: Number(p.rating ?? 0),
+            sales: Number(p.salesCount ?? p._count?.purchases ?? 0),
+            stock: Number(p.stock ?? -1),
+            featured: Boolean(p.isFeatured),
+          }))
+        );
         const orderRows = (ordersRes?.data?.orders ?? ordersRes?.data) as RawRow[] | undefined;
-        if (Array.isArray(orderRows) && orderRows.length > 0) {
-          setOrders(
-            orderRows.map((o: RawRow) => {
-              const firstItem = (o.items as RawRow[] | undefined)?.[0]?.item as RawRow | undefined;
-              return {
-                id: String(o.id),
-                orderNo: String(o.id).slice(0, 8).toUpperCase(),
-                buyer: `@${(o.buyer as { username?: string } | undefined)?.username || "unknown"}`,
-                seller: firstItem ? `@seller` : "—",
-                product: firstItem?.title ? String(firstItem.title) : `${(o.items as RawRow[] | undefined)?.length || 0} item(s)`,
-                amount: Number(o.totalAmount ?? 0),
-                status: (String(o.status || "PENDING")) as OrderRow["status"],
-                createdAt: String(o.createdAt || new Date(0).toISOString()),
-                paymentMethod: String(o.paymentMethod || "card"),
-              };
-            })
-          );
-        } else {
-          setOrders(seedOrders());
-        }
-        const reviewRows = (reviewsRes?.data?.reviews ?? reviewsRes?.data) as RawRow[] | undefined;
-        if (Array.isArray(reviewRows) && reviewRows.length > 0) {
-          setReviews(
-            reviewRows.map((r: RawRow) => ({
-              id: String(r.id),
-              product: String((r.item as RawRow | undefined)?.title || "Product"),
-              reviewer: `@${String(r.buyerUsername || "unknown")}`,
-              rating: Number(r.rating ?? 0),
-              content: String(r.content || r.title || "—"),
-              status: "PUBLISHED",
-              createdAt: String(r.createdAt || new Date(0).toISOString()),
+        const orders = (orderRows ?? []).map((o: RawRow) => {
+          const firstItem = (o.items as RawRow[] | undefined)?.[0]?.item as RawRow | undefined;
+          return {
+            id: String(o.id),
+            orderNo: String(o.id).slice(0, 8).toUpperCase(),
+            buyer: `@${(o.buyer as { username?: string } | undefined)?.username || "unknown"}`,
+            seller: firstItem ? `@seller` : "—",
+            product: firstItem?.title ? String(firstItem.title) : `${(o.items as RawRow[] | undefined)?.length || 0} item(s)`,
+            amount: Number(o.totalAmount ?? 0),
+            status: (String(o.status || "PENDING")) as OrderRow["status"],
+            createdAt: String(o.createdAt || new Date(0).toISOString()),
+            paymentMethod: String(o.paymentMethod || "card"),
+          };
+        });
+        setOrders(orders);
+        setRefunds(
+          orders
+            .filter((o) => o.status === "REFUNDED")
+            .map((o) => ({
+              id: `ref-${o.id}`,
+              orderNo: o.orderNo,
+              buyer: o.buyer,
+              amount: o.amount,
+              reason: "Refunded order",
+              status: "PROCESSED" as const,
+              createdAt: o.createdAt,
             }))
-          );
-        } else {
-          setReviews(seedReviews());
-        }
+        );
+        const reviewRows = (reviewsRes?.data?.reviews ?? reviewsRes?.data) as RawRow[] | undefined;
+        setReviews(
+          (reviewRows ?? []).map((r: RawRow) => ({
+            id: String(r.id),
+            product: String((r.item as RawRow | undefined)?.title || "Product"),
+            reviewer: r.buyerUsername ? `@${String(r.buyerUsername)}` : `@${String(r.buyerId || "unknown").slice(0, 8)}`,
+            rating: Number(r.rating ?? 0),
+            content: String(r.content || r.title || "—"),
+            status: "PUBLISHED",
+            createdAt: String(r.createdAt || new Date(0).toISOString()),
+          }))
+        );
       })
       .catch(() => {
         if (!mounted) return;
-        setProducts(seedMarketplaceProducts());
-        setOrders(seedOrders());
-        setReviews(seedReviews());
+        setProducts([]);
+        setOrders([]);
+        setReviews([]);
       })
       .finally(() => mounted && setLoading(false));
     return () => {
@@ -140,23 +132,38 @@ export default function MarketplaceTab() {
     });
   };
 
-  const toggleFeatured = (p: MarketplaceProductRow) => {
-    setProducts((prev) => prev.map((x) => (x.id === p.id ? { ...x, featured: !x.featured } : x)));
-    notify(p.featured ? `Unfeatured ${p.title}` : `Featured ${p.title}`, "success");
-    audit("TOGGLE_ITEM_FEATURED", `Product ${p.title} ${p.featured ? "unfeatured" : "featured"}`, "product", p.id);
+  const toggleFeatured = async (p: MarketplaceProductRow) => {
+    try {
+      await api.adminToggleItemFeatured(p.id);
+      setProducts((prev) => prev.map((x) => (x.id === p.id ? { ...x, featured: !x.featured } : x)));
+      notify(p.featured ? `Unfeatured ${p.title}` : `Featured ${p.title}`, "success");
+      audit("TOGGLE_ITEM_FEATURED", `Product ${p.title} ${p.featured ? "unfeatured" : "featured"}`, "product", p.id);
+    } catch {
+      notify(`Could not update ${p.title}`, "error");
+    }
   };
 
-  const togglePause = (p: MarketplaceProductRow) => {
+  const togglePause = async (p: MarketplaceProductRow) => {
     const pausing = p.status !== "SUSPENDED" && p.status !== "HIDDEN";
-    setProducts((prev) => prev.map((x) => (x.id === p.id ? { ...x, status: pausing ? "SUSPENDED" : "ACTIVE" } : x)));
-    notify(`${pausing ? "Paused" : "Activated"} ${p.title}`, "success");
-    audit("UPDATE_ITEM_STATUS", `Product ${p.title} ${pausing ? "paused" : "activated"}`, "product", p.id);
+    try {
+      await api.adminUpdateItemStatus(p.id, pausing ? "PAUSED" : "ACTIVE");
+      setProducts((prev) => prev.map((x) => (x.id === p.id ? { ...x, status: pausing ? "SUSPENDED" : "ACTIVE" } : x)));
+      notify(`${pausing ? "Paused" : "Activated"} ${p.title}`, "success");
+      audit("UPDATE_ITEM_STATUS", `Product ${p.title} ${pausing ? "paused" : "activated"}`, "product", p.id);
+    } catch {
+      notify(`Could not update ${p.title}`, "error");
+    }
   };
 
-  const setOrderStatus = (id: string, status: OrderRow["status"]) => {
-    setOrders((prev) => prev.map((x) => (x.id === id ? { ...x, status } : x)));
-    notify(`Order status set to ${status}`, "success");
-    audit("UPDATE_ORDER_STATUS", `Order ${id.slice(0, 8).toUpperCase()} -> ${status}`, "order", id);
+  const setOrderStatus = async (id: string, status: OrderRow["status"]) => {
+    try {
+      await api.adminUpdateOrderStatus(id, status);
+      setOrders((prev) => prev.map((x) => (x.id === id ? { ...x, status } : x)));
+      notify(`Order status set to ${status}`, "success");
+      audit("UPDATE_ORDER_STATUS", `Order ${id.slice(0, 8).toUpperCase()} -> ${status}`, "order", id);
+    } catch {
+      notify("Could not update order", "error");
+    }
   };
 
   const toggleCoupon = (c: CouponRow) => {
@@ -171,10 +178,15 @@ export default function MarketplaceTab() {
     audit("UPDATE_REFUND", `Refund ${id.slice(0, 8).toUpperCase()} ${status.toLowerCase()}`, "refund", id);
   };
 
-  const removeReview = (r: ReviewRow) => {
-    setReviews((prev) => prev.filter((x) => x.id !== r.id));
-    notify("Review removed", "success");
-    audit("DELETE_REVIEW", "Review removed", "review", r.id);
+  const removeReview = async (r: ReviewRow) => {
+    try {
+      await api.adminDeleteReview(r.id);
+      setReviews((prev) => prev.filter((x) => x.id !== r.id));
+      notify("Review removed", "success");
+      audit("DELETE_REVIEW", "Review removed", "review", r.id);
+    } catch {
+      notify("Could not remove review", "error");
+    }
   };
 
   const tabs = SUB_TABS.filter((t) => can(user?.role, t.perm) || can(user?.role, "marketplace.view"));

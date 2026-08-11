@@ -6,7 +6,8 @@ import { useAuth } from "@/providers/AuthProvider";
 import { useAdmin } from "./AdminProvider";
 import { SearchBox, SectionHeading, Modal, MatrixCell, downloadTextFile, toCsv, EmptyRow } from "./AdminShared";
 import { ADMIN_ROLES, PERMISSION_DEFS, can, formatCount } from "./data";
-import type { AdminRole, AdminRoleId } from "./types";
+import api from "@/lib/api";
+import type { AdminRole, AdminRoleId, ApiEnvelope, RawRow } from "./types";
 
 const CUSTOM_KEY = "nova_admin_custom_roles";
 
@@ -45,11 +46,40 @@ export default function RolesTab() {
     return () => cancelAnimationFrame(raf);
   }, []);
 
+  const [realMemberCounts, setRealMemberCounts] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    let mounted = true;
+    api
+      .adminGetRoles()
+      .then((res: ApiEnvelope) => {
+        if (!mounted) return;
+        const raw = (res?.data?.roles ?? res?.data?.items) as RawRow[] | undefined;
+        const map: Record<string, number> = {};
+        (raw ?? []).forEach((r) => {
+          map[String(r.name)] = Number(r.count ?? 0);
+        });
+        setRealMemberCounts(map);
+      })
+      .catch(() => {
+        if (!mounted) return;
+      });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   useEffect(() => {
     window.localStorage.setItem(CUSTOM_KEY, JSON.stringify(customRoles));
   }, [customRoles]);
 
-  const allRoles = useMemo(() => [...ADMIN_ROLES, ...customRoles], [customRoles]);
+  const allRoles = useMemo(
+    () => [
+      ...ADMIN_ROLES.map((r) => ({ ...r, members: realMemberCounts[r.id] ?? r.members })),
+      ...customRoles,
+    ],
+    [customRoles, realMemberCounts]
+  );
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
