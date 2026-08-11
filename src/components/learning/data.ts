@@ -147,13 +147,45 @@ function emptyState(): LearningState {
   };
 }
 
+const DEMO_SUBJECT_IDS = ["sub-ai", "sub-prog", "sub-math", "sub-sec"];
+const DEMO_NOTE_IDS = ["note-1", "note-2", "note-3"];
+const DEMO_LECTURE_IDS = ["lec-1", "lec-2", "lec-3"];
+const DEMO_FILE_IDS = ["file-1", "file-2"];
+const DEMO_TASK_IDS = ["task-1", "task-2", "task-3"];
+const DEMO_BOOKMARK_IDS = ["bm-1", "bm-2", "bm-3"];
+const DEMO_SESSION_MINUTES = new Set([40, 77, 114, 71, 108, 65, 102, 59, 96, 53, 90, 47, 84, 41]);
+
+// Strips any leftover demo/test rows that the old client-side seed wrote to
+// localStorage (or that were synced to the backend). Fixed ids are always
+// safe to drop; the fake study sessions are only removed while the demo
+// subjects are still present, so real study minutes are never touched.
+export function purgeDemo(state: LearningState): LearningState {
+  const hasDemoSubjects = state.subjects.some((s) => DEMO_SUBJECT_IDS.includes(s.id));
+  const subjects = state.subjects.filter((s) => !DEMO_SUBJECT_IDS.includes(s.id));
+  const notes = state.notes.filter((n) => !DEMO_NOTE_IDS.includes(n.id));
+  const lectures = state.lectures.filter((l) => !DEMO_LECTURE_IDS.includes(l.id));
+  const files = state.files.filter((f) => !DEMO_FILE_IDS.includes(f.id));
+  const tasks = state.tasks.filter((t) => !DEMO_TASK_IDS.includes(t.id));
+  const bookmarks = state.bookmarks.filter(
+    (b) =>
+      !DEMO_BOOKMARK_IDS.includes(b.id) &&
+      !(b.refType === "note" && DEMO_NOTE_IDS.includes(b.refId)) &&
+      !(b.refType === "lecture" && DEMO_LECTURE_IDS.includes(b.refId)) &&
+      !(b.refType === "file" && DEMO_FILE_IDS.includes(b.refId)),
+  );
+  const sessions = hasDemoSubjects
+    ? state.sessions.filter((s) => !DEMO_SESSION_MINUTES.has(s.minutes))
+    : state.sessions;
+  return { ...state, subjects, notes, lectures, files, tasks, bookmarks, sessions };
+}
+
 export function loadState(): LearningState {
   if (typeof window === "undefined") return emptyState();
   try {
     localStorage.removeItem(LEGACY_STORAGE_KEY);
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return emptyState();
-    return JSON.parse(raw) as LearningState;
+    return purgeDemo(JSON.parse(raw) as LearningState);
   } catch {
     return emptyState();
   }

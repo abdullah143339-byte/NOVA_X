@@ -9,7 +9,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { loadState, saveState, uid, dateKey } from "./data";
+import { loadState, purgeDemo, saveState, uid, dateKey } from "./data";
 import api from "@/lib/api";
 import type {
   LearningState,
@@ -254,7 +254,7 @@ export function LearningProvider({ children }: { children: ReactNode }) {
       try {
         const res = await api.getLearningState();
         if (cancelled) return;
-        const serverState = normalizeServerState(res.data);
+        const serverState = purgeDemo(normalizeServerState(res.data));
         if (!isStateEmpty(serverState)) {
           setState(serverState);
         } else if (!isStateEmpty(stateRef.current)) {

@@ -23,14 +23,31 @@ async function main() {
 
   const where = { userId: user.id };
 
-  // Only wipe the fake study sessions while the demo seed is still present.
-  // Once demo rows are gone the script becomes a safe no-op, so real study
-  // sessions are never touched on later deployments.
+  // Only wipe the fake study sessions while the demo seed is still present
+  // (or the workspace is otherwise empty), so real study sessions are never
+  // touched on later deployments.
   const demoPresent = await prisma.learningSubject.count({
     where: { ...where, id: { in: DEMO.subjects } },
   });
+  const workspaceCount =
+    (await prisma.learningSubject.count({ where })) +
+    (await prisma.learningNote.count({ where })) +
+    (await prisma.learningLecture.count({ where })) +
+    (await prisma.learningFile.count({ where })) +
+    (await prisma.learningTask.count({ where }));
+  const sessionsExist = await prisma.studySession.count({ where });
 
-  const bookmarks = await prisma.learningBookmark.deleteMany({ where: { ...where, id: { in: DEMO.bookmarks } } });
+  const bookmarks = await prisma.learningBookmark.deleteMany({
+    where: {
+      userId: user.id,
+      OR: [
+        { id: { in: DEMO.bookmarks } },
+        { refType: 'note', refId: { in: DEMO.notes } },
+        { refType: 'lecture', refId: { in: DEMO.lectures } },
+        { refType: 'file', refId: { in: DEMO.files } },
+      ],
+    },
+  });
   console.log(`BOOKMARKS_DELETED=${bookmarks.count}`);
 
   const tasks = await prisma.learningTask.deleteMany({ where: { ...where, id: { in: DEMO.tasks } } });
@@ -48,7 +65,7 @@ async function main() {
   const subjects = await prisma.learningSubject.deleteMany({ where: { ...where, id: { in: DEMO.subjects } } });
   console.log(`SUBJECTS_DELETED=${subjects.count}`);
 
-  if (demoPresent > 0) {
+  if (demoPresent > 0 || (sessionsExist > 0 && workspaceCount === 0)) {
     const sessions = await prisma.studySession.deleteMany({ where });
     console.log(`SESSIONS_DELETED=${sessions.count} (demo seed present)`);
   } else {
