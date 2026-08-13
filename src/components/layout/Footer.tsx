@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { motion } from "framer-motion";
 import Logo from "@/components/ui/Logo";
 
@@ -9,6 +10,33 @@ const fade = {
   viewport: { once: true },
   transition: { duration: 0.8, ease: "easeOut" as const },
 };
+
+const productLinks = [
+  { label: "Features", href: "/#features" },
+  { label: "AI Assistant", href: "/dashboard/learning/ai-search" },
+  { label: "Marketplace", href: "/dashboard/marketplace" },
+  { label: "Learning", href: "/dashboard/learning" },
+];
+
+const companyLinks = [
+  { label: "About", href: "/" },
+  { label: "Blog", href: "/" },
+  { label: "Careers", href: "/signup" },
+  { label: "Contact", href: "/dashboard/messages" },
+];
+
+const legalLinks = [
+  { label: "Privacy", href: "/dashboard/settings" },
+  { label: "Terms", href: "/dashboard/settings" },
+  { label: "Security", href: "/dashboard/settings" },
+  { label: "Cookies", href: "/dashboard/settings" },
+];
+
+const socialLinks = [
+  { label: "GitHub", href: "https://github.com/abdullah143339-byte/NOVA_X", external: true },
+  { label: "Twitter", href: "/signup", external: false },
+  { label: "Discord", href: "/dashboard/communities", external: false },
+];
 
 export default function Footer() {
   return (
@@ -37,11 +65,11 @@ export default function Footer() {
           >
             <h3 className="text-sm font-semibold text-foreground mb-3">Product</h3>
             <ul className="space-y-2">
-              {["Features", "AI Assistant", "Marketplace", "Learning"].map((item) => (
-                <li key={item}>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                    {item}
-                  </a>
+              {productLinks.map((item) => (
+                <li key={item.label}>
+                  <Link href={item.href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                    {item.label}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -52,11 +80,11 @@ export default function Footer() {
           >
             <h3 className="text-sm font-semibold text-foreground mb-3">Company</h3>
             <ul className="space-y-2">
-              {["About", "Blog", "Careers", "Contact"].map((item) => (
-                <li key={item}>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                    {item}
-                  </a>
+              {companyLinks.map((item) => (
+                <li key={item.label}>
+                  <Link href={item.href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                    {item.label}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -67,11 +95,11 @@ export default function Footer() {
           >
             <h3 className="text-sm font-semibold text-foreground mb-3">Legal</h3>
             <ul className="space-y-2">
-              {["Privacy", "Terms", "Security", "Cookies"].map((item) => (
-                <li key={item}>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                    {item}
-                  </a>
+              {legalLinks.map((item) => (
+                <li key={item.label}>
+                  <Link href={item.href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                    {item.label}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -86,15 +114,27 @@ export default function Footer() {
             &copy; 2026 NOVAX. All rights reserved.
           </p>
           <div className="flex items-center gap-4">
-            {["GitHub", "Twitter", "Discord"].map((item) => (
-              <a
-                key={item}
-                href="#"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                {item}
-              </a>
-            ))}
+            {socialLinks.map((item) =>
+              item.external ? (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {item.label}
+                </a>
+              ) : (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {item.label}
+                </Link>
+              )
+            )}
           </div>
         </motion.div>
       </div>

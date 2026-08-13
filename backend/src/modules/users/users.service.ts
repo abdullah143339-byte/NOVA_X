@@ -24,7 +24,7 @@ export class UsersService {
     return user;
   }
 
-  async getByUsername(username: string) {
+  async getByUsername(username: string, viewerId?: string) {
     const user = await this.prisma.user.findUnique({
       where: { username: username.toLowerCase() },
       select: {
@@ -35,7 +35,15 @@ export class UsersService {
       },
     });
     if (!user) throw new NotFoundException('User not found');
-    return user;
+    let isFollowing = false;
+    if (viewerId && viewerId !== user.id) {
+      const rel = await this.prisma.follow.findUnique({
+        where: { followerId_followingId: { followerId: viewerId, followingId: user.id } },
+        select: { id: true },
+      });
+      isFollowing = !!rel;
+    }
+    return { ...user, isFollowing };
   }
 
   async updateProfile(userId: string, data: any) {

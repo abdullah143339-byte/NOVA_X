@@ -54,7 +54,7 @@ export default function CommunitiesTab({ joined, owned, loading }: CommunitiesTa
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {section.items.map((community, i) => (
                 <motion.div key={community.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}>
-                  <Link href={`/dashboard/communities/${community.slug || community.id}`} className="block glass rounded-xl p-4 hover-glow group">
+                  <Link href="/dashboard/communities" className="block glass rounded-xl p-4 hover-glow group">
                     <div className="flex items-start gap-3">
                       <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center text-xl shrink-0">
                         {avatarEmoji(community.category)}

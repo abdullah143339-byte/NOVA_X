@@ -145,6 +145,11 @@ class ApiClient {
   forgotPassword(email: string) { return this.post('/auth/forgot-password', { email }); }
   resetPassword(token: string, password: string) { return this.post('/auth/reset-password', { token, password }); }
   validateResetToken(token: string) { return this.get(`/auth/password-reset/validate?token=${encodeURIComponent(token)}`); }
+  changePassword(currentPassword: string, newPassword: string) { return this.post('/auth/change-password', { currentPassword, newPassword }); }
+  setup2FA() { return this.post('/auth/2fa/setup'); }
+  enable2FA(token: string) { return this.post('/auth/2fa/enable', { token }); }
+  disable2FA(token: string) { return this.post('/auth/2fa/disable', { token }); }
+  get2FAStatus() { return this.get('/auth/2fa/status'); }
 
   // Users
   getUserProfile(username: string) { return this.get(`/users/${username}`); }

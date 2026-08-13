@@ -18,6 +18,40 @@ function getStep(order: Order): number {
   return 0;
 }
 
+function downloadInvoice(order: Order) {
+  const lines = order.lines
+    .map((l) => `${l.quantity} x ${l.title} @ ${formatPrice(l.price, order.currency)} = ${formatPrice(l.price * l.quantity, order.currency)}`)
+    .join("\n");
+  const text = [
+    `NOVAX Invoice`,
+    `Order: ${order.id}`,
+    `Date: ${new Date(order.createdAt).toLocaleString()}`,
+    `Status: ${order.status}`,
+    ``,
+    lines,
+    ``,
+    `Subtotal: ${formatPrice(order.subtotal, order.currency)}`,
+    `Shipping: ${formatPrice(order.shipping, order.currency)}`,
+    order.discount > 0 ? `Discount: -${formatPrice(order.discount, order.currency)}` : null,
+    `Total: ${formatPrice(order.total, order.currency)}`,
+    ``,
+    `Deliver to: ${order.address.fullName}, ${order.address.line1}, ${order.address.city}, ${order.address.country}`,
+    `Payment: ${order.paymentMethod.replace(/_/g, " ").toUpperCase()}`,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  const blob = new Blob([text], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `NOVAX-invoice-${order.id}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
 export default function OrdersPage() {
   const { orders, notify } = useMarketplace();
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -27,6 +61,7 @@ export default function OrdersPage() {
   const filtered = filter === "All" ? orders : orders.filter((o) => o.status === filter);
 
   const handleInvoice = (order: Order) => {
+    downloadInvoice(order);
     notify(`Invoice for ${order.id} downloaded`, "info");
   };
 
@@ -40,7 +75,9 @@ export default function OrdersPage() {
         <Package className="w-14 h-14 text-muted-foreground/40 mx-auto mb-4" />
         <h2 className="text-xl font-semibold text-foreground">No orders yet</h2>
         <p className="text-sm text-muted-foreground mt-2">When you place an order it will show up here.</p>
-        <Button className="mt-6" onClick={() => undefined}>Place an Order</Button>
+        <Link href="/dashboard/marketplace">
+          <Button className="mt-6">Browse Products</Button>
+        </Link>
       </div>
     );
   }
@@ -128,7 +165,9 @@ export default function OrdersPage() {
                     <FileDown className="w-3.5 h-3.5" /> Invoice
                   </Button>
                   {order.status === "Delivered" && (
-                    <Button size="sm" variant="ghost">
+                    <Button size="sm" variant="ghost" onClick={() => {
+                      notify(`Return/Replace for ${order.id} — this action isn't wired to a backend endpoint yet`, "info");
+                    }}>
                       <RotateCcw className="w-3.5 h-3.5" /> Return / Replace
                     </Button>
                   )}

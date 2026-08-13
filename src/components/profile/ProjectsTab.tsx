@@ -26,7 +26,7 @@ export default function ProjectsTab({ projectPosts, loading }: ProjectsTabProps)
                   <p className="text-xs font-medium text-foreground truncate">{p.content}</p>
                   <p className="text-[10px] text-muted-foreground mt-0.5">{p.likeCount ?? p.reactionsCount ?? 0} likes · {p.commentCount ?? p.commentsCount ?? 0} comments</p>
                 </div>
-                <Link href="/dashboard" className="ml-3 text-[11px] text-primary shrink-0">View</Link>
+                <Link href={`/dashboard?post=${p.id}`} className="ml-3 text-[11px] text-primary shrink-0">View</Link>
               </div>
             ))}
           </div>

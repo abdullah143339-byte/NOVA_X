@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import Button from "@/components/ui/Button";
 import GlassCard from "@/components/ui/GlassCard";
 import api from "@/lib/api";
+import { cn } from "@/lib/utils";
 import { PageHeader, LearningNav } from "@/components/learning/LearningShared";
 import {
   Brain,
@@ -163,6 +164,7 @@ export default function AISearchPage() {
   const resultsRef = useRef<HTMLDivElement>(null);
   const [searchMethod, setSearchMethod] = useState<SearchMethod>("auto");
   const [searchLang, setSearchLang] = useState<SearchLang>("english");
+  const [feedback, setFeedback] = useState<"yes" | "no" | null>(null);
 
   const handleDeepSearch = async (query: string, method: SearchMethod = searchMethod) => {
     if (!query.trim() || isSearching) return;
@@ -497,11 +499,36 @@ Then list 3-4 related topics each on a new line starting with "RELATED:".`;
               <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
                 <CheckCircle className="w-3.5 h-3.5 text-green-500" />
                 Was this helpful?
-                <button className="hover:text-foreground transition-all">Yes</button>
+                <button
+                  onClick={() => setFeedback(feedback === "yes" ? null : "yes")}
+                  className={cn(
+                    "transition-all",
+                    feedback === "yes" ? "text-green-500 font-semibold" : "hover:text-foreground"
+                  )}
+                >
+                  {feedback === "yes" ? "✓ Thanks!" : "Yes"}
+                </button>
                 <span>·</span>
-                <button className="hover:text-foreground transition-all">No</button>
+                <button
+                  onClick={() => setFeedback(feedback === "no" ? null : "no")}
+                  className={cn(
+                    "transition-all",
+                    feedback === "no" ? "text-red-500 font-semibold" : "hover:text-foreground"
+                  )}
+                >
+                  {feedback === "no" ? "✕ Noted" : "No"}
+                </button>
                 <span>·</span>
-                <button className="hover:text-foreground transition-all">Ask Follow-up</button>
+                <button
+                  onClick={() => {
+                    inputRef.current?.focus();
+                    inputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+                    setSearchQuery(aiResult.title.replace(/^AI Search:\s*/, "").replace(/\.\.\.$/, ""));
+                  }}
+                  className="hover:text-foreground transition-all"
+                >
+                  Ask Follow-up
+                </button>
               </div>
             </div>
           )}

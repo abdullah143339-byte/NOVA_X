@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { SlidersHorizontal, FileDown, Printer, RefreshCw, AlertTriangle } from "lucide-react";
 import api from "@/lib/api";
@@ -109,9 +109,12 @@ export default function ProfilePage() {
   const { user, refreshUser } = useAuth();
   const { prefs, notify } = useProfile();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const queryUser = searchParams.get("u") || searchParams.get("username");
 
   const [profile, setProfile] = useState<ProfilePayload | null>(null);
   const [reputation, setReputation] = useState<ReputationData | null>(null);
+  const [following, setFollowing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("posts");
@@ -133,35 +136,13 @@ export default function ProfilePage() {
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
 
+  const viewingUsername = queryUser && queryUser !== user?.username ? queryUser : user?.username ?? "";
   const isOwner = !!user && !!profile && user.username === profile.username;
 
-  const loadProfile = useCallback(async () => {
-    if (!user) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const [pRes, rRes] = await Promise.all([
-        api.getUserProfile(user.username).catch(() => null),
-        api.getUserReputation(user.id).catch(() => null),
-      ]);
-      if (pRes?.data) {
-        setProfile(pRes.data as ProfilePayload);
-        setReputation(rRes?.data ?? null);
-      } else {
-        setError("Could not load profile data");
-      }
-    } catch {
-      setError("Failed to load profile. Check your connection.");
-    } finally {
-      setLoading(false);
-    }
-  }, [user]);
-
-  const loadPosts = useCallback(async () => {
-    if (!user) return;
+  const loadPosts = useCallback(async (userId: string) => {
     setPostsLoading(true);
     try {
-      const res = await api.getUserPosts(user.id);
+      const res = await api.getUserPosts(userId);
       const raw = res?.data;
       const items = Array.isArray(raw) ? raw : raw?.posts || [];
       setUserPosts(items.map((p: RawPost) => normalizePost(p)));
@@ -170,7 +151,7 @@ export default function ProfilePage() {
     } finally {
       setPostsLoading(false);
     }
-  }, [user]);
+  }, []);
 
   const loadSaved = useCallback(async () => {
     if (!user) return;
@@ -197,16 +178,15 @@ export default function ProfilePage() {
       const res = await api.getMarketplaceItems(1);
       const raw = res?.data;
       const items = Array.isArray(raw) ? raw : raw?.items || raw?.data || [];
-      setMarketItems(items.filter((i: RawPost) => String(i.sellerId) === user.id));
+      setMarketItems(items.filter((i: RawPost) => String(i.sellerId) === (profile?.id ?? user.id)));
     } catch {
       setMarketItems([]);
     } finally {
       setMarketLoading(false);
     }
-  }, [user]);
+  }, [user, profile]);
 
-  const loadCommunities = useCallback(async () => {
-    if (!user) return;
+  const loadCommunities = useCallback(async (userId: string) => {
     setCommunitiesLoading(true);
     try {
       const res = await api.getCommunities(1);
@@ -221,10 +201,10 @@ export default function ProfilePage() {
               : []
       ) as RawCommunity[];
       const owned = list
-        .filter((c) => String(c.ownerId ?? c.owner?.id ?? "") === String(user.id))
+        .filter((c) => String(c.ownerId ?? c.owner?.id ?? "") === String(userId))
         .map(normalizeCommunity);
       const joined = list
-        .filter((c) => c.isMember && String(c.ownerId ?? c.owner?.id ?? "") !== String(user.id))
+        .filter((c) => c.isMember && String(c.ownerId ?? c.owner?.id ?? "") !== String(userId))
         .map(normalizeCommunity);
       setCommunities({ owned, joined });
     } catch {
@@ -232,17 +212,41 @@ export default function ProfilePage() {
     } finally {
       setCommunitiesLoading(false);
     }
-  }, [user]);
+  }, []);
+
+  const loadProfile = useCallback(async () => {
+    if (!user) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const [pRes, rRes] = await Promise.all([
+        api.getUserProfile(viewingUsername || user.username).catch(() => null),
+        api.getUserReputation(user.id).catch(() => null),
+      ]);
+      if (pRes?.data) {
+        const p = pRes.data as ProfilePayload;
+        setProfile(p);
+        setReputation(rRes?.data ?? null);
+        setFollowing(Boolean((p as any).isFollowing));
+        const viewedId = p.id;
+        await Promise.all([loadPosts(viewedId), loadCommunities(viewedId)]);
+      } else {
+        setError("Could not load profile data");
+      }
+    } catch {
+      setError("Failed to load profile. Check your connection.");
+    } finally {
+      setLoading(false);
+    }
+  }, [user, viewingUsername, loadPosts, loadCommunities]);
 
   useEffect(() => {
     if (!user) return;
     const t = window.setTimeout(() => {
       loadProfile();
-      loadPosts();
-      loadCommunities();
     }, 0);
     return () => window.clearTimeout(t);
-  }, [user, loadProfile, loadPosts, loadCommunities]);
+  }, [user, loadProfile]);
 
   useEffect(() => {
     if (!user) return;
@@ -256,10 +260,14 @@ export default function ProfilePage() {
   const reloadProfile = useCallback(async () => {
     if (!user) return;
     try {
-      const res = await api.getUserProfile(user.username);
-      if (res?.data) setProfile(res.data as ProfilePayload);
+      const res = await api.getUserProfile(viewingUsername || user.username);
+      if (res?.data) {
+        const p = res.data as ProfilePayload;
+        setProfile(p);
+        setFollowing(Boolean((p as any).isFollowing));
+      }
     } catch {}
-  }, [user]);
+  }, [user, viewingUsername]);
 
   const displayName = profile?.displayName || user?.displayName || [user?.firstName, user?.lastName].filter(Boolean).join(" ") || profile?.username || user?.username || "";
   const initials =
@@ -335,17 +343,24 @@ export default function ProfilePage() {
 
   const handleFollow = useCallback(async () => {
     if (!profile) return;
+    const prev = following;
+    setFollowing(!prev);
     try {
-      await api.followUser(profile.id);
-      notify(`Following @${profile.username}`);
+      const res = await api.followUser(profile.id);
+      const next = Boolean(res?.data?.following ?? !prev);
+      setFollowing(next);
+      notify(next ? `Following @${profile.username}` : `Unfollowed @${profile.username}`);
+      reloadProfile();
     } catch {
-      notify("Could not follow right now", "error");
+      setFollowing(prev);
+      notify("Could not update follow", "error");
     }
-  }, [profile, notify]);
+  }, [profile, following, notify, reloadProfile]);
 
   const handleMessage = useCallback(() => {
-    router.push("/dashboard/messages");
-  }, [router]);
+    if (!profile) return;
+    router.push(`/dashboard/messages?user=${encodeURIComponent(profile.username)}`);
+  }, [profile, router]);
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -482,7 +497,7 @@ export default function ProfilePage() {
         <p className="text-foreground font-semibold">Couldn&apos;t load this profile</p>
         <p className="text-sm text-muted-foreground mt-1">{error}</p>
         <button
-          onClick={() => { loadProfile(); loadPosts(); }}
+          onClick={() => { loadProfile(); }}
           className="mt-5 inline-flex items-center gap-2 h-9 px-4 rounded-xl bg-gradient-primary text-white text-xs font-medium hover:shadow-lg hover:shadow-primary/25 transition-all"
         >
           <RefreshCw className="w-3.5 h-3.5" /> Retry
@@ -503,6 +518,7 @@ export default function ProfilePage() {
         reputation={reputation ?? undefined}
         counts={counts}
         isOwner={isOwner}
+        isFollowing={following}
         onFollow={handleFollow}
         onMessage={handleMessage}
         onShare={() => setShareOpen(true)}

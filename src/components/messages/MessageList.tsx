@@ -18,6 +18,7 @@ interface MessageListProps {
   onOpenMedia: (m: ChatMessage) => void;
   onRetry: (m: ChatMessage) => void;
   onDelete: (m: ChatMessage) => void;
+  onQuoteClick?: (id: string) => void;
 }
 
 export default function MessageList({
@@ -32,6 +33,7 @@ export default function MessageList({
   onOpenMedia,
   onRetry,
   onDelete,
+  onQuoteClick,
 }: MessageListProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const topSentinelRef = useRef<HTMLDivElement>(null);
@@ -120,6 +122,7 @@ export default function MessageList({
         onOpenMedia={onOpenMedia}
         onRetry={onRetry}
         onDelete={onDelete}
+        onQuoteClick={onQuoteClick}
       />
     );
   });

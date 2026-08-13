@@ -65,6 +65,7 @@ interface MessageBubbleProps {
   onOpenMedia: (m: ChatMessage) => void;
   onRetry: (m: ChatMessage) => void;
   onDelete: (m: ChatMessage) => void;
+  onQuoteClick?: (id: string) => void;
 }
 
 export default function MessageBubble({
@@ -76,6 +77,7 @@ export default function MessageBubble({
   onOpenMedia,
   onRetry,
   onDelete,
+  onQuoteClick,
 }: MessageBubbleProps) {
   const [playingVoice, setPlayingVoice] = useState(false);
   const voiceRef = useRef<HTMLAudioElement>(null);
@@ -94,6 +96,7 @@ export default function MessageBubble({
   return (
     <motion.div
       layout
+      id={`msg-${m.id}`}
       initial={{ opacity: 0, y: 8, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ type: "spring", damping: 26, stiffness: 320 }}
@@ -119,7 +122,7 @@ export default function MessageBubble({
           {quoted && (
             <button
               onClick={() => {
-                /* scroll to quoted handled by parent via reply — best-effort */
+                if (onQuoteClick && quoted?.id) onQuoteClick(quoted.id);
               }}
               className={cn(
                 "flex items-center gap-2 w-full max-w-[240px] rounded-lg px-2.5 py-1.5 mb-1.5 border-l-2 border-accent/60 bg-black/20 text-left",

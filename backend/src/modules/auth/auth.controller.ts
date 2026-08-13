@@ -3,7 +3,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagg
 import { AuthService } from './auth.service';
 import { TwoFactorService } from './two-factor.service';
 import { RegisterDto } from '../../common/dto/register.dto';
-import { LoginDto, ForgotPasswordDto, ResetPasswordDto, RefreshTokenDto } from '../../common/dto/auth.dto';
+import { LoginDto, ForgotPasswordDto, ResetPasswordDto, RefreshTokenDto, ChangePasswordDto } from '../../common/dto/auth.dto';
 import { Verify2FATokenDto, VerifyLoginDto } from './two-factor.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { Public } from '../../common/decorators/auth.decorator';
@@ -181,6 +181,16 @@ export class AuthController {
     return ApiResponseDto.ok(result, 'Reset token is valid');
   }
 
+  @Post('change-password')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Change password for the current user' })
+  async changePassword(@CurrentUser('id') userId: string, @Body() dto: ChangePasswordDto) {
+    const result = await this.authService.changePassword(userId, dto.currentPassword, dto.newPassword);
+    return ApiResponseDto.ok(result, 'Password updated. Please sign in again.');
+  }
+
   @Post('2fa/setup')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
@@ -190,7 +200,6 @@ export class AuthController {
     const result = await this.twoFactorService.generateSecret(userId, email);
     return ApiResponseDto.ok(result, '2FA secret generated');
   }
-
   @Post('2fa/enable')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()

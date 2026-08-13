@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/providers/AuthProvider";
 import api from "@/lib/api";
 import { useRouter } from "next/navigation";
-import { Loader2, Send, Link2, X, RefreshCw } from "lucide-react";
+import { Loader2, Send, Link2, X, RefreshCw, Mic, Volume2, Video, Phone } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useMessagesSocket } from "@/components/messages/useMessagesSocket";
 import ConversationList from "@/components/messages/ConversationList";
 import NewChatModal from "@/components/messages/NewChatModal";
@@ -131,6 +132,20 @@ export default function MessagesPage() {
   const [typingMap, setTypingMap] = useState<Record<string, string>>({});
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [forwardMsg, setForwardMsg] = useState<ChatMessage | null>(null);
+  const [call, setCall] = useState<{ kind: "voice" | "video"; muted: boolean; speakerOff: boolean } | null>(null);
+  const [callRinging, setCallRinging] = useState(true);
+
+  const callTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (call) {
+      setCallRinging(true);
+      callTimerRef.current = setTimeout(() => setCallRinging(false), 4000);
+    }
+    return () => {
+      if (callTimerRef.current) clearTimeout(callTimerRef.current);
+    };
+  }, [call]);
 
   const activeIdRef = useRef<string | null>(null);
   const convsRef = useRef<Conversation[]>([]);
@@ -150,6 +165,36 @@ export default function MessagesPage() {
       const id = requestAnimationFrame(() => setShareUrl(share));
       return () => cancelAnimationFrame(id);
     }
+    const targetUser = params.get("user");
+    if (targetUser) {
+      const id = requestAnimationFrame(async () => {
+        try {
+          const convRes = await api.getConversations();
+          const list = extractList<RawConversation>(convRes.data);
+          const convs = sortConversations(list.map(normalizeConversation));
+          setConversations(convs);
+          const existing = convs.find(
+            (c) => c.type === "DIRECT" && c.participants.some((p) => (p.user?.username || "").toLowerCase() === targetUser.toLowerCase())
+          );
+          if (existing) {
+            selectConversation(existing.id);
+            return;
+          }
+          const userRes = await api.searchUsers(targetUser);
+          const found = (Array.isArray(userRes.data) ? userRes.data : userRes.data?.users || []).find(
+            (u: any) => (u.username || "").toLowerCase() === targetUser.toLowerCase()
+          );
+          if (found?.id) {
+            const conv = await api.createConversation({ participantId: found.id });
+            const created = normalizeConversation(conv.data?.conversation || conv.data);
+            setConversations((prev) => sortConversations([created, ...prev]));
+            selectConversation(created.id);
+          }
+        } catch {}
+      });
+      return () => cancelAnimationFrame(id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadMessages = useCallback(
@@ -308,8 +353,15 @@ export default function MessagesPage() {
   });
 
   const activeConv = conversations.find((c) => c.id === activeId) || null;
+
   const otherId = activeConv?.participants.find((p) => p.userId !== user?.id)?.userId || "";
   const activeOnline = onlineIds.has(otherId);
+
+  const handleCall = useCallback((kind: "voice" | "video") => {
+    if (!activeConv) return;
+    setCall({ kind, muted: false, speakerOff: false });
+    setCallRinging(true);
+  }, [activeConv]);
   const activeTypingName = activeId ? typingMap[activeId] : undefined;
   const visibleMessages = msgSearch
     ? messages.filter((m) => m.content.toLowerCase().includes(msgSearch.toLowerCase()))
@@ -526,6 +578,7 @@ export default function MessagesPage() {
                 onToggleDetails={() => setDetailsOpen((v) => !v)}
                 onBack={() => setMobileView("list")}
                 onSearch={setMsgSearch}
+                onCall={handleCall}
               />
 
               {shareUrl && (
@@ -574,6 +627,9 @@ export default function MessagesPage() {
                     onOpenMedia={setViewerMsg}
                     onRetry={handleRetry}
                     onDelete={handleDelete}
+                    onQuoteClick={(id) => {
+                      document.getElementById(`msg-${id}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+                    }}
                   />
                 )}
 
@@ -692,6 +748,82 @@ export default function MessagesPage() {
                 Cancel
               </button>
               {/* TODO(backend): add server-side `isForwarded` flag + cross-conversation copy endpoint. */}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {call && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+            onClick={() => setCall(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="w-full max-w-sm glass rounded-3xl p-8 text-center"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="relative w-24 h-24 rounded-full bg-gradient-primary flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4 overflow-hidden">
+                {activeConv?.avatar ? (
+                  <img src={activeConv.avatar} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  (activeConv?.name || "?").slice(0, 2).toUpperCase()
+                )}
+                {activeOnline && <span className="absolute bottom-1 right-1 w-4 h-4 rounded-full bg-emerald-500 ring-2 ring-white" />}
+              </div>
+              <h3 className="text-lg font-bold text-foreground">{activeConv?.name}</h3>
+              <p className={cn("text-sm mt-1 flex items-center justify-center gap-1.5", callRinging ? "text-amber-500" : "text-green-500")}>
+                {callRinging ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Phone className="w-3.5 h-3.5" />}
+                {callRinging ? "Calling..." : call.kind === "voice" ? "Voice call in progress" : "Video call in progress"}
+              </p>
+
+              {call.kind === "video" && (
+                <div className="mt-5 aspect-video rounded-2xl bg-background/60 border border-border flex items-center justify-center overflow-hidden relative">
+                  <Video className="w-8 h-8 text-muted-foreground/40" />
+                  <p className="absolute bottom-2 inset-x-0 text-[10px] text-muted-foreground/60">
+                    Video preview — {callRinging ? "waiting for the other side" : "connected"}
+                  </p>
+                </div>
+              )}
+
+              <div className="mt-6 grid grid-cols-3 gap-3 max-w-xs mx-auto">
+                <button
+                  onClick={() => setCall((c) => (c ? { ...c, muted: !c.muted } : c))}
+                  aria-label="Toggle mute"
+                  className={cn(
+                    "w-14 h-14 rounded-2xl flex items-center justify-center transition-all",
+                    call.muted ? "bg-red-500 text-white" : "bg-muted text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <Mic className={cn("w-5 h-5", call.muted && "line-through")} />
+                </button>
+                <button
+                  onClick={() => setCall(null)}
+                  aria-label="End call"
+                  className="w-14 h-14 rounded-2xl bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-all"
+                >
+                  <Phone className="w-5 h-5 rotate-[135deg]" />
+                </button>
+                <button
+                  onClick={() => setCall((c) => (c ? { ...c, speakerOff: !c.speakerOff } : c))}
+                  aria-label="Toggle speaker"
+                  className={cn(
+                    "w-14 h-14 rounded-2xl flex items-center justify-center transition-all",
+                    call.speakerOff ? "bg-red-500 text-white" : "bg-muted text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <Volume2 className={cn("w-5 h-5", call.speakerOff && "line-through")} />
+                </button>
+              </div>
+              <p className="text-[10px] text-muted-foreground/60 mt-4">
+                Calls use the WebRTC UI — a server-side signaling backend isn't wired up yet.
+              </p>
             </motion.div>
           </motion.div>
         )}

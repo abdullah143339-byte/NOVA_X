@@ -35,6 +35,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
   const [aiModal, setAiModal] = useState(false);
   const [aiPrompt, setAiPrompt] = useState("");
   const [aiGenerating, setAiGenerating] = useState(false);
+  const [aiMediaUrls, setAiMediaUrls] = useState<string[]>([]);
   const [visibility, setVisibility] = useState<"PUBLIC" | "PRIVATE">("PUBLIC");
   const photoInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
@@ -69,10 +70,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
       const url = res?.data?.url || res?.data?.imageUrl || res?.data?.image;
       if (!url) throw new Error("No image returned");
       setMediaPreviews((prev) => [...prev, url]);
-      setMediaFiles((prev) => [
-        ...prev,
-        new File([new Uint8Array(0)], `ai-${Date.now()}.png`, { type: "image/png" }),
-      ]);
+      setAiMediaUrls((prev) => [...prev, url]);
       setAiModal(false);
       setAiPrompt("");
       setHint("AI image attached to your post");
@@ -87,7 +85,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
     if ((!content.trim() && mediaFiles.length === 0) || posting) return;
     setPosting(true);
     try {
-      const uploadedUrls: string[] = [];
+      const uploadedUrls: string[] = [...aiMediaUrls];
       const hasVideo = mediaFiles.some((f) => f.type.startsWith("video/"));
       for (const file of mediaFiles) {
         const isVideo = file.type.startsWith("video/");
@@ -102,7 +100,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
         const uploadRes = await api.uploadFile(file, isVideo ? "reel" : "post", duration || undefined);
         uploadedUrls.push(uploadRes.data.url);
       }
-      const finalType = hasVideo ? "VIDEO" : mediaFiles.length > 0 ? "IMAGE" : "TEXT";
+      const finalType = hasVideo ? "VIDEO" : uploadedUrls.length > 0 ? "IMAGE" : "TEXT";
       await api.createPost({
         content,
         type: finalType,
@@ -111,6 +109,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
       });
       setContent("");
       setMediaFiles([]);
+      setAiMediaUrls([]);
       setMediaPreviews((prev) => { prev.forEach((u) => u.startsWith("blob:") && URL.revokeObjectURL(u)); return []; });
       onPostCreated();
     } catch {
@@ -153,7 +152,12 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
                     <img src={url} alt="" className="w-full h-full object-cover" />
                   )}
                   <button
-                    onClick={() => { setMediaPreviews((p) => p.filter((_, j) => j !== i)); setMediaFiles((f) => f.filter((_, j) => j !== i)); }}
+                    onClick={() => {
+                      const removed = mediaPreviews[i];
+                      setMediaPreviews((p) => p.filter((_, j) => j !== i));
+                      setMediaFiles((f) => f.filter((_, j) => j !== i));
+                      if (removed && !removed.startsWith("blob:")) setAiMediaUrls((p) => p.filter((u) => u !== removed));
+                    }}
                     className="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 flex items-center justify-center"
                     aria-label="Remove media"
                   >

@@ -400,6 +400,26 @@ export class AuthService {
     return { email: user.email, username: user.username };
   }
 
+  async changePassword(userId: string, currentPassword: string, newPassword: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user || !user.passwordHash) {
+      throw new UnauthorizedException('Password change not available for this account');
+    }
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Current password is incorrect');
+    }
+    const passwordHash = await bcrypt.hash(newPassword, 12);
+    await this.prisma.$transaction([
+      this.prisma.user.update({ where: { id: userId }, data: { passwordHash } }),
+      this.prisma.session.updateMany({
+        where: { userId, isActive: true },
+        data: { isActive: false },
+      }),
+    ]);
+    return { changed: true };
+  }
+
   async resetPassword(token: string, newPassword: string) {
     const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
     const user = await this.prisma.user.findFirst({

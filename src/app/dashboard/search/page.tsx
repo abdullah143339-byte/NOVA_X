@@ -39,8 +39,8 @@ export default function SearchPage() {
         type: r.type || "post",
         title: r.title || r.name || r.username || r.content?.slice(0, 80) || "Untitled",
         subtitle: r.description || r.bio || r.slug || r.content?.slice(0, 120) || "",
-        url: r.type === "user" ? `/dashboard/profile?username=${r.username || r.id}` :
-             r.type === "community" ? `/dashboard/communities/${r.slug || r.id}` :
+        url: r.type === "user" ? `/dashboard/profile?u=${r.username || r.id}` :
+             r.type === "community" ? `/dashboard/communities` :
              `/dashboard?post=${r.id}`,
       })));
     } catch {

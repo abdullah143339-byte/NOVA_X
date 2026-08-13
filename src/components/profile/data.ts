@@ -93,7 +93,10 @@ export function parseJsonArray(value?: string | null): string[] {
 }
 
 export function getProfileUrl(username: string): string {
-  return `https://nova.ai/${username}`;
+  if (typeof window !== "undefined") {
+    return `${window.location.origin}/dashboard/profile?u=${encodeURIComponent(username)}`;
+  }
+  return `/dashboard/profile?u=${encodeURIComponent(username)}`;
 }
 
 export const AI_PROFILE_ACTIONS = [

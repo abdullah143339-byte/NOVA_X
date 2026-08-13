@@ -39,6 +39,7 @@ interface MarketplaceContextValue {
   isInCart: (itemId: string) => boolean;
   toggleWishlist: (item: MarketplaceItem) => void;
   isWishlisted: (itemId: string) => boolean;
+  clearWishlist: () => void;
   toggleCompare: (item: MarketplaceItem) => void;
   isCompared: (itemId: string) => boolean;
   clearCompare: () => void;
@@ -188,6 +189,8 @@ export function MarketplaceProvider({ children }: { children: ReactNode }) {
 
   const isWishlisted = useCallback((itemId: string) => wishlist.some((i) => i.id === itemId), [wishlist]);
 
+  const clearWishlist = useCallback(() => setWishlist([]), []);
+
   const toggleCompare = useCallback((item: MarketplaceItem) => {
     setCompare((prev) => {
       const exists = prev.some((i) => i.id === item.id);
@@ -286,6 +289,7 @@ export function MarketplaceProvider({ children }: { children: ReactNode }) {
     isInCart,
     toggleWishlist,
     isWishlisted,
+    clearWishlist,
     toggleCompare,
     isCompared,
     clearCompare,

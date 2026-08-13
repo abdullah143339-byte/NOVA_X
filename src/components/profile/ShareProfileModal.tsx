@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Check, Copy, Link2, AtSign, MessageSquare } from "lucide-react";
 import { getProfileUrl } from "./data";
@@ -15,6 +16,7 @@ interface ShareProfileModalProps {
 }
 
 export default function ShareProfileModal({ open, onClose, username, notify }: ShareProfileModalProps) {
+  const router = useRouter();
   const url = getProfileUrl(username);
   const [copied, setCopied] = useState(false);
 
@@ -25,6 +27,17 @@ export default function ShareProfileModal({ open, onClose, username, notify }: S
       notify("Profile link copied");
       setTimeout(() => setCopied(false), 1600);
     } catch {}
+  };
+
+  const shareToTwitter = () => {
+    const text = encodeURIComponent(`Check out ${username} on NOVAX`);
+    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(url)}`, "_blank", "noopener,noreferrer");
+    onClose();
+  };
+
+  const dmUser = () => {
+    router.push(`/dashboard/messages?user=${encodeURIComponent(username)}`);
+    onClose();
   };
 
   return (
@@ -63,11 +76,11 @@ export default function ShareProfileModal({ open, onClose, username, notify }: S
               </div>
 
               <div className="grid grid-cols-3 gap-2 w-full">
-                <button onClick={copyUrl} className={cn("flex flex-col items-center gap-1.5 py-3 rounded-xl border border-border hover:bg-muted transition-all")}>
+                <button onClick={shareToTwitter} className={cn("flex flex-col items-center gap-1.5 py-3 rounded-xl border border-border hover:bg-muted transition-all")}>
                   <AtSign className="w-4 h-4 text-sky-400" />
                   <span className="text-[10px] text-muted-foreground">X / Twitter</span>
                 </button>
-                <button onClick={copyUrl} className="flex flex-col items-center gap-1.5 py-3 rounded-xl border border-border hover:bg-muted transition-all">
+                <button onClick={dmUser} className="flex flex-col items-center gap-1.5 py-3 rounded-xl border border-border hover:bg-muted transition-all">
                   <MessageSquare className="w-4 h-4 text-emerald-400" />
                   <span className="text-[10px] text-muted-foreground">DM</span>
                 </button>

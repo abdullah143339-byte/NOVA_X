@@ -83,11 +83,13 @@ export default function DashboardLayout({
               )}
             </Link>
             <div className="flex items-center gap-2.5 pl-3 border-l border-border">
-              <div className="w-9 h-9 rounded-xl bg-gradient-primary flex items-center justify-center text-white text-sm font-bold cursor-pointer hover:opacity-90 transition-opacity">
-                {user.firstName?.[0]}{user.lastName?.[0] || user.username[0]?.toUpperCase()}
-              </div>
+              <Link href="/dashboard/profile" aria-label="My profile">
+                <div className="w-9 h-9 rounded-xl bg-gradient-primary flex items-center justify-center text-white text-sm font-bold cursor-pointer hover:opacity-90 transition-opacity">
+                  {user.firstName?.[0]}{user.lastName?.[0] || user.username[0]?.toUpperCase()}
+                </div>
+              </Link>
               <div className="hidden xl:block">
-                <p className="text-sm font-medium text-foreground leading-none">{user.firstName} {user.lastName}</p>
+                <Link href="/dashboard/profile" className="text-sm font-medium text-foreground leading-none hover:underline">{user.firstName} {user.lastName}</Link>
                 <p className="text-xs text-muted-foreground mt-0.5">@{user.username}</p>
               </div>
             </div>

@@ -3,8 +3,9 @@ import { Controller, Get, Patch, Post, Param, Body, Query, UseGuards } from '@ne
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '../auth/optional-jwt-auth.guard';
 import { Public } from '../../common/decorators/auth.decorator';
-import { CurrentUser } from '../../common/decorators/user.decorator';
+import { CurrentUser, CurrentUserId } from '../../common/decorators/user.decorator';
 import { ApiResponseDto } from '../../common/dto/api-response.dto';
 
 @ApiTags('Users')
@@ -27,9 +28,9 @@ export class UsersController {
   }
 
   @Get(':username')
-  @Public()
-  async getByUsername(@Param('username') username: string) {
-    return ApiResponseDto.ok(await this.usersService.getByUsername(username));
+  @UseGuards(OptionalJwtAuthGuard)
+  async getByUsername(@Param('username') username: string, @CurrentUserId() viewerId?: string) {
+    return ApiResponseDto.ok(await this.usersService.getByUsername(username, viewerId));
   }
 
   @Patch('me')

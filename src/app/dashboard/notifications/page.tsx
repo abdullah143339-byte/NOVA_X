@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import api from "@/lib/api";
 import { useAuth } from "@/providers/AuthProvider";
@@ -53,6 +54,7 @@ function timeAgo(dateStr: string) {
 
 export default function NotificationsPage() {
   const { user } = useAuth();
+  const router = useRouter();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "unread">("all");
@@ -88,6 +90,29 @@ export default function NotificationsPage() {
   const markRead = async (id: string) => {
     try { await api.markNotificationRead(id); } catch {}
     setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)));
+  };
+
+  const openNotification = (notif: Notification) => {
+    if (!notif.isRead) markRead(notif.id);
+    const data = notif.data || {};
+    const username = data.username || data.actor?.username || data.actorName || null;
+    const type = notif.type?.toUpperCase();
+
+    if (type === "FOLLOW" || type === "MENTION") {
+      router.push(username ? `/dashboard/profile?u=${encodeURIComponent(username)}` : "/dashboard/profile");
+    } else if (type === "LIKE" || type === "COMMENT") {
+      if (data.postId) {
+        router.push(`/dashboard?post=${data.postId}`);
+      } else if (username) {
+        router.push(`/dashboard/profile?u=${encodeURIComponent(username)}`);
+      } else {
+        router.push("/dashboard");
+      }
+    } else if (data.url) {
+      router.push(data.url);
+    } else {
+      router.push("/dashboard");
+    }
   };
 
   const filtered = filter === "unread" ? notifications.filter((n) => !n.isRead) : notifications;
@@ -144,7 +169,7 @@ export default function NotificationsPage() {
             return (
               <button
                 key={notif.id}
-                onClick={() => !notif.isRead && markRead(notif.id)}
+                onClick={() => openNotification(notif)}
                 className={cn(
                   "w-full flex items-start gap-3 p-4 rounded-xl text-left transition-all hover:bg-muted/50",
                   !notif.isRead && "glass"

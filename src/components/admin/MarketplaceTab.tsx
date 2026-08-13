@@ -27,13 +27,31 @@ const PRODUCT_STATUS_MAP: Record<string, MarketplaceProductRow["status"]> = {
   SOLD_OUT: "HIDDEN",
 };
 
+const COUPONS_KEY = "novax_admin_coupons";
+
+const DEMO_COUPONS: CouponRow[] = [
+  { id: "cp1", code: "NOVAX10", description: "10% off orders over 500", discount: 10, type: "PERCENT", maxUses: 500, used: 0, expiresAt: new Date(Date.now() + 90 * 864e5).toISOString(), active: true },
+  { id: "cp2", code: "WELCOME15", description: "15% off orders over 1000", discount: 15, type: "PERCENT", maxUses: 300, used: 0, expiresAt: new Date(Date.now() + 60 * 864e5).toISOString(), active: true },
+  { id: "cp3", code: "LAUNCH25", description: "25% off orders over 2000", discount: 25, type: "PERCENT", maxUses: 100, used: 0, expiresAt: new Date(Date.now() + 30 * 864e5).toISOString(), active: false },
+];
+
+function readCoupons(): CouponRow[] {
+  try {
+    const raw = window.localStorage.getItem(COUPONS_KEY);
+    if (!raw) return DEMO_COUPONS;
+    return JSON.parse(raw) as CouponRow[];
+  } catch {
+    return DEMO_COUPONS;
+  }
+}
+
 export default function MarketplaceTab() {
   const { user } = useAuth();
   const { notify, addAuditAction } = useAdmin();
   const [sub, setSub] = useState<SubTab>("products");
   const [products, setProducts] = useState<MarketplaceProductRow[]>([]);
   const [orders, setOrders] = useState<OrderRow[]>([]);
-  const [coupons, setCoupons] = useState<CouponRow[]>([]);
+  const [coupons, setCoupons] = useState<CouponRow[]>(readCoupons);
   const [refunds, setRefunds] = useState<RefundRow[]>([]);
   const [reviews, setReviews] = useState<ReviewRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -167,7 +185,11 @@ export default function MarketplaceTab() {
   };
 
   const toggleCoupon = (c: CouponRow) => {
-    setCoupons((prev) => prev.map((x) => (x.id === c.id ? { ...x, active: !x.active } : x)));
+    setCoupons((prev) => {
+      const next = prev.map((x) => (x.id === c.id ? { ...x, active: !x.active } : x));
+      try { window.localStorage.setItem(COUPONS_KEY, JSON.stringify(next)); } catch {}
+      return next;
+    });
     notify(c.active ? `Coupon ${c.code} deactivated` : `Coupon ${c.code} activated`, "success");
     audit("TOGGLE_COUPON", `Coupon ${c.code} ${c.active ? "deactivated" : "activated"}`, "coupon", c.id);
   };

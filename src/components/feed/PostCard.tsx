@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import api from "@/lib/api";
 import {
@@ -106,8 +107,8 @@ function renderInline(text: string, keyPrefix: string) {
     const [full, code, bold, mention, hashtag, link] = m;
     if (code) parts.push(<code key={`${keyPrefix}-c${i++}`} className="px-1.5 py-0.5 rounded-md bg-muted text-accent font-mono text-[0.85em]">{code.slice(1, -1)}</code>);
     else if (bold) parts.push(<strong key={`${keyPrefix}-b${i++}`} className="font-semibold">{bold.slice(2, -2)}</strong>);
-    else if (mention) parts.push(<span key={`${keyPrefix}-m${i++}`} className="text-primary font-medium">{mention}</span>);
-    else if (hashtag) parts.push(<span key={`${keyPrefix}-h${i++}`} className="text-primary font-medium">{hashtag}</span>);
+    else if (mention) parts.push(<Link key={`${keyPrefix}-m${i++}`} href={`/dashboard/profile?u=${encodeURIComponent(mention.slice(1))}`} className="text-primary font-medium hover:underline">{mention}</Link>);
+    else if (hashtag) parts.push(<Link key={`${keyPrefix}-h${i++}`} href={`/dashboard/search?q=${encodeURIComponent(hashtag)}`} className="text-primary font-medium hover:underline">{hashtag}</Link>);
     else if (link) parts.push(<a key={`${keyPrefix}-l${i++}`} href={link.startsWith("http") ? link : `https://${link}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">{full}</a>);
     else parts.push(<span key={`${keyPrefix}-r${i++}`}>{full}</span>);
     last = m.index + full.length;
@@ -304,14 +305,20 @@ export default function PostCard({ post, currentUserId, onDelete }: PostCardProp
     >
       <div className="p-4 pb-0">
         <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center text-white text-xs font-bold shrink-0 overflow-hidden ring-1 ring-border">
-            {post.author.avatar ? <img src={post.author.avatar} alt="" className="w-full h-full object-cover" /> : getInitials(post.author)}
-          </div>
+          <Link href={`/dashboard/profile?u=${encodeURIComponent(post.author.username)}`} className="shrink-0">
+            <div className="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center text-white text-xs font-bold shrink-0 overflow-hidden ring-1 ring-border hover:opacity-90 transition-opacity">
+              {post.author.avatar ? <img src={post.author.avatar} alt="" className="w-full h-full object-cover" /> : getInitials(post.author)}
+            </div>
+          </Link>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-sm font-semibold text-foreground">{getAuthorName(post.author)}</span>
+              <Link href={`/dashboard/profile?u=${encodeURIComponent(post.author.username)}`} className="text-sm font-semibold text-foreground hover:underline">
+                {getAuthorName(post.author)}
+              </Link>
               {isVerified && <BadgeCheck className="w-4 h-4 text-primary" />}
-              <span className="text-xs text-muted-foreground">@{post.author.username}</span>
+              <Link href={`/dashboard/profile?u=${encodeURIComponent(post.author.username)}`} className="text-xs text-muted-foreground hover:underline">
+                @{post.author.username}
+              </Link>
             </div>
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
               <span>{timeAgo(post.createdAt)}</span>
@@ -338,7 +345,7 @@ export default function PostCard({ post, currentUserId, onDelete }: PostCardProp
         {parseTags(post.tags).filter((t) => t !== "project").length > 0 && (
           <div className="flex flex-wrap gap-1.5 mt-3">
             {parseTags(post.tags).filter((t) => t !== "project").map((tag) => (
-              <span key={tag} className="px-2 py-0.5 rounded-md bg-primary/10 text-primary text-xs font-medium">#{tag}</span>
+              <Link key={tag} href={`/dashboard/search?q=${encodeURIComponent("#" + tag)}`} className="px-2 py-0.5 rounded-md bg-primary/10 text-primary text-xs font-medium hover:bg-primary/20 transition-colors">#{tag}</Link>
             ))}
           </div>
         )}
@@ -421,12 +428,14 @@ export default function PostCard({ post, currentUserId, onDelete }: PostCardProp
               ) : (
                 comments.map((c) => (
                   <div key={c.id} className="flex items-start gap-2.5">
-                    <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center text-[10px] font-bold shrink-0 overflow-hidden">
-                      {c.author?.avatar ? <img src={c.author.avatar} alt="" className="w-full h-full object-cover" /> : (c.author?.username?.[0] || "U").toUpperCase()}
-                    </div>
+                    <Link href={`/dashboard/profile?u=${encodeURIComponent(c.author?.username || "")}`} className="shrink-0">
+                      <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center text-[10px] font-bold shrink-0 overflow-hidden hover:opacity-90">
+                        {c.author?.avatar ? <img src={c.author.avatar} alt="" className="w-full h-full object-cover" /> : (c.author?.username?.[0] || "U").toUpperCase()}
+                      </div>
+                    </Link>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs">
-                        <span className="font-semibold text-foreground">@{c.author?.username || "unknown"}</span>
+                        <Link href={`/dashboard/profile?u=${encodeURIComponent(c.author?.username || "")}`} className="font-semibold text-foreground hover:underline">@{c.author?.username || "unknown"}</Link>
                         <span className="text-muted-foreground"> · {timeAgo(c.createdAt)}</span>
                       </p>
                       <p className="text-sm text-foreground mt-0.5 leading-relaxed">{c.content}</p>

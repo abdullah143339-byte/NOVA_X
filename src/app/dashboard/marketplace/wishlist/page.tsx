@@ -10,8 +10,7 @@ import type { MarketplaceItem } from "@/components/marketplace/types";
 
 export default function WishlistPage() {
   const router = useRouter();
-  const { wishlist, toggleWishlist, addToCart, isInCart, notify } = useMarketplace();
-
+  const { wishlist, toggleWishlist, clearWishlist, addToCart, isInCart, notify } = useMarketplace();
   if (wishlist.length === 0) {
     return (
       <div className="text-center py-20 glass rounded-3xl">
@@ -31,7 +30,7 @@ export default function WishlistPage() {
     <div>
       <div className="flex items-center justify-between mb-5">
         <h1 className="text-xl font-bold text-foreground">My Wishlist ({wishlist.length})</h1>
-        <Button variant="ghost" size="sm" onClick={() => { toggleWishlist(wishlist[0]); }}>
+        <Button variant="ghost" size="sm" onClick={() => { clearWishlist(); notify("Wishlist cleared", "info"); }}>
           <Trash2 className="w-3.5 h-3.5" /> Clear All
         </Button>
       </div>

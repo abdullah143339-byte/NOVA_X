@@ -16,6 +16,7 @@ interface ProfileHeaderProps {
   reputation?: ReputationData;
   counts: { posts: number; reels: number; communities: number; market: number; followers: number; following: number };
   isOwner: boolean;
+  isFollowing?: boolean;
   onFollow: () => void;
   onMessage: () => void;
   onShare: () => void;
@@ -34,6 +35,7 @@ export default function ProfileHeader({
   reputation,
   counts,
   isOwner,
+  isFollowing = false,
   onFollow,
   onMessage,
   onShare,
@@ -46,8 +48,8 @@ export default function ProfileHeader({
   initials,
   displayName,
 }: ProfileHeaderProps) {
-  const { isFollowing, toggleFollow, isRemoved } = useProfile();
-  const followed = isFollowing(profile.id) || profile.profile?.followersCount === 0;
+  const { isRemoved } = useProfile();
+  const followed = isFollowing;
   const removed = isRemoved(profile.id);
   const tier = getCreatorLevel(reputation?.totalScore ?? 0);
   const aiTrust = getAiTrustScore(reputation);
@@ -107,7 +109,14 @@ export default function ProfileHeader({
                 <span className="inline-flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5 text-primary" /> {profile.location}</span>
               )}
               {profile.website && (
-                <span className="inline-flex items-center gap-1.5"><Globe className="w-3.5 h-3.5 text-primary" /> <span className="text-primary truncate max-w-[180px]">{profile.website.replace(/^https?:\/\//, "")}</span></span>
+                <a
+                  href={profile.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 hover:underline"
+                >
+                  <Globe className="w-3.5 h-3.5 text-primary" /> <span className="text-primary truncate max-w-[180px]">{profile.website.replace(/^https?:\/\//, "")}</span>
+                </a>
               )}
               <span className="inline-flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5 text-primary" /> Joined {formatJoined(profile.createdAt)}</span>
             </div>
@@ -120,9 +129,9 @@ export default function ProfileHeader({
               </>
             ) : (
               <>
-                <Button size="sm" variant={followed && !isFollowing(profile.id) ? "primary" : "secondary"} onClick={() => { toggleFollow(profile.id); onFollow(); }}>
-                  {isFollowing(profile.id) ? <UserCheck className="w-3.5 h-3.5" /> : <UserPlus className="w-3.5 h-3.5" />}
-                  {isFollowing(profile.id) ? "Following" : "Follow"}
+                <Button size="sm" variant={followed ? "secondary" : "primary"} onClick={onFollow}>
+                  {followed ? <UserCheck className="w-3.5 h-3.5" /> : <UserPlus className="w-3.5 h-3.5" />}
+                  {followed ? "Following" : "Follow"}
                 </Button>
                 <Button size="sm" variant="secondary" onClick={onMessage}><Send className="w-3.5 h-3.5" /> Message</Button>
               </>

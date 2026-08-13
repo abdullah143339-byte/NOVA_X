@@ -15,6 +15,7 @@ interface ChatHeaderProps {
   onToggleDetails: () => void;
   onBack: () => void;
   onSearch: (q: string) => void;
+  onCall?: (kind: "voice" | "video") => void;
 }
 
 function initials(name: string): string {
@@ -30,6 +31,7 @@ export default function ChatHeader({
   onToggleDetails,
   onBack,
   onSearch,
+  onCall,
 }: ChatHeaderProps) {
   const [searching, setSearching] = useState(false);
   const [query, setQuery] = useState("");
@@ -73,10 +75,10 @@ export default function ChatHeader({
       </div>
 
       <div className="flex items-center gap-1 shrink-0">
-        <button aria-label="Voice call" title="Voice call" className="w-9 h-9 rounded-xl hover:bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground transition-all">
+        <button onClick={() => onCall?.("voice")} aria-label="Voice call" title="Voice call" className="w-9 h-9 rounded-xl hover:bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground transition-all">
           <Phone className="w-4 h-4" />
         </button>
-        <button aria-label="Video call" title="Video call" className="w-9 h-9 rounded-xl hover:bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground transition-all">
+        <button onClick={() => onCall?.("video")} aria-label="Video call" title="Video call" className="w-9 h-9 rounded-xl hover:bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground transition-all">
           <Video className="w-4 h-4" />
         </button>
 
