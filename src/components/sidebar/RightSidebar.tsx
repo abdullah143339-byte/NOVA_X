@@ -68,8 +68,8 @@ export default function RightSidebar() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onFocus={() => results.length > 0 && setOpen(true)}
-            placeholder="Search NOVA AI..."
-            aria-label="Search NOVA AI"
+            placeholder="Search NOVAX..."
+            aria-label="Search NOVAX"
             className="w-full h-11 rounded-xl bg-surface/80 border border-border pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all shadow-premium"
           />
           {searching && <Loader2 className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground animate-spin" />}

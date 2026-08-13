@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { Star, ShoppingBag, Loader2, ArrowRight } from "lucide-react";
 import { formatPrice } from "@/components/marketplace/format";
 import EmptyState from "./EmptyState";
-import { marketRating, marketSales } from "./data";
+
 import type { MarketItem } from "./types";
 
 interface MarketplaceTabProps {
@@ -44,8 +44,8 @@ export default function MarketplaceTab({ items, loading, isOwner }: MarketplaceT
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           {items.map((item, i) => {
             const img = imageOf(item);
-            const rating = marketRating(item);
-            const sales = marketSales(item);
+            const rating = item.rating ?? null;
+            const sales = item.salesCount ?? null;
             return (
               <motion.div key={item.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}>
                 <Link href={`/dashboard/marketplace/product/${item.id}`} className="block glass rounded-xl overflow-hidden hover-glow group">
@@ -58,14 +58,19 @@ export default function MarketplaceTab({ items, loading, isOwner }: MarketplaceT
                     <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-1">{item.shortDescription || item.description || item.category}</p>
                     <div className="flex items-center justify-between mt-2">
                       <span className="text-sm font-bold" style={{ color: "var(--nova-accent, #6C63FF)" }}>{formatPrice(item.price)}</span>
-                      <span className="inline-flex items-center gap-0.5 text-[10px] text-muted-foreground">
-                        <Star className="w-3 h-3 text-amber-400 fill-amber-400" /> {rating.toFixed(1)}
-                      </span>
+                      {rating !== null ? (
+                        <span className="inline-flex items-center gap-0.5 text-[10px] text-muted-foreground">
+                          <Star className="w-3 h-3 text-amber-400 fill-amber-400" /> {rating.toFixed(1)}
+                        </span>
+                      ) : (
+                        <span className="text-[10px] text-primary font-medium">New</span>
+                      )}
                     </div>
-                    <div className="flex items-center justify-between mt-1 text-[10px] text-muted-foreground">
-                      <span>{sales} sold</span>
-                      <span>{Math.max(1, Math.round(sales / 4))} reviews</span>
-                    </div>
+                    {sales !== null && (
+                      <div className="mt-1 text-[10px] text-muted-foreground">
+                        <span>{sales} sold</span>
+                      </div>
+                    )}
                     {isOwner && (
                       <button
                         onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.location.href = "/dashboard/marketplace/seller"; }}

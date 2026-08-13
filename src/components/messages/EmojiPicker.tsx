@@ -16,7 +16,7 @@ interface EmojiPickerProps {
 
 export default function EmojiPicker({ onPick }: EmojiPickerProps) {
   return (
-    <div className="grid grid-cols-10 gap-0.5 p-2 max-h-48 overflow-y-auto no-scrollbar">
+    <div className="grid grid-cols-8 sm:grid-cols-10 gap-0.5 p-2 max-h-48 overflow-y-auto no-scrollbar">
       {EMOJIS.map((e) => (
         <motion.button
           key={e}

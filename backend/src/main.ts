@@ -63,8 +63,8 @@ async function bootstrap() {
   );
 
   const config = new DocumentBuilder()
-    .setTitle('NOVA AI API')
-    .setDescription('The NOVA AI Platform API - AI-First Social Media Ecosystem')
+    .setTitle('NOVAX API')
+    .setDescription('NOVAX · Think Beyond Social — AI-First Social Media Ecosystem')
     .setVersion('1.0')
     .addBearerAuth()
     .addTag('Authentication', 'User authentication & session management')
@@ -74,7 +74,7 @@ async function bootstrap() {
     .addTag('Communities', 'Community management')
     .addTag('Marketplace', 'Digital marketplace')
     .addTag('Learning', 'Personal Learning Hub workspace')
-    .addTag('AI', 'NOVA AI assistant & agents')
+    .addTag('AI', 'NOVAX assistant & agents')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
@@ -89,7 +89,7 @@ async function bootstrap() {
 
   const port = configService.get<number>('APP_PORT') || 8080;
   await app.listen(port);
-  console.log(`🚀 NOVA AI Backend running on http://localhost:${port}`);
+  console.log(`🚀 NOVAX Backend running on http://localhost:${port}`);
   console.log(`📚 API Docs: http://localhost:${port}/docs`);
 }
 

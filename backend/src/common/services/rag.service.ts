@@ -1,6 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { NovaAiOsService } from './nova-ai-os.service';
 
 interface DocumentChunk {
   id: string;
@@ -26,7 +25,6 @@ export class RagService {
 
   constructor(
     private prisma: PrismaService,
-    private novaAiOs: NovaAiOsService,
   ) {}
 
   // Index content into the RAG store
@@ -169,40 +167,34 @@ export class RagService {
       .map((s) => ({ ...s.chunk, relevanceScore: s.score } as any));
   }
 
-  // RAG-enhanced AI response
+  // RAG-enhanced response built from retrieved knowledge base matches
   async queryWithContext(query: string, userId?: string): Promise<RAGResult> {
     // Retrieve relevant context
     const relevantChunks = await this.search(query, 5);
 
     if (relevantChunks.length === 0) {
       return {
-        answer: "I don't have specific context for this question. Let me help with what I know.",
+        answer: 'No relevant context found in the knowledge base for this query.',
         sources: [],
-        confidence: 0.3,
+        confidence: 0,
       };
     }
 
-    // Build context for the AI
-    const context = relevantChunks
-      .map((c) => `[${c.source}] ${c.content}`)
-      .join('\n\n');
+    const responseContent =
+      'Retrieved from the knowledge base:\n\n' +
+      relevantChunks.map((c, i) => `${i + 1}. [${c.source}] ${c.content.slice(0, 200)}...`).join('\n\n');
 
-    const enhancedQuery = `Context from knowledge base:\n${context}\n\nUser question: ${query}\n\nPlease answer based on the context provided. If the context doesn't contain enough information, say so.`;
-
-    // Get AI response
-    const decision = this.novaAiOs.routeAiTask('text', 'medium');
-    const responseContent = `Based on my knowledge base (${relevantChunks.length} sources found), here's what I found:\n\n` +
-      relevantChunks.map((c, i) => `${i + 1}. [${c.source}] ${c.content.slice(0, 200)}...`).join('\n\n') +
-      `\n\nWould you like me to dive deeper into any of these topics?`;
+    const topRelevance = Math.max(0, ...relevantChunks.map((c) => ((c as any).relevanceScore || 0)));
+    const confidence = Math.round((1 - Math.exp(-topRelevance)) * 100) / 100;
 
     return {
       answer: responseContent,
       sources: relevantChunks.map((c) => ({
         content: c.content,
         source: c.source,
-        relevanceScore: (c as any).relevanceScore || 1,
+        relevanceScore: (c as any).relevanceScore || 0,
       })),
-      confidence: Math.min(0.9, relevantChunks.length * 0.15 + 0.3),
+      confidence,
     };
   }
 

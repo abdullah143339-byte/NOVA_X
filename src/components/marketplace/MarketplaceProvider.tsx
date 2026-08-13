@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import api from "@/lib/api";
-import { calcCouponDiscount, calcShipping, calcTotals, findCoupon } from "./pricing";
+import { calcShipping, calcTotals } from "./pricing";
 import type {
   CartLine,
   DeliveryOption,
@@ -18,7 +18,6 @@ interface PlaceOrderInput {
   address: ShippingAddress;
   payment: PaymentMethod;
   delivery: DeliveryOption;
-  couponCode?: string;
 }
 
 interface MarketplaceContextValue {
@@ -28,13 +27,11 @@ interface MarketplaceContextValue {
   recentlyViewed: MarketplaceItem[];
   orders: Order[];
   toasts: ToastMessage[];
-  couponCode: string | null;
   prefs: MarketplacePrefs;
   setPrefs: (prefs: Partial<MarketplacePrefs>) => void;
   cartCount: number;
   cartSubtotal: number;
   cartDiscount: number;
-  couponDiscount: number;
   addToCart: (item: MarketplaceItem, quantity?: number) => void;
   updateQuantity: (itemId: string, quantity: number) => void;
   removeFromCart: (itemId: string) => void;
@@ -46,8 +43,6 @@ interface MarketplaceContextValue {
   isCompared: (itemId: string) => boolean;
   clearCompare: () => void;
   addRecentlyViewed: (item: MarketplaceItem) => void;
-  applyCoupon: (code: string) => boolean;
-  removeCoupon: () => void;
   placeOrder: (input: PlaceOrderInput) => Promise<Order | null>;
   notify: (message: string, type?: ToastMessage["type"]) => void;
   dismissToast: (id: string) => void;
@@ -55,12 +50,12 @@ interface MarketplaceContextValue {
 
 const MarketplaceContext = createContext<MarketplaceContextValue | undefined>(undefined);
 
-const CART_KEY = "nova_market_cart";
-const WISHLIST_KEY = "nova_market_wishlist";
-const COMPARE_KEY = "nova_market_compare";
-const RECENT_KEY = "nova_market_recent";
-const ORDERS_KEY = "nova_market_orders";
-const PREFS_KEY = "nova_market_prefs";
+const CART_KEY = "novax_market_cart";
+const WISHLIST_KEY = "novax_market_wishlist";
+const COMPARE_KEY = "novax_market_compare";
+const RECENT_KEY = "novax_market_recent";
+const ORDERS_KEY = "novax_market_orders";
+const PREFS_KEY = "novax_market_prefs";
 
 const DEFAULT_PREFS: MarketplacePrefs = { currency: "PKR", language: "en", location: "karachi" };
 
@@ -84,7 +79,6 @@ export function MarketplaceProvider({ children }: { children: ReactNode }) {
   const [recentlyViewed, setRecentlyViewed] = useState<MarketplaceItem[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
-  const [couponCode, setCouponCode] = useState<string | null>(null);
   const [prefs, setPrefsState] = useState<MarketplacePrefs>(DEFAULT_PREFS);
   const hydratedRef = useRef(false);
   const toastTimers = useRef<number[]>([]);
@@ -218,29 +212,19 @@ export function MarketplaceProvider({ children }: { children: ReactNode }) {
     setPrefsState((prev) => ({ ...prev, ...next }));
   }, []);
 
-  // ---- Coupons & totals -----------------------------------------------------
-  const applyCoupon = useCallback((code: string) => {
-    const coupon = findCoupon(code);
-    if (!coupon) return false;
-    setCouponCode(coupon.code);
-    return true;
-  }, []);
-
-  const removeCoupon = useCallback(() => setCouponCode(null), []);
-
+  // ---- Cart totals ------------------------------------------------------------
   const cartSubtotal = cart.reduce((sum, l) => sum + (l.item.price || 0) * l.quantity, 0);
   const cartCount = cart.reduce((sum, l) => sum + l.quantity, 0);
 
   // Volume/quantity discounts are not applied yet.
   const cartDiscount = 0;
-  const couponDiscount = calcCouponDiscount(cartSubtotal, couponCode);
 
   // ---- Order placement ------------------------------------------------------
   const placeOrder = useCallback(async (input: PlaceOrderInput): Promise<Order | null> => {
     if (cart.length === 0) return null;
     const subtotal = cart.reduce((sum, l) => sum + (l.item.price || 0) * l.quantity, 0);
     const shipping = calcShipping(subtotal, input.delivery);
-    const discount = calcCouponDiscount(subtotal, couponCode);
+    const discount = 0;
     const { tax, total } = calcTotals(subtotal, discount, shipping);
 
     const order: Order = {
@@ -263,7 +247,6 @@ export function MarketplaceProvider({ children }: { children: ReactNode }) {
       paymentMethod: input.payment,
       address: input.address,
       delivery: input.delivery,
-      couponCode: couponCode ?? undefined,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       tracking: [
@@ -276,14 +259,13 @@ export function MarketplaceProvider({ children }: { children: ReactNode }) {
 
     setOrders((prev) => [order, ...prev]);
     setCart([]);
-    setCouponCode(null);
 
     order.lines.forEach((line) => {
       api.purchaseItem(line.itemId).catch(() => {});
     });
 
     return order;
-  }, [cart, couponCode, prefs.currency]);
+  }, [cart, prefs.currency]);
 
   const value: MarketplaceContextValue = {
     cart,
@@ -292,13 +274,11 @@ export function MarketplaceProvider({ children }: { children: ReactNode }) {
     recentlyViewed,
     orders,
     toasts,
-    couponCode,
     prefs,
     setPrefs,
     cartCount,
     cartSubtotal,
     cartDiscount,
-    couponDiscount,
     addToCart,
     updateQuantity,
     removeFromCart,
@@ -310,8 +290,6 @@ export function MarketplaceProvider({ children }: { children: ReactNode }) {
     isCompared,
     clearCompare,
     addRecentlyViewed,
-    applyCoupon,
-    removeCoupon,
     placeOrder,
     notify,
     dismissToast,

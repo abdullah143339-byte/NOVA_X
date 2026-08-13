@@ -27,7 +27,7 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const DRAFT_KEY = "nova_note_draft";
+const DRAFT_KEY = "novax_note_draft";
 
 const ACTIONS: { icon: LucideIcon; label: string; before: string; after: string; pad?: string }[] = [
   { icon: Bold, label: "Bold", before: "**", after: "**" },
@@ -212,7 +212,7 @@ export function NoteEditor({
                 onClick={() => apply(a.before, a.after, a.pad)}
                 aria-label={a.label}
                 title={a.label}
-                className="w-8 h-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-surface flex items-center justify-center transition-all shrink-0"
+                className="w-9 h-9 sm:w-8 sm:h-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-surface flex items-center justify-center transition-all shrink-0"
               >
                 <a.icon className="w-4 h-4" />
               </button>

@@ -34,7 +34,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshUser = useCallback(async () => {
     try {
-      const token = localStorage.getItem('nova_token');
+      const token = localStorage.getItem('novax_token');
       if (!token) {
         setUser(null);
         return;
@@ -45,13 +45,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch {
       try {
         const refreshRes = await api.refresh();
-        localStorage.setItem('nova_token', refreshRes.data.accessToken);
+        localStorage.setItem('novax_token', refreshRes.data.accessToken);
         const res = await api.getMe();
         setUser(res.data);
         try { connectSocket(); } catch {}
         return;
       } catch {}
-      localStorage.removeItem('nova_token');
+      localStorage.removeItem('novax_token');
       setUser(null);
     }
   }, []);
@@ -68,28 +68,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       err.tempToken = res.data.tempToken;
       throw err;
     }
-    localStorage.setItem('nova_token', res.data.accessToken);
+    localStorage.setItem('novax_token', res.data.accessToken);
     setUser(res.data.user);
     try { connectSocket(); } catch {}
   };
 
   const complete2FALogin = async (tempToken: string, code: string) => {
     const res = await api.verify2faLogin(tempToken, code);
-    localStorage.setItem('nova_token', res.data.accessToken);
+    localStorage.setItem('novax_token', res.data.accessToken);
     setUser(res.data.user);
     try { connectSocket(); } catch {}
   };
 
   const register = async (data: any) => {
     const res = await api.register(data);
-    localStorage.setItem('nova_token', res.data.accessToken);
+    localStorage.setItem('novax_token', res.data.accessToken);
     setUser(res.data.user);
     try { connectSocket(); } catch {}
   };
 
   const logout = async () => {
     try { await api.logout(); } catch {}
-    localStorage.removeItem('nova_token');
+    localStorage.removeItem('novax_token');
     disconnectSocket();
     setUser(null);
   };

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, Loader2, Check, Copy, X } from "lucide-react";
 import api from "@/lib/api";
-import { AI_PROFILE_ACTIONS, getSkills, parseJsonArray } from "./data";
+import { AI_PROFILE_ACTIONS, parseJsonArray } from "./data";
 import { cn } from "@/lib/utils";
 
 interface AiPanelProps {
@@ -23,13 +23,13 @@ interface AiPanelProps {
 }
 
 const ACTION_PROMPTS: Record<string, string> = {
-  bio: "Write a compelling, professional bio for a NOVA AI creator profile. Keep it under 220 characters, friendly and premium.",
+  bio: "Write a compelling, professional bio for a NOVAX creator profile. Keep it under 220 characters, friendly and premium.",
   summary: "Write a concise professional profile summary (2-3 sentences) that highlights strengths, expertise and passion.",
   skills: "Analyze the user's skills and suggest 3 recommended skills to add, plus a one-line explanation for each.",
   career: "Suggest 3 concrete next steps to grow as a creator on the platform, tailored to their profile.",
   content: "Suggest 5 content/post ideas this creator could publish, one line each.",
   username: "Suggest 6 clean, memorable username/handle ideas based on their current handle.",
-  seo: "Give 5 quick SEO/profile-optimization tips for a NOVA AI profile.",
+  seo: "Give 5 quick SEO/profile-optimization tips for a NOVAX profile.",
   translate: "Translate the user's bio into natural English, Spanish and Arabic. Show all three.",
   reputation: "Explain the user's reputation score in simple terms and give 3 ways to improve it.",
 };
@@ -45,7 +45,7 @@ export default function AiPanel({ open, onClose, displayName, username, bio, pro
     `Handle: @${username}`,
     `Bio: ${bio || "not set"}`,
     `About: ${profileAbout || "not set"}`,
-    `Skills: ${parseJsonArray(skillsRaw).join(", ") || getSkills(username).join(", ")}`,
+    `Skills: ${parseJsonArray(skillsRaw).join(", ") || "not set"}`,
     `Creator tier: ${tier}`,
     `Reputation score: ${totalScore}`,
     `Posts: ${postsCount}`,
@@ -57,68 +57,19 @@ export default function AiPanel({ open, onClose, displayName, username, bio, pro
     setOutput("");
     const label = AI_PROFILE_ACTIONS.find((a) => a.id === id)?.label || id;
     const prompt = ACTION_PROMPTS[id];
-    const finalPrompt = id === "translate" ? `${prompt}\n\nBio to translate:\n"${bio || displayName + " is a creator on NOVA AI."}"` : prompt;
+    const finalPrompt = id === "translate" ? `${prompt}\n\nBio to translate:\n"${bio || displayName + " is a creator on NOVAX."}"` : prompt;
     try {
       const res = await api.aiChat([
-        { role: "system", content: "You are NOVA AI's friendly profile assistant. Be concise, warm and practical. Use plain text with short bullet points." },
+        { role: "system", content: "You are NOVAX's friendly profile assistant. Be concise, warm and practical. Use plain text with short bullet points." },
         { role: "user", content: `${context}\n\nTask: ${finalPrompt}` },
       ]);
-      setOutput((res.data?.content as string) || localFallback(id));
+      setOutput((res.data?.content as string) || "No response returned.");
     } catch {
-      setOutput(localFallback(id));
-      notify(`${label} generated offline`, "info");
+      setOutput("AI assistant is currently unavailable. Please try again later.");
+      notify("AI service unavailable", "error");
     } finally {
       setLoading(false);
     }
-  };
-
-  const localFallback = (id: string): string => {
-    const lines: Record<string, string[]> = {
-      bio: [
-        `${displayName} — creator, builder and lifelong learner on NOVA AI. I ship products, share ideas and help the community grow. 🚀`,
-        `Building cool things with AI · ${postsCount} posts and counting. Let's create together! ✨`,
-      ],
-      summary: [
-        `${displayName} is a passionate creator focused on turning ideas into shipped products. With a growing portfolio of posts, reels and marketplace items, they blend creativity with technical craft. Known for being approachable, consistent and community-first, ${displayName} is building a digital identity around trust and value.`,
-      ],
-      skills: [
-        `• Recommended to highlight: AI Prompting — you already create AI-powered content.\n• Add: Public Speaking — grows your reach and authority.\n• Add: Analytics — helps you double down on what works.`,
-      ],
-      career: [
-        `• Publish consistently — a weekly cadence beats bursts.\n• Engage daily — comments and replies raise your trust score.\n• Launch one marketplace item — monetize your expertise.`,
-      ],
-      content: [
-        `• "3 things AI taught me this week"\n• Behind-the-scenes of your latest project\n• A quick tutorial/reel on your niche\n• Ask-me-anything thread\n• One myth about creators, debunked`,
-      ],
-      username: [
-        `@${username.replace(/^@/, "")}`,
-        `@${username.replace(/^@/, "")}·creates`,
-        `@${username.replace(/^@/, "")}·studio`,
-        `@${username.replace(/^@/, "")}·labs`,
-        `@${username.replace(/^@/, "")}·io`,
-        `@${username.replace(/^@/, "")}·world`,
-      ],
-      seo: [
-        `• Use a keyword-rich bio (your niche + value).\n• Pin your best post.\n• Add location + website.\n• Use clear categories in the marketplace.\n• Keep a consistent visual theme.`,
-      ],
-      translate: [
-        `English: ${bio || `${displayName} is a creator on NOVA AI.`}`,
-        `Español: ${translateLine(bio || displayName, "es")}`,
-        `العربية: ${translateLine(bio || displayName, "ar")}`,
-      ],
-      reputation: [
-        `Your reputation score is ${totalScore} (${tier}). It reflects trust, contribution, activity and expertise.\n\nTo improve: engage meaningfully, publish original content, and complete your profile 100%.`,
-      ],
-    };
-    return lines[id]?.join("\n\n") || "Here's some guidance for your profile.";
-  };
-
-  const translateLine = (text: string, lang: string): string => {
-    const map: Record<string, Record<string, string>> = {
-      es: { "creator": "creador", "on": "en", "is": "es", "a": "un" },
-      ar: { "creator": "مبدع", "on": "على", "is": "هو", "a": "" },
-    };
-    return text.split(" ").map((w) => map[lang]?.[w.toLowerCase()] || w).join(" ");
   };
 
   const copy = async () => {
@@ -154,7 +105,7 @@ export default function AiPanel({ open, onClose, displayName, username, bio, pro
                   <Sparkles className="w-4 h-4" style={{ color: accent }} />
                 </span>
                 <div>
-                  <h3 className="text-sm font-bold text-foreground">NOVA AI Profile Assistant</h3>
+                  <h3 className="text-sm font-bold text-foreground">NOVAX Profile Assistant</h3>
                   <p className="text-[11px] text-muted-foreground">Powered by {displayName.split(" ")[0]}&apos;s profile data</p>
                 </div>
               </div>

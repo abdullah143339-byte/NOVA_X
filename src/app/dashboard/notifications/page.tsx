@@ -43,14 +43,6 @@ const typeColors: Record<string, string> = {
   MENTION: "text-purple-500 bg-purple-500/10",
 };
 
-const fallbackNotifications: Notification[] = [
-  { id: "1", type: "LIKE", content: "Sarah Chen liked your post about AI routers", isRead: false, createdAt: new Date(Date.now() - 300000).toISOString() },
-  { id: "2", type: "COMMENT", content: "Marcus Rivera commented on your post", isRead: false, createdAt: new Date(Date.now() - 1800000).toISOString() },
-  { id: "3", type: "FOLLOW", content: "Aisha Patel started following you", isRead: true, createdAt: new Date(Date.now() - 3600000).toISOString() },
-  { id: "4", type: "ACHIEVEMENT", content: "You earned the Early Adopter badge!", isRead: true, createdAt: new Date(Date.now() - 7200000).toISOString() },
-  { id: "5", type: "LIKE", content: "Alex Kim and 3 others liked your post", isRead: false, createdAt: new Date(Date.now() - 14400000).toISOString() },
-];
-
 function timeAgo(dateStr: string) {
   const diff = (Date.now() - new Date(dateStr).getTime()) / 1000;
   if (diff < 60) return "just now";
@@ -80,9 +72,9 @@ export default function NotificationsPage() {
           : Array.isArray(raw?.items)
             ? raw.items
             : [];
-      setNotifications(items.length > 0 ? items : fallbackNotifications);
+      setNotifications(items);
     } catch {
-      setNotifications(fallbackNotifications);
+      setNotifications([]);
     } finally {
       setLoading(false);
     }
@@ -114,7 +106,7 @@ export default function NotificationsPage() {
           {unreadCount > 0 && (
             <button
               onClick={markAllRead}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+              className="flex items-center gap-1.5 h-9 px-3 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
             >
               <CheckCheck className="w-3.5 h-3.5" />
               Mark all read
@@ -123,7 +115,7 @@ export default function NotificationsPage() {
           <button
             onClick={() => setFilter(filter === "all" ? "unread" : "all")}
             className={cn(
-              "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all",
+              "flex items-center gap-1.5 h-9 px-3 rounded-lg text-xs transition-all",
               filter === "unread" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"
             )}
           >

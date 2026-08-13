@@ -1,4 +1,3 @@
-import { COUPONS } from "./catalog";
 import type { DeliveryOption } from "./types";
 
 // Shared pricing rules used by the cart, checkout and order placement.
@@ -16,23 +15,6 @@ export const DELIVERY_COSTS: Record<DeliveryOption, number> = {
 /** Round to the nearest cent (avoids floating point drift). */
 export function roundMoney(value: number): number {
   return Math.round(value * 100) / 100;
-}
-
-/** Look up a coupon by code (case-insensitive). */
-export function findCoupon(code: string | null | undefined) {
-  if (!code) return undefined;
-  return COUPONS.find((c) => c.code.toLowerCase() === code.trim().toLowerCase());
-}
-
-/**
- * Discount produced by a coupon for a given subtotal.
- * A coupon only applies once the subtotal reaches its minimum spend.
- */
-export function calcCouponDiscount(subtotal: number, code: string | null | undefined): number {
-  const coupon = findCoupon(code);
-  if (!coupon || subtotal < coupon.minSpend) return 0;
-  if (coupon.type === "percent") return roundMoney(subtotal * (coupon.value / 100));
-  return Math.min(coupon.value, subtotal);
 }
 
 /** Shipping cost for a delivery option (free above the threshold). */

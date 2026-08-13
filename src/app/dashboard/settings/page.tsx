@@ -84,7 +84,24 @@ export default function SettingsPage() {
         <p className="text-sm text-muted-foreground mt-1">Manage your account preferences</p>
       </div>
 
-      <div className="flex gap-6">
+      <div className="flex flex-col sm:flex-row gap-6">
+        <div className="flex gap-2 overflow-x-auto no-scrollbar sm:hidden -mx-1 px-1 pb-1 w-full">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-1.5 px-3 h-9 rounded-xl text-sm font-medium transition-all whitespace-nowrap shrink-0 ${
+                activeTab === tab.id
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
+              }`}
+            >
+              {tab.icon}
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
         <div className="w-48 shrink-0 hidden sm:block">
           <nav className="space-y-1">
             {tabs.map((tab) => (
@@ -122,7 +139,7 @@ export default function SettingsPage() {
                       onChange={(e) => setBio(e.target.value)}
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <Input label="Location" placeholder="San Francisco, CA" value={location} onChange={(e) => setLocation(e.target.value)} />
                     <Input label="Website" placeholder="yoursite.com" value={website} onChange={(e) => setWebsite(e.target.value)} />
                   </div>

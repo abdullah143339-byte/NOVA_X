@@ -4,6 +4,7 @@ import { ImageProvider } from './providers/image.provider';
 import { CodeProvider } from './providers/code.provider';
 import { TranslationProvider } from './providers/translation.provider';
 import { SearchProvider } from './providers/search.provider';
+import { ProviderFallbackService } from '../../common/services/provider-fallback.service';
 import {
   AIProviderResponse,
   AIChatOptions,
@@ -18,12 +19,24 @@ import {
 export class AiRouterService {
   private readonly logger = new Logger(AiRouterService.name);
 
+  private readonly providerCatalog: Record<string, { model: string; capabilities: string[] }> = {
+    groq: { model: 'mixtral-8x7b-32768', capabilities: ['text-generation', 'qa', 'analysis', 'code'] },
+    gemini: { model: 'gemini-2.0-flash-exp', capabilities: ['text-generation', 'translation', 'language-detection', 'deep-search'] },
+    openrouter: { model: 'mistralai/mistral-7b-instruct', capabilities: ['text-generation', 'code'] },
+    deepseek: { model: 'deepseek-chat', capabilities: ['text-generation', 'code'] },
+    mistral: { model: 'mistral-small-latest', capabilities: ['text-generation', 'translation', 'code'] },
+    fal: { model: 'fal-ai/flux/dev', capabilities: ['image-generation'] },
+    stability: { model: 'sd3-large', capabilities: ['image-generation'] },
+    pollinations: { model: 'pollinations-flux', capabilities: ['image-generation'] },
+  };
+
   constructor(
     private chatProvider: ChatProvider,
     private imageProvider: ImageProvider,
     private codeProvider: CodeProvider,
     private translationProvider: TranslationProvider,
     private searchProvider: SearchProvider,
+    private fallback: ProviderFallbackService,
   ) {}
 
   async routeToChat(messages: AIChatMessage[], options?: Partial<AIChatOptions>): Promise<AIProviderResponse> {
@@ -53,13 +66,7 @@ export class AiRouterService {
 
   async detectLanguage(text: string): Promise<AIProviderResponse> {
     this.logger.log(`Detecting language for text`);
-    const lang = await this.translationProvider.detectLanguage(text);
-    return {
-      success: true,
-      data: { language: lang },
-      model: 'nova-lingua-7b',
-      provider: 'nova-translate',
-    };
+    return this.translationProvider.detectLanguage(text);
   }
 
   async getSupportedLanguages(): Promise<AIProviderResponse> {
@@ -72,23 +79,35 @@ export class AiRouterService {
   }
 
   async getRouterInfo(): Promise<AIProviderResponse> {
+    const configured = new Set<string>();
+    for (const providers of [
+      this.fallback.getChatProviders(),
+      this.fallback.getCodeProviders(),
+      this.fallback.getImageProviders(),
+      this.fallback.getTranslationProviders(),
+      this.fallback.getSearchProviders(),
+    ]) {
+      for (const p of providers) {
+        if (p.check()) configured.add(p.name);
+      }
+    }
+
+    const providers = [...configured].map((name) => {
+      const info = this.providerCatalog[name] || { model: name, capabilities: [] };
+      return { id: name, name, model: info.model, capabilities: info.capabilities };
+    });
+
     return {
       success: true,
       data: {
-        providers: [
-          { id: 'chat', name: 'NOVA Chat', model: 'nova-chat-7b', capabilities: ['text-generation', 'qa', 'analysis', 'creative-writing'] },
-          { id: 'code', name: 'NOVA Code', model: 'nova-code-7b', capabilities: ['code-generation', 'code-review', 'debugging', 'refactoring'] },
-          { id: 'image', name: 'NOVA Vision', model: 'nova-image-xl', capabilities: ['image-generation', 'image-editing'] },
-          { id: 'audio', name: 'NOVA Audio', model: 'nova-speech-3b', capabilities: ['text-to-speech', 'speech-to-text'] },
-          { id: 'translation', name: 'NOVA Lingua', model: 'nova-lingua-7b', capabilities: ['translation', 'language-detection'] },
-          { id: 'search', name: 'NOVA DeepSearch', model: 'nova-deepsearch-7b', capabilities: ['web-search', 'deep-research', 'knowledge-retrieval'] },
-        ],
-        routingStrategy: 'intent-based',
-        autoScaling: true,
+        providers,
+        configuredCount: providers.length,
+        routingStrategy: 'provider-fallback',
+        autoScaling: false,
         fallbackEnabled: true,
       },
-      model: 'nova-router',
-      provider: 'nova-ai-os',
+      model: 'provider-fallback',
+      provider: 'ai-router',
     };
   }
 }

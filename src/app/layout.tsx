@@ -16,8 +16,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NOVA AI — The Future Begins With You",
-  description: "AI-first social media platform with intelligent feeds, voice-first interactions, community learning, and creator economy.",
+  title: "NOVAX — Think Beyond Social",
+  description: "NOVAX · Think Beyond Social — AI-first social media platform with intelligent feeds, voice-first interactions, community learning, and creator economy.",
+  icons: {
+    icon: "/novax.png",
+    apple: "/novax.png",
+  },
 };
 
 export default function RootLayout({

@@ -162,7 +162,7 @@ function SellerHeader({
   const [contact, setContact] = useState("");
   useEffect(() => {
     try {
-      setContact(window.localStorage.getItem("nova_store_contact") ?? "");
+      setContact(window.localStorage.getItem("novax_store_contact") ?? "");
     } catch {
       // localStorage unavailable
     }

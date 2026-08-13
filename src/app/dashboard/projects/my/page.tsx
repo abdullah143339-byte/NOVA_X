@@ -13,7 +13,7 @@ import { useSocialMap } from "@/components/projects/ProjectShared";
 import { normalizePostToProject, extractPostList, parseTags } from "@/components/projects/data";
 import type { ProjectRow } from "@/components/projects/types";
 
-const DRAFT_KEY = "nova_project_drafts";
+const DRAFT_KEY = "novax_project_drafts";
 
 interface DraftRecord {
   savedAt: string;

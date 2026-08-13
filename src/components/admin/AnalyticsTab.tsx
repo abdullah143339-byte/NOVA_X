@@ -152,7 +152,7 @@ export default function AnalyticsTab() {
         }
       />
 
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <StatCard label="Revenue (30d)" value={formatMoney(totals.revenue)} icon={<DollarSign className="w-5 h-5" />} color="from-green-500 to-emerald-700" />
         <StatCard label="New Users" value={formatCount(totals.users)} icon={<Users className="w-5 h-5" />} color="from-primary to-indigo-700" />
         <StatCard label="Active Users" value={formatCount(totals.active)} icon={<Activity className="w-5 h-5" />} color="from-sky-500 to-blue-700" />

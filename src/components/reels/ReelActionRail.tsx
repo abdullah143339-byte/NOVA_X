@@ -77,7 +77,7 @@ export default function ReelActionRail({
   const initials = [reel.author.firstName?.[0], reel.author.lastName?.[0]].filter(Boolean).join("") || reel.author.username.slice(0, 2).toUpperCase();
 
   return (
-    <div className="absolute right-3 bottom-24 z-20 flex flex-col items-center gap-4" aria-label="Reel actions">
+    <div className="absolute right-3 bottom-32 sm:bottom-24 z-20 flex flex-col items-center gap-4" aria-label="Reel actions">
       <motion.button
         whileTap={{ scale: 0.85 }}
         onClick={onProfile}

@@ -4,11 +4,11 @@ import { useState, useRef, useEffect } from "react";
 import { MessageCircle, X, Send, Loader2, Bot, Sparkles } from "lucide-react";
 import api from "@/lib/api";
 
-const WEBSITE_KNOWLEDGE = `You are NOVA AI, the intelligent assistant of the NOVA platform.
+const WEBSITE_KNOWLEDGE = `You are NOVAX, the intelligent assistant of the NOVAX platform.
 You have complete knowledge of the entire website and its features.
 
 == PLATFORM OVERVIEW ==
-NOVA is a premium AI-powered social ecosystem where users can Connect, Learn, Build, Collaborate, and Grow.
+NOVAX is a premium AI-powered social ecosystem where users can Connect, Learn, Build, Collaborate, and Grow.
 It combines Social Media, AI, Learning, Portfolio, Community, and Collaboration in one platform.
 
 == PAGES & FEATURES ==
@@ -84,7 +84,7 @@ export default function ChatBotWidget() {
 
   useEffect(() => {
     if (open && messages.length === 0) {
-      setMessages([{ role: "system", content: WEBSITE_KNOWLEDGE }, { role: "assistant", content: "Hi! I'm NOVA. Ask me anything about the platform." }]);
+      setMessages([{ role: "system", content: WEBSITE_KNOWLEDGE }, { role: "assistant", content: "Hi! I'm NOVAX. Ask me anything about the platform." }]);
     }
   }, [open]);
 
@@ -120,7 +120,7 @@ export default function ChatBotWidget() {
               <div className="w-7 h-7 rounded-lg bg-gradient-primary flex items-center justify-center">
                 <Bot className="w-4 h-4 text-white" />
               </div>
-              <span className="text-sm font-semibold text-foreground">NOVA AI</span>
+              <span className="text-sm font-semibold text-foreground">NOVAX</span>
             </div>
             <button onClick={() => setOpen(false)} className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-muted transition-colors">
               <X className="w-4 h-4 text-muted-foreground" />
@@ -155,7 +155,7 @@ export default function ChatBotWidget() {
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={e => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), handleSend())}
-                placeholder="Ask me about NOVA..."
+                placeholder="Ask me about NOVAX..."
                 className="flex-1 rounded-xl bg-muted/70 border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/40 transition-all"
               />
               <button

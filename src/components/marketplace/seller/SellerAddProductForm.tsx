@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { Upload, X, Sparkles, Loader2, Film, Image as ImageIcon } from "lucide-react";
 import Button from "@/components/ui/Button";
-import { MEGA_CATEGORIES, TOP_BRANDS } from "../catalog";
+import { MEGA_CATEGORIES } from "../catalog";
 
 export interface SellForm {
   title: string;
@@ -11,7 +11,6 @@ export interface SellForm {
   contact: string;
   category: string;
   type: string;
-  brand: string;
   sku: string;
   stock: string;
   images: string[];
@@ -26,7 +25,6 @@ export const EMPTY_FORM: SellForm = {
   contact: "",
   category: "Digital Products",
   type: "TEMPLATE",
-  brand: "",
   sku: "",
   stock: "-1",
   images: [],
@@ -112,14 +110,6 @@ export default function SellerAddProductForm({
             <select value={form.type} onChange={onChange("type")} className={INPUT_CLASS}>
               {TYPE_OPTIONS.map((t) => (
                 <option key={t} value={t}>{t.replace(/_/g, " ")}</option>
-              ))}
-            </select>
-          </Field>
-          <Field label="Brand">
-            <select value={form.brand} onChange={onChange("brand")} className={INPUT_CLASS}>
-              <option value="">No brand</option>
-              {TOP_BRANDS.map((b) => (
-                <option key={b.id} value={b.name}>{b.name}</option>
               ))}
             </select>
           </Field>

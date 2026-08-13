@@ -15,10 +15,9 @@ interface AboutTabProps {
   experience: ExperienceItem[];
   education: EducationItem[];
   certifications: CertificationItem[];
-  achievementsCount: number;
 }
 
-export default function AboutTab({ profile, aboutText, skills, interests, languages, experience, education, certifications, achievementsCount }: AboutTabProps) {
+export default function AboutTab({ profile, aboutText, skills, interests, languages, experience, education, certifications }: AboutTabProps) {
   const { prefs } = useProfile();
   const meta = profile.profile || {};
 
@@ -32,17 +31,18 @@ export default function AboutTab({ profile, aboutText, skills, interests, langua
   const pinned = socialLinks.filter((s) => prefs.pinnedLinks.includes(s.id) || s.href);
   const shown = pinned.length > 0 ? pinned : socialLinks;
 
-  const blocks: { title: string; icon: React.ReactNode; children: React.ReactNode }[] = [
-    {
+  const blocks: { title: string; icon: React.ReactNode; children: React.ReactNode }[] = [];
+
+  if (aboutText.trim()) {
+    blocks.push({
       title: "Professional Summary",
       icon: <Briefcase className="w-4 h-4 text-primary" />,
-      children: (
-        <p className="text-sm text-foreground/85 leading-relaxed">
-          {profile.profile?.about || aboutText}
-        </p>
-      ),
-    },
-    {
+      children: <p className="text-sm text-foreground/85 leading-relaxed whitespace-pre-line">{aboutText}</p>,
+    });
+  }
+
+  if (experience.length > 0) {
+    blocks.push({
       title: "Experience",
       icon: <Briefcase className="w-4 h-4 text-primary" />,
       children: (
@@ -59,8 +59,11 @@ export default function AboutTab({ profile, aboutText, skills, interests, langua
           ))}
         </div>
       ),
-    },
-    {
+    });
+  }
+
+  if (education.length > 0) {
+    blocks.push({
       title: "Education",
       icon: <GraduationCap className="w-4 h-4 text-primary" />,
       children: (
@@ -73,8 +76,11 @@ export default function AboutTab({ profile, aboutText, skills, interests, langua
           ))}
         </div>
       ),
-    },
-    {
+    });
+  }
+
+  if (skills.length > 0) {
+    blocks.push({
       title: "Skills",
       icon: <Award className="w-4 h-4 text-primary" />,
       children: (
@@ -84,24 +90,32 @@ export default function AboutTab({ profile, aboutText, skills, interests, langua
           ))}
         </div>
       ),
-    },
-    {
+    });
+  }
+
+  if (interests.length > 0 || languages.length > 0) {
+    blocks.push({
       title: "Interests & Languages",
       icon: <LanguagesIcon className="w-4 h-4 text-primary" />,
       children: (
         <div className="space-y-3">
-          <div className="flex flex-wrap gap-1.5">
-            {interests.map((interest) => (
-              <span key={interest} className="px-3 py-1 rounded-full bg-muted text-xs text-foreground/80">{interest}</span>
-            ))}
-          </div>
+          {interests.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {interests.map((interest) => (
+                <span key={interest} className="px-3 py-1 rounded-full bg-muted text-xs text-foreground/80">{interest}</span>
+              ))}
+            </div>
+          )}
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <LanguagesIcon className="w-3.5 h-3.5" /> {languages.join(" · ") || "English"}
+            <LanguagesIcon className="w-3.5 h-3.5" /> {languages.join(" · ")}
           </div>
         </div>
       ),
-    },
-    {
+    });
+  }
+
+  if (certifications.length > 0) {
+    blocks.push({
       title: "Certifications",
       icon: <Award className="w-4 h-4 text-primary" />,
       children: (
@@ -117,31 +131,25 @@ export default function AboutTab({ profile, aboutText, skills, interests, langua
           ))}
         </div>
       ),
-    },
-    {
-      title: "Achievements",
-      icon: <Award className="w-4 h-4 text-primary" />,
-      children: (
-        <div className="rounded-xl bg-gradient-to-br from-amber-500/10 to-primary/10 p-4 flex items-center gap-3">
-          <span className="text-2xl">🏆</span>
-          <div>
-            <p className="text-sm font-semibold text-foreground">{achievementsCount} achievements earned</p>
-            <p className="text-[11px] text-muted-foreground mt-0.5">Badges, milestones and top rankings</p>
-          </div>
-        </div>
-      ),
-    },
-  ];
+    });
+  }
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
       <div className="lg:col-span-2 space-y-4">
-        {blocks.map((block, i) => (
-          <motion.div key={block.title} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} className="glass rounded-2xl p-5">
-            <h3 className="flex items-center gap-2 text-xs font-semibold text-foreground uppercase tracking-wide mb-3">{block.icon} {block.title}</h3>
-            {block.children}
+        {blocks.length === 0 ? (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="glass rounded-2xl p-6 text-center">
+            <p className="text-sm font-semibold text-foreground">No about info added yet</p>
+            <p className="text-xs text-muted-foreground mt-1">This user hasn&apos;t written an about section yet.</p>
           </motion.div>
-        ))}
+        ) : (
+          blocks.map((block, i) => (
+            <motion.div key={block.title} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} className="glass rounded-2xl p-5">
+              <h3 className="flex items-center gap-2 text-xs font-semibold text-foreground uppercase tracking-wide mb-3">{block.icon} {block.title}</h3>
+              {block.children}
+            </motion.div>
+          ))
+        )}
       </div>
 
       <div className="space-y-4">

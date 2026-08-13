@@ -32,15 +32,6 @@ export function getItemVideos(item: MarketplaceItem | undefined | null): string[
   return [];
 }
 
-export function getDiscount(item: MarketplaceItem | undefined | null): number {
-  if (!item) return 0;
-  let hash = 0;
-  for (let i = 0; i < item.id.length; i++) {
-    hash = (hash * 31 + item.id.charCodeAt(i)) >>> 0;
-  }
-  return 10 + (hash % 46);
-}
-
 export function formatPrice(value: number | undefined | null, _currency = "PKR"): string {
   const amount = Number.isFinite(value) ? Number(value) : 0;
   try {

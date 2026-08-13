@@ -29,7 +29,7 @@ export default function SignInModal({ open, onClose, onSuccess, message }: SignI
     setLoading(true);
     try {
       const res = await api.login({ identifier: identifier.trim(), password });
-      localStorage.setItem("nova_token", res.data.accessToken);
+      localStorage.setItem("novax_token", res.data.accessToken);
       onSuccess();
       onClose();
     } catch (err) {

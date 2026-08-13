@@ -118,7 +118,7 @@ export default function AiPanel({ messages, currentUserId, open, onClose, onUseS
         >
           <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-accent/8">
             <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-accent" /> NOVA AI
+              <Sparkles className="w-4 h-4 text-accent" /> NOVAX
             </h4>
             <button onClick={onClose} aria-label="Close AI tools" className="w-8 h-8 rounded-full hover:bg-muted flex items-center justify-center text-muted-foreground">
               <X className="w-4 h-4" />

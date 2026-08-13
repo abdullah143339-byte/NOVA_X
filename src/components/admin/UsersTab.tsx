@@ -236,7 +236,7 @@ export default function UsersTab() {
                         <select
                           value=""
                           onChange={(e) => e.target.value && handleRoleChange(u, e.target.value)}
-                          className="w-5 h-5 rounded bg-transparent text-muted-foreground hover:text-primary cursor-pointer"
+                          className="w-8 h-8 rounded bg-transparent text-muted-foreground hover:text-primary cursor-pointer"
                           aria-label={`Assign role to ${u.username}`}
                         >
                           <option value="">⋯</option>

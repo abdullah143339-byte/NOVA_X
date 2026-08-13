@@ -92,7 +92,7 @@ export default function SearchPage() {
           <button
             key={f}
             onClick={() => setActiveFilter(f)}
-            className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all capitalize ${
+            className={`h-9 px-3 rounded-xl text-xs font-medium transition-all capitalize ${
               activeFilter === f
                 ? "bg-primary/10 text-primary border border-primary/20"
                 : "bg-muted text-muted-foreground hover:text-foreground border border-transparent"

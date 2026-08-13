@@ -50,7 +50,7 @@ export default function BookmarksPage() {
 
       <LearningNav />
 
-      <div className="flex gap-1.5">
+      <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
         {filters.map((f) => {
           const Icon = f.icon;
           return (

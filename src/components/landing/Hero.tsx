@@ -34,7 +34,7 @@ export default function Hero() {
             <div className="inline-flex items-center gap-2 glass rounded-full px-4 py-2 mb-8">
               <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
               <span className="text-sm text-muted-foreground">
-                AI-Powered Social Platform
+                NOVAX · Think Beyond Social
               </span>
             </div>
           </motion.div>

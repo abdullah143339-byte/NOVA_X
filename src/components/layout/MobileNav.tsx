@@ -4,13 +4,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import ThemeToggle from "@/components/ui/ThemeToggle";
+import Logo from "@/components/ui/Logo";
 import { useAuth } from "@/providers/AuthProvider";
 import {
   Home,
   User,
   MessageSquare,
   Bell,
-  Sparkles,
   Video,
   Route,
   Shield,
@@ -44,10 +44,8 @@ export default function MobileNav() {
     <>
       <header className="lg:hidden fixed top-0 left-0 right-0 z-50 glass-strong border-b border-border h-14 flex items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center">
-            <Sparkles className="w-4 h-4 text-white" />
-          </div>
-          <span className="font-bold text-gradient">NOVA AI</span>
+          <Logo size={32} />
+          <span className="font-bold text-gradient">NOVAX</span>
         </Link>
         <div className="flex items-center gap-2">
           <ThemeToggle />
@@ -58,7 +56,7 @@ export default function MobileNav() {
         </div>
       </header>
 
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 glass-strong border-t border-border">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 glass-strong border-t border-border pb-[env(safe-area-inset-bottom)]">
         <div className="flex items-center justify-around h-16">
           {mobileItems.map((item) => {
             const isActive = pathname === item.href;

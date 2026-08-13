@@ -72,30 +72,6 @@ function normalizePost(raw: PostPayload): FeedPost {
   };
 }
 
-const fallbackPosts: FeedPost[] = [
-  {
-    id: "demo-1", type: "TEXT", tags: ["AI", "Development", "OpenSource"], visibility: "PUBLIC",
-    content: "Just shipped a new AI-powered code review tool using the NOVA AI API. The AI Router is incredible!",
-    author: { id: "1", username: "sarahdev", displayName: "Sarah Chen" },
-    likesCount: 234, commentsCount: 42, sharesCount: 18, viewCount: 1240,
-    createdAt: new Date(Date.now() - 7200000).toISOString(),
-  },
-  {
-    id: "demo-2", type: "TEXT", tags: ["Design", "Portfolio", "AI"], visibility: "PUBLIC",
-    content: "Published my latest design portfolio — built entirely with AI assistance from NOVA AI.",
-    author: { id: "2", username: "marcusdesigns", displayName: "Marcus Rivera" },
-    likesCount: 189, commentsCount: 31, sharesCount: 12, viewCount: 980,
-    createdAt: new Date(Date.now() - 18000000).toISOString(),
-  },
-  {
-    id: "demo-3", type: "TEXT", tags: ["Learning", "Coding", "Gamification"], visibility: "PUBLIC",
-    content: "Completed the weekly coding challenge and earned the Algorithm Master badge!",
-    author: { id: "3", username: "aishalearn", displayName: "Aisha Patel" },
-    likesCount: 156, commentsCount: 28, sharesCount: 8, viewCount: 760,
-    createdAt: new Date(Date.now() - 28800000).toISOString(),
-  },
-];
-
 export default function FeedPage() {
   const { user } = useAuth();
   const searchParams = useSearchParams();
@@ -123,7 +99,7 @@ export default function FeedPage() {
       setHasMore(items.length === 20);
       setError(false);
     } catch {
-      if (p === 1) { setError(true); setPosts(fallbackPosts); }
+      if (p === 1) { setError(true); setHasMore(false); }
     }
   }, []);
 
@@ -139,11 +115,11 @@ export default function FeedPage() {
         else if (Array.isArray(raw?.items)) items = raw.items;
         else if (Array.isArray(raw?.data)) items = raw.data;
         const normalized = items.map((item) => normalizePost(item));
-        setPosts(normalized.length > 0 ? normalized : fallbackPosts);
+        setPosts(normalized);
         setHasMore(items.length === 20);
         setError(false);
       })
-      .catch(() => { setError(true); setPosts(fallbackPosts); setHasMore(false); })
+      .catch(() => { setError(true); setHasMore(false); })
       .finally(() => active && setLoading(false));
     return () => { active = false; };
   }, []);
@@ -197,7 +173,7 @@ export default function FeedPage() {
         ) : (
           <>
             {posts.length === 0 ? (
-              <EmptyFeed />
+              error ? <ErrorFeed onRetry={refreshFeed} /> : <EmptyFeed />
             ) : (
               <div className="space-y-4">
                 {posts.map((post) => (

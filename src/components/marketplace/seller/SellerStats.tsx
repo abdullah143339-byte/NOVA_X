@@ -28,9 +28,7 @@ export default function SellerStats({ stats, listings }: SellerStatsProps) {
   ];
 
   const metrics = [
-    { label: "Avg. Rating", value: `${storeRating.toFixed(1)} / 5`, pct: storeRating / 5 },
-    { label: "Response Rate", value: "98%", pct: 0.98 },
-    { label: "On-Time Delivery", value: "96%", pct: 0.96 },
+    { label: "Avg. Rating", value: storeRating > 0 ? `${storeRating.toFixed(1)} / 5` : "No ratings yet", pct: storeRating > 0 ? storeRating / 5 : 0 },
     {
       label: "Sell Through Rate",
       value: listings.length ? `${Math.round((totalSold / Math.max(listings.length, 1)) * 10)}%` : "0%",

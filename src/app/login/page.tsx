@@ -6,13 +6,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+import Logo from "@/components/ui/Logo";
 import { useAuth } from "@/providers/AuthProvider";
 import {
   Mail,
   Lock,
   Eye,
   EyeOff,
-  Sparkles,
   ArrowRight,
   Loader2,
   CheckCircle2,
@@ -65,7 +65,7 @@ const FEATURES = [
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [identifier, setIdentifier] = useState(
-    () => (typeof window !== "undefined" ? localStorage.getItem("nova_remembered_identifier") || "" : "")
+      () => (typeof window !== "undefined" ? localStorage.getItem("novax_remembered_identifier") || "" : "")
   );
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(true);
@@ -114,9 +114,9 @@ export default function LoginPage() {
     try {
       await login(identifier.trim(), password);
       if (rememberMe) {
-        localStorage.setItem("nova_remembered_identifier", identifier.trim());
+        localStorage.setItem("novax_remembered_identifier", identifier.trim());
       } else {
-        localStorage.removeItem("nova_remembered_identifier");
+        localStorage.removeItem("novax_remembered_identifier");
       }
       setSuccess(true);
       setTimeout(() => router.push("/dashboard"), 900);
@@ -190,18 +190,18 @@ export default function LoginPage() {
       <div className="relative z-10 flex w-full max-w-[1400px] mx-auto">
         <aside className="hidden lg:flex w-1/2 flex-col justify-between p-12 xl:p-16">
           <div>
-            <Link href="/" className="inline-flex items-center gap-3 group" aria-label="NOVA AI home">
+            <Link href="/" className="inline-flex items-center gap-3 group" aria-label="NOVAX home">
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.5 }}
                 className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg shadow-[#6C63FF]/30"
-                style={{ background: "linear-gradient(135deg, #6C63FF, #7C3AED)" }}
               >
-                <Sparkles className="w-6 h-6 text-white" />
+                <Logo size={48} rounded="rounded-2xl" />
               </motion.div>
               <span className="text-2xl font-bold tracking-tight text-white group-hover:text-white/90 transition-colors">
-                NOVA&nbsp;AI
+                NOVAX
+                <span className="block mt-0.5 text-[11px] font-medium tracking-[0.15em] uppercase text-white/40">Think Beyond Social</span>
               </span>
             </Link>
           </div>
@@ -225,7 +225,7 @@ export default function LoginPage() {
               className="mt-5 text-lg text-white/60 max-w-md"
             >
               Sign in to explore your feed, collaborate on projects and command
-              your personal AI across the NOVA ecosystem.
+              your personal AI across the NOVAX ecosystem.
             </motion.p>
 
             <div className="mt-10 grid grid-cols-1 gap-4 max-w-md">
@@ -255,7 +255,7 @@ export default function LoginPage() {
             transition={{ duration: 0.8, delay: 0.6 }}
             className="text-xs text-white/35"
           >
-            © {new Date().getFullYear()} NOVA AI. Crafted with intelligence.
+            © {new Date().getFullYear()} NOVAX · Think Beyond Social. Crafted with intelligence.
           </motion.p>
         </aside>
 
@@ -271,11 +271,9 @@ export default function LoginPage() {
               style={{ background: "rgba(23, 27, 34, 0.85)" }}
             >
               <div className="lg:hidden mb-8 text-center">
-                <Link href="/" className="inline-flex items-center gap-2.5" aria-label="NOVA AI home">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "linear-gradient(135deg, #6C63FF, #7C3AED)" }}>
-                    <Sparkles className="w-5 h-5 text-white" />
-                  </div>
-                  <span className="text-xl font-bold tracking-tight text-white">NOVA AI</span>
+                <Link href="/" className="inline-flex items-center gap-2.5" aria-label="NOVAX home">
+                  <Logo size={40} rounded="rounded-xl" />
+                  <span className="text-xl font-bold tracking-tight text-white">NOVAX</span>
                 </Link>
               </div>
 

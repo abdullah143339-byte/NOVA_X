@@ -19,8 +19,8 @@ interface AdminContextValue {
 
 const AdminContext = createContext<AdminContextValue | undefined>(undefined);
 
-const FF_KEY = "nova_admin_feature_flags";
-const SETTINGS_KEY = "nova_admin_settings";
+const FF_KEY = "novax_admin_feature_flags";
+const SETTINGS_KEY = "novax_admin_settings";
 
 let auditSeq = 0;
 

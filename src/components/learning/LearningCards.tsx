@@ -46,13 +46,13 @@ export function SubjectCard({ subject }: { subject: Subject }) {
         >
           {subject.emoji}
         </div>
-        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
           <button
             type="button"
             aria-label={`Archive ${subject.name}`}
             onClick={() => updateSubject(subject.id, { archived: !subject.archived })}
             className={cn(
-              "w-8 h-8 rounded-lg flex items-center justify-center transition-all",
+        "w-9 h-9 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center transition-all",
               subject.archived ? "text-amber-400 bg-amber-500/10" : "text-muted-foreground hover:text-foreground hover:bg-muted"
             )}
           >
@@ -133,7 +133,7 @@ export function NoteCard({ note }: { note: Note }) {
           <SubjectChip subject={subject} to={subject ? `/dashboard/learning/subjects/${subject.id}` : undefined} />
           <span className="text-[11px] text-muted-foreground">{relativeTime(note.updatedAt)}</span>
         </div>
-        <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex gap-1 shrink-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
           <ActionIcon
             label={note.pinned ? "Unpin" : "Pin"}
             active={note.pinned}
@@ -207,7 +207,7 @@ export function LectureCard({ lecture }: { lecture: Lecture }) {
           <div className="flex items-center gap-2 min-w-0">
             <SubjectChip subject={subject} to={subject ? `/dashboard/learning/subjects/${subject.id}` : undefined} />
           </div>
-          <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="flex gap-1 shrink-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
             <ActionIcon
               label={lecture.completed ? "Mark incomplete" : "Mark complete"}
               active={lecture.completed}
@@ -285,7 +285,7 @@ export function FileCard({ file }: { file: LearningFile }) {
         <div className="w-11 h-11 rounded-xl bg-muted border border-border flex items-center justify-center text-muted-foreground shrink-0">
           <FileTypeIcon kind={file.kind} />
         </div>
-        <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex gap-1 shrink-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
           <ActionIcon
             label={file.favorite ? "Unfavorite" : "Favorite"}
             active={file.favorite}
@@ -372,7 +372,7 @@ export function TaskCard({ task }: { task: StudyTask }) {
         </div>
       </div>
 
-      <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="flex gap-1 shrink-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
         <ActionIcon label="Archive" icon={Archive} onClick={() => updateTask(task.id, { archived: !task.archived })} />
         <ActionIcon label="Trash" icon={Trash2} onClick={() => removeTask(task.id)} />
       </div>

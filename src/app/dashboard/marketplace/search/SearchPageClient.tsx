@@ -36,7 +36,7 @@ export default function SearchPageClient() {
   const [recentSearches, setRecentSearches] = useState<string[]>(() => {
     if (typeof window === "undefined") return [];
     try {
-      return JSON.parse(window.localStorage.getItem("nova_market_searches") ?? "[]") as string[];
+      return JSON.parse(window.localStorage.getItem("novax_market_searches") ?? "[]") as string[];
     } catch {
       return [];
     }
@@ -49,7 +49,7 @@ export default function SearchPageClient() {
     if (!trimmed) return;
     setRecentSearches((prev) => {
       const next = [trimmed, ...prev.filter((s) => s !== trimmed)].slice(0, 8);
-      window.localStorage.setItem("nova_market_searches", JSON.stringify(next));
+      window.localStorage.setItem("novax_market_searches", JSON.stringify(next));
       return next;
     });
   }, []);
@@ -173,7 +173,7 @@ export default function SearchPageClient() {
           <button
             onClick={() => {
               setRecentSearches([]);
-              window.localStorage.removeItem("nova_market_searches");
+              window.localStorage.removeItem("novax_market_searches");
             }}
             className="text-xs text-muted-foreground/60 hover:text-red-500 px-1"
           >

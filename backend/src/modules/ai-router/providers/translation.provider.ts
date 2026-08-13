@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { AiIntegrationService } from '../../../common/services/ai-integration.service';
 import { ProviderFallbackService } from '../../../common/services/provider-fallback.service';
 import { AIProviderResponse, AITranslationOptions } from './ai-provider.interface';
@@ -14,8 +14,10 @@ export class TranslationProvider {
     const start = Date.now();
     const langName = this.getLangName(options.targetLanguage);
 
+    let translatedText: string;
+    let provider = '';
     try {
-      const { data: translatedText, provider } = await this.fallback.tryProviders(
+      const result = await this.fallback.tryProviders(
         this.fallback.getTranslationProviders(),
         {
           gemini: () => this.ai.geminiTranslate(options.text, langName),
@@ -34,64 +36,61 @@ export class TranslationProvider {
           mistral: () => this.ai.mistralTranslate(options.text, langName),
         },
       );
-
-      let detectedLang = '';
-      try {
-        const { data: lang } = await this.fallback.tryProviders(
-          this.fallback.getTranslationProviders(),
-          {
-            gemini: () => this.ai.geminiDetectLanguage(options.text),
-            groq: () => this.ai.groqChat([
-              { role: 'system', content: 'Detect the language. Return ONLY the language name (e.g., "English").' },
-              { role: 'user', content: options.text },
-            ], 'mixtral-8x7b-32768', 0.3),
-            openrouter: () => this.ai.openRouterChat([
-              { role: 'system', content: 'Detect the language. Return ONLY the language name (e.g., "English").' },
-              { role: 'user', content: options.text },
-            ], 'mistralai/mistral-7b-instruct', 0.3),
-            deepseek: () => this.ai.deepSeekChat([
-              { role: 'system', content: 'Detect the language. Return ONLY the language name (e.g., "English").' },
-              { role: 'user', content: options.text },
-            ], 'deepseek-chat', 0.3),
-            mistral: () => this.ai.mistralChat([
-              { role: 'system', content: 'Detect the language. Return ONLY the language name (e.g., "English").' },
-              { role: 'user', content: options.text },
-            ], 'mistral-small-latest', 0.3),
-          },
-        );
-        detectedLang = lang;
-      } catch {
-        detectedLang = 'Unknown';
-      }
-
-      let modelName = '';
-      switch (provider) {
-        case 'gemini': modelName = 'gemini-2.0-flash-exp'; break;
-        case 'groq': modelName = 'mixtral-8x7b-32768'; break;
-        case 'openrouter': modelName = 'mistralai/mistral-7b-instruct'; break;
-        case 'deepseek': modelName = 'deepseek-chat'; break;
-        case 'mistral': modelName = 'mistral-small-latest'; break;
-      }
-
-      return {
-        success: true,
-        data: { translatedText, sourceLanguage: detectedLang, targetLanguage: options.targetLanguage, confidence: 0.88 },
-        model: modelName,
-        provider,
-        latency: Date.now() - start,
-      };
+      translatedText = result.data;
+      provider = result.provider;
     } catch {
-      return {
-        success: true,
-        data: { translatedText: `[${options.sourceLanguage || 'auto'} → ${options.targetLanguage}] ${options.text}`, sourceLanguage: 'English', targetLanguage: options.targetLanguage, confidence: 0.5 },
-        model: 'mock',
-        provider: 'mock',
-        latency: Date.now() - start,
-      };
+      throw new ServiceUnavailableException('AI translation is unavailable: no AI provider is configured or reachable.');
     }
+
+    let detectedLang = '';
+    try {
+      const { data: lang } = await this.fallback.tryProviders(
+        this.fallback.getTranslationProviders(),
+        {
+          gemini: () => this.ai.geminiDetectLanguage(options.text),
+          groq: () => this.ai.groqChat([
+            { role: 'system', content: 'Detect the language. Return ONLY the language name (e.g., "English").' },
+            { role: 'user', content: options.text },
+          ], 'mixtral-8x7b-32768', 0.3),
+          openrouter: () => this.ai.openRouterChat([
+            { role: 'system', content: 'Detect the language. Return ONLY the language name (e.g., "English").' },
+            { role: 'user', content: options.text },
+          ], 'mistralai/mistral-7b-instruct', 0.3),
+          deepseek: () => this.ai.deepSeekChat([
+            { role: 'system', content: 'Detect the language. Return ONLY the language name (e.g., "English").' },
+            { role: 'user', content: options.text },
+          ], 'deepseek-chat', 0.3),
+          mistral: () => this.ai.mistralChat([
+            { role: 'system', content: 'Detect the language. Return ONLY the language name (e.g., "English").' },
+            { role: 'user', content: options.text },
+          ], 'mistral-small-latest', 0.3),
+        },
+      );
+      detectedLang = lang;
+    } catch {
+      detectedLang = 'Unknown';
+    }
+
+    let modelName = '';
+    switch (provider) {
+      case 'gemini': modelName = 'gemini-2.0-flash-exp'; break;
+      case 'groq': modelName = 'mixtral-8x7b-32768'; break;
+      case 'openrouter': modelName = 'mistralai/mistral-7b-instruct'; break;
+      case 'deepseek': modelName = 'deepseek-chat'; break;
+      case 'mistral': modelName = 'mistral-small-latest'; break;
+    }
+
+    return {
+      success: true,
+      data: { translatedText, sourceLanguage: detectedLang, targetLanguage: options.targetLanguage },
+      model: modelName,
+      provider,
+      latency: Date.now() - start,
+    };
   }
 
   async detectLanguage(text: string): Promise<AIProviderResponse> {
+    const start = Date.now();
     try {
       const { data, provider } = await this.fallback.tryProviders(
         this.fallback.getTranslationProviders(),
@@ -115,9 +114,25 @@ export class TranslationProvider {
           ], 'mistral-small-latest', 0.3),
         },
       );
-      return { success: true, data: { language: data }, model: 'gemini-2.0-flash-exp', provider };
+
+      let modelName = '';
+      switch (provider) {
+        case 'gemini': modelName = 'gemini-2.0-flash-exp'; break;
+        case 'groq': modelName = 'mixtral-8x7b-32768'; break;
+        case 'openrouter': modelName = 'mistralai/mistral-7b-instruct'; break;
+        case 'deepseek': modelName = 'deepseek-chat'; break;
+        case 'mistral': modelName = 'mistral-small-latest'; break;
+      }
+
+      return {
+        success: true,
+        data: { language: data },
+        model: modelName,
+        provider,
+        latency: Date.now() - start,
+      };
     } catch {
-      return { success: true, data: { language: 'English' }, model: 'mock', provider: 'mock' };
+      throw new ServiceUnavailableException('Language detection is unavailable: no AI provider is configured or reachable.');
     }
   }
 
@@ -137,8 +152,8 @@ export class TranslationProvider {
     return {
       success: true,
       data: { languages, count: languages.length },
-      model: 'gemini-2.0-flash-exp',
-      provider: 'gemini',
+      model: '',
+      provider: '',
     };
   }
 

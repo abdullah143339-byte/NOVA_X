@@ -7,7 +7,8 @@ import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import ThemeToggle from "@/components/ui/ThemeToggle";
-import { Mail, Lock, Eye, EyeOff, User, Sparkles, ArrowRight, Check, Loader2 } from "lucide-react";
+import Logo from "@/components/ui/Logo";
+import { Mail, Lock, Eye, EyeOff, User, ArrowRight, Check, Loader2 } from "lucide-react";
 import { useAuth } from "@/providers/AuthProvider";
 
 export default function SignupPage() {
@@ -73,14 +74,12 @@ export default function SignupPage() {
         <div className="glass-strong rounded-3xl p-8 sm:p-10">
           <div className="text-center mb-8">
             <Link href="/" className="inline-flex items-center gap-2.5 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-gradient-primary flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-xl font-bold text-gradient">NOVA AI</span>
+              <Logo size={40} rounded="rounded-xl" />
+              <span className="text-xl font-bold text-gradient">NOVAX</span>
             </Link>
             <h1 className="text-2xl font-bold text-foreground">Create your account</h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Start building the future of social
+              NOVAX — Think Beyond Social
             </p>
           </div>
 

@@ -13,7 +13,7 @@ const ICONS = {
 export default function AdminToasts() {
   const { toasts, dismissToast } = useAdmin();
   return (
-    <div className="fixed bottom-5 right-5 z-[100] space-y-2">
+    <div className="fixed bottom-20 lg:bottom-5 right-5 z-[100] space-y-2">
       <AnimatePresence>
         {toasts.map((t) => (
           <motion.div

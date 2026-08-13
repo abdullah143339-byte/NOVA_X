@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Sparkles } from "lucide-react";
+import Logo from "@/components/ui/Logo";
 
 const fade = {
   initial: { opacity: 0, y: 20, filter: "blur(10px)" },
@@ -21,10 +21,11 @@ export default function Footer() {
             className="col-span-2 md:col-span-1"
           >
             <div className="flex items-center gap-2.5 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center">
-                <Sparkles className="w-4 h-4 text-white" />
+              <Logo size={32} />
+              <div>
+                <span className="text-lg font-bold text-gradient block leading-none">NOVAX</span>
+                <span className="text-[10px] text-muted-foreground tracking-wide">Think Beyond Social</span>
               </div>
-              <span className="text-lg font-bold text-gradient">NOVA AI</span>
             </div>
             <p className="text-sm text-muted-foreground max-w-xs">
               The future generation of social media — AI-first, voice-first, community-driven.
@@ -82,7 +83,7 @@ export default function Footer() {
           className="mt-8 pt-8 border-t border-border flex flex-col sm:flex-row justify-between items-center gap-4"
         >
           <p className="text-sm text-muted-foreground">
-            &copy; 2026 NOVA AI. All rights reserved.
+            &copy; 2026 NOVAX. All rights reserved.
           </p>
           <div className="flex items-center gap-4">
             {["GitHub", "Twitter", "Discord"].map((item) => (

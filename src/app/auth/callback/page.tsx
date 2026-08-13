@@ -20,7 +20,7 @@ function CallbackHandler() {
     }
 
     if (accessToken) {
-      localStorage.setItem("nova_token", accessToken);
+      localStorage.setItem("novax_token", accessToken);
       router.replace("/dashboard");
     } else {
       router.replace("/login?error=no_tokens");

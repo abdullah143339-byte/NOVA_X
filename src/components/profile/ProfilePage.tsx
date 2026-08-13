@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Users, Eye, SlidersHorizontal, FileDown, Printer, RefreshCw, AlertTriangle } from "lucide-react";
+import { SlidersHorizontal, FileDown, Printer, RefreshCw, AlertTriangle } from "lucide-react";
 import api from "@/lib/api";
 import { useAuth } from "@/providers/AuthProvider";
 import { useProfile } from "./ProfileProvider";
@@ -21,29 +21,13 @@ import SavedTab from "./SavedTab";
 import MarketplaceTab from "./MarketplaceTab";
 import CommunitiesTab from "./CommunitiesTab";
 import ProjectsTab from "./ProjectsTab";
-import AchievementsTab from "./AchievementsTab";
-import ActivityTab from "./ActivityTab";
 import AboutTab from "./AboutTab";
-import {
-  parseTags,
-  parseJsonArray,
-  getSkills,
-  getInterests,
-  getLanguages,
-  getCertifications,
-  getExperience,
-  getEducation,
-  getAchievements,
-  getActivity,
-  getHeatmap,
-  getOwnedCommunities,
-  getJoinedCommunities,
-  getProjects,
-  getProfileThemes,
-  getCreatorLevel,
-  formatCount,
-} from "./data";
+import { parseTags, parseJsonArray, getProfileThemes, getCreatorLevel } from "./data";
 import type {
+  CertificationItem,
+  CommunityItem,
+  EducationItem,
+  ExperienceItem,
   MarketItem,
   PostData,
   PostMedia,
@@ -54,6 +38,49 @@ import type {
 import { cn } from "@/lib/utils";
 
 type RawPost = Record<string, unknown>;
+
+function parseItems<T>(raw: string | null | undefined): T[] {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? (parsed as T[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+interface RawCommunity {
+  id: string;
+  name?: string;
+  title?: string;
+  slug?: string;
+  description?: string;
+  category?: string;
+  icon?: string;
+  image?: string;
+  membersCount?: number;
+  memberCount?: number;
+  isMember?: boolean;
+  isOwner?: boolean;
+  isModerator?: boolean;
+  ownerId?: string;
+  owner?: { id: string };
+  _count?: { members?: number };
+}
+
+function normalizeCommunity(c: RawCommunity): CommunityItem {
+  return {
+    id: String(c.id),
+    name: c.name || c.title,
+    title: c.name || c.title,
+    slug: c.slug,
+    description: c.description,
+    category: c.category,
+    memberCount: c.membersCount ?? c.memberCount ?? c._count?.members ?? 0,
+    ownerId: c.ownerId,
+    role: c.isOwner ? "OWNER" : c.isModerator ? "MODERATOR" : "MEMBER",
+  };
+}
 
 function normalizePost(p: RawPost, isSaved = false): PostData {
   let media: PostMedia[] = [];
@@ -80,7 +107,7 @@ function normalizePost(p: RawPost, isSaved = false): PostData {
 
 export default function ProfilePage() {
   const { user, refreshUser } = useAuth();
-  const { prefs, notify, visitorCount, profileViews, recordVisit, recordView } = useProfile();
+  const { prefs, notify } = useProfile();
   const router = useRouter();
 
   const [profile, setProfile] = useState<ProfilePayload | null>(null);
@@ -95,6 +122,8 @@ export default function ProfilePage() {
   const [savedLoading, setSavedLoading] = useState(false);
   const [marketItems, setMarketItems] = useState<MarketItem[]>([]);
   const [marketLoading, setMarketLoading] = useState(false);
+  const [communities, setCommunities] = useState<{ owned: CommunityItem[]; joined: CommunityItem[] }>({ owned: [], joined: [] });
+  const [communitiesLoading, setCommunitiesLoading] = useState(true);
 
   const [aiOpen, setAiOpen] = useState(false);
   const [customizeOpen, setCustomizeOpen] = useState(false);
@@ -104,7 +133,6 @@ export default function ProfilePage() {
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
 
-  const seed = profile?.username || user?.username || "nova";
   const isOwner = !!user && !!profile && user.username === profile.username;
 
   const loadProfile = useCallback(async () => {
@@ -177,14 +205,44 @@ export default function ProfilePage() {
     }
   }, [user]);
 
+  const loadCommunities = useCallback(async () => {
+    if (!user) return;
+    setCommunitiesLoading(true);
+    try {
+      const res = await api.getCommunities(1);
+      const raw = res?.data;
+      const list = (
+        Array.isArray(raw)
+          ? raw
+          : Array.isArray(raw?.communities)
+            ? raw.communities
+            : Array.isArray(raw?.items)
+              ? raw.items
+              : []
+      ) as RawCommunity[];
+      const owned = list
+        .filter((c) => String(c.ownerId ?? c.owner?.id ?? "") === String(user.id))
+        .map(normalizeCommunity);
+      const joined = list
+        .filter((c) => c.isMember && String(c.ownerId ?? c.owner?.id ?? "") !== String(user.id))
+        .map(normalizeCommunity);
+      setCommunities({ owned, joined });
+    } catch {
+      setCommunities({ owned: [], joined: [] });
+    } finally {
+      setCommunitiesLoading(false);
+    }
+  }, [user]);
+
   useEffect(() => {
     if (!user) return;
     const t = window.setTimeout(() => {
       loadProfile();
       loadPosts();
+      loadCommunities();
     }, 0);
     return () => window.clearTimeout(t);
-  }, [user, loadProfile, loadPosts]);
+  }, [user, loadProfile, loadPosts, loadCommunities]);
 
   useEffect(() => {
     if (!user) return;
@@ -194,12 +252,6 @@ export default function ProfilePage() {
     }, 0);
     return () => window.clearTimeout(t);
   }, [user, activeTab, loadSaved, loadMarket]);
-
-  useEffect(() => {
-    if (!user || !profile) return;
-    if (user.username === profile.username) recordVisit();
-    else recordView();
-  }, [user, profile, recordVisit, recordView]);
 
   const reloadProfile = useCallback(async () => {
     if (!user) return;
@@ -224,29 +276,20 @@ export default function ProfilePage() {
 
   const reelPosts = userPosts.filter((p) => p.type === "VIDEO");
   const projectPosts = userPosts.filter((p) => parseTags(p.tags).includes("project"));
-  const ownedCommunities = getOwnedCommunities(seed);
-  const joinedCommunities = getJoinedCommunities(seed);
-  const projects = getProjects(seed, projectPosts.length);
-  const achievements = getAchievements(seed, reputation ? { tier: reputation.tier, level: reputation.level, totalScore: reputation.totalScore } : undefined);
-  const activity = getActivity(seed, userPosts, marketItems.length, ownedCommunities.length + joinedCommunities.length);
-  const heatmap = getHeatmap(seed);
   const followersCount = profile?._count?.followers ?? profile?.profile?.followersCount ?? 0;
 
   const meta = profile?.profile;
-  const skillsRaw = parseJsonArray(meta?.skills);
-  const skills = skillsRaw.length > 0 ? skillsRaw : getSkills(seed);
+  const skills = parseJsonArray(meta?.skills);
   const interests = parseJsonArray(meta?.interests);
-  const interestsFinal = interests.length > 0 ? interests : getInterests(seed);
   const languages = parseJsonArray(meta?.languages);
-  const languagesFinal = languages.length > 0 ? languages : getLanguages(seed);
-  const experience = getExperience(seed);
-  const education = getEducation(seed);
-  const certifications = getCertifications(seed);
+  const experience = parseItems<ExperienceItem>(meta?.experience);
+  const education = parseItems<EducationItem>(meta?.education);
+  const certifications: CertificationItem[] = [];
 
   const counts = {
     posts: userPosts.length,
     reels: reelPosts.length,
-    communities: ownedCommunities.length + joinedCommunities.length,
+    communities: communities.owned.length + communities.joined.length,
     market: marketItems.length,
     followers: followersCount,
     following: profile?._count?.following ?? profile?.profile?.followingCount ?? 0,
@@ -260,8 +303,6 @@ export default function ProfilePage() {
     { id: "market", label: "Marketplace", icon: "🛍️" },
     { id: "communities", label: "Communities", icon: "👥" },
     { id: "projects", label: "Projects", icon: "🚀" },
-    { id: "achievements", label: "Achievements", icon: "🏆" },
-    { id: "activity", label: "Activity", icon: "📊" },
     { id: "about", label: "About", icon: "ℹ️" },
   ];
 
@@ -409,25 +450,20 @@ export default function ProfilePage() {
       case "market":
         return <MarketplaceTab items={marketItems} loading={marketLoading} isOwner={isOwner} />;
       case "communities":
-        return <CommunitiesTab joined={joinedCommunities} owned={ownedCommunities} loading={loading} />;
+        return <CommunitiesTab joined={communities.joined} owned={communities.owned} loading={communitiesLoading} />;
       case "projects":
-        return <ProjectsTab projects={projects} projectPosts={projectPosts} loading={loading} />;
-      case "achievements":
-        return <AchievementsTab achievements={achievements} reputation={reputation ?? undefined} tier={tier.tier} tierColor={tier.color} />;
-      case "activity":
-        return <ActivityTab activity={activity} heatmap={heatmap} accent={accent} visible={prefs.visibility.activity ?? true} />;
+        return <ProjectsTab projectPosts={projectPosts} loading={loading} />;
       case "about":
         return (
           <AboutTab
             profile={profile!}
-            aboutText={profile?.profile?.about || `${displayName} is a creator on NOVA AI.`}
+            aboutText={profile?.profile?.about || ""}
             skills={skills}
-            interests={interestsFinal}
-            languages={languagesFinal}
+            interests={interests}
+            languages={languages}
             experience={experience}
             education={education}
             certifications={certifications}
-            achievementsCount={achievements.filter((a) => a.earned).length}
           />
         );
       default:
@@ -482,12 +518,6 @@ export default function ProfilePage() {
 
       {isOwner && (
         <div className="glass rounded-2xl px-4 py-3 flex flex-wrap items-center gap-2 sm:gap-3">
-          <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground" title="Visitor counter">
-            <Eye className="w-3.5 h-3.5 text-primary" /> {formatCount(visitorCount)} visits
-          </span>
-          <span className="inline-flex items-center gap-1.5 text-[11px] text-muted-foreground" title="Profile views">
-            <Users className="w-3.5 h-3.5 text-primary" /> {formatCount(profileViews)} views
-          </span>
           <div className="ml-auto flex items-center gap-2">
             <button
               onClick={() => setCustomizeOpen(true)}

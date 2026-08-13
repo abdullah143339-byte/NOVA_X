@@ -12,7 +12,7 @@ import { COVER_GRADIENTS, LOGOS, CATEGORY_POOL, TECH_POOL, TAG_POOL, normalizePo
 import { aiGenerateDescription, aiSuggestTags, aiSuggestTechStack } from "@/components/projects/ai";
 import type { ProjectRow, ProjectStatus, ProjectVisibility, ProjectTeamMember } from "@/components/projects/types";
 
-const DRAFT_KEY = "nova_project_drafts";
+const DRAFT_KEY = "novax_project_drafts";
 
 interface DraftRecord {
   savedAt: string;
@@ -304,7 +304,7 @@ export function CreateProjectForm({ editId }: { editId?: string }) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-xl md:text-2xl font-bold text-foreground">{editId ? "Edit Project" : "Create a Project"}</h1>
-          <p className="text-xs text-muted-foreground mt-1">Showcase your work to the NOVA community. Publish as a post, refine with AI.</p>
+          <p className="text-xs text-muted-foreground mt-1">Showcase your work to the NOVAX community. Publish as a post, refine with AI.</p>
         </div>
         <div className="flex gap-2">
           <Button variant="secondary" size="sm" onClick={saveDraft}>

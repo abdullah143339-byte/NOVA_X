@@ -218,7 +218,7 @@ export default function ReelsPage() {
   for (let i = startIdx; i <= endIdx; i++) windowIndices.push(i);
 
   return (
-    <div className="fixed inset-0 lg:left-64 z-40 bg-[#0B0D12] overflow-hidden">
+    <div className="fixed inset-x-0 top-14 bottom-16 md:left-16 md:bottom-0 lg:inset-y-0 lg:left-64 z-40 bg-[#0B0D12] overflow-hidden">
       <div className="absolute inset-x-0 top-0 z-30 flex items-center justify-between gap-3 px-4 pt-3 pb-2 pointer-events-none">
         <div className="flex items-center gap-2 pointer-events-auto">
           <div className="w-9 h-9 rounded-2xl glass-strong flex items-center justify-center">

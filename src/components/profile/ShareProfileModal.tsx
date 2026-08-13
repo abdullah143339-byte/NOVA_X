@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Check, Copy, Link2, AtSign, MessageSquare } from "lucide-react";
-import { buildQrModules, getProfileUrl } from "./data";
+import { getProfileUrl } from "./data";
 import { cn } from "@/lib/utils";
 
 interface ShareProfileModalProps {
@@ -14,11 +14,9 @@ interface ShareProfileModalProps {
   notify: (msg: string, type?: "success" | "error" | "info") => void;
 }
 
-export default function ShareProfileModal({ open, onClose, username, accent, notify }: ShareProfileModalProps) {
+export default function ShareProfileModal({ open, onClose, username, notify }: ShareProfileModalProps) {
   const url = getProfileUrl(username);
   const [copied, setCopied] = useState(false);
-  const modules = buildQrModules(username);
-  const size = 21;
 
   const copyUrl = async () => {
     try {
@@ -54,20 +52,6 @@ export default function ShareProfileModal({ open, onClose, username, accent, not
             </div>
 
             <div className="p-6 flex flex-col items-center">
-              <div
-                className="rounded-2xl p-4 mb-4"
-                style={{ background: "#ffffff", boxShadow: `0 12px 32px -12px ${accent}55` }}
-              >
-                <div className="grid gap-[2px]" style={{ gridTemplateColumns: `repeat(${size}, 4px)` }} aria-label="Profile QR code">
-                  {modules.map((row, i) =>
-                    row.map((on, j) => (
-                      <span key={`${i}-${j}`} className="w-1 h-1 rounded-[1px]" style={{ backgroundColor: on ? "#0F1115" : "transparent" }} />
-                    ))
-                  )}
-                </div>
-              </div>
-              <p className="text-xs text-muted-foreground text-center mb-4">Scan to open @{username}&apos;s NOVA profile</p>
-
               <div className="flex items-center gap-2 w-full mb-3">
                 <div className="flex-1 min-w-0 flex items-center gap-2 h-10 px-3 rounded-xl bg-muted border border-border">
                   <Link2 className="w-3.5 h-3.5 text-muted-foreground shrink-0" />

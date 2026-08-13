@@ -56,7 +56,7 @@ export default function MarketplaceHeader() {
             <Sparkles className="w-5 h-5 text-white" />
           </div>
           <span className="hidden md:block">
-            <span className="block text-sm font-bold text-gradient leading-none">NOVA Market</span>
+            <span className="block text-sm font-bold text-gradient leading-none">NOVAX Market</span>
             <span className="block text-[9px] text-muted-foreground mt-0.5">Shop · Sell · Earn</span>
           </span>
         </Link>
@@ -107,7 +107,7 @@ export default function MarketplaceHeader() {
                 <p className="px-3 py-1.5 mt-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
                   <Clock className="w-3 h-3" /> Quick Filters
                 </p>
-                {["AI Products", "Free Shipping", "Under Rs 5,000", "Official Stores"].map((s) => (
+                {["AI Products", "Free Shipping", "Under Rs 5,000"].map((s) => (
                   <button
                     key={s}
                     onClick={() => quickSearch(s)}

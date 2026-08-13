@@ -5,8 +5,8 @@ import type {
   FileKind,
 } from "./types";
 
-const STORAGE_KEY = "nova_learning_v2";
-const LEGACY_STORAGE_KEY = "nova_learning_v1";
+const STORAGE_KEY = "novax_learning_v2";
+const LEGACY_STORAGE_KEY = "novax_learning_v1";
 
 export const SUBJECT_COLORS: Record<SubjectColor, string> = {
   violet: "#6C63FF",

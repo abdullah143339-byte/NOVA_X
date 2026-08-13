@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/AuthProvider";
+import Logo from "@/components/ui/Logo";
 import {
   Home,
   User,
@@ -12,7 +13,6 @@ import {
   Bell,
   Settings,
   LogOut,
-  Sparkles,
   GraduationCap,
   Search,
   Video,
@@ -67,13 +67,60 @@ export default function Sidebar() {
   };
 
   return (
+    <>
+    <aside className="hidden md:flex lg:hidden flex-col w-16 h-screen fixed left-0 top-0 z-40 glass-strong border-r border-border pt-14">
+      <nav className="flex-1 overflow-y-auto py-3 flex flex-col items-center gap-1">
+        {navItems.map((item) => {
+          const isActive = pathname === item.href;
+          return (
+            <Link
+              key={item.label}
+              href={item.href}
+              title={item.label}
+              aria-label={item.label}
+              className={cn(
+                "w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-200",
+                isActive
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
+              )}
+            >
+              {item.icon}
+            </Link>
+          );
+        })}
+      </nav>
+      <div className="py-3 border-t border-border flex flex-col items-center gap-1">
+        {bottomItems.map((item) => (
+          <Link
+            key={item.label}
+            href={item.href}
+            title={item.label}
+            aria-label={item.label}
+            className="w-11 h-11 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-all duration-200"
+          >
+            {item.icon}
+          </Link>
+        ))}
+        <button
+          onClick={handleLogout}
+          title="Log Out"
+          aria-label="Log Out"
+          className="w-11 h-11 rounded-xl flex items-center justify-center text-red-500 hover:bg-red-500/10 transition-all duration-200"
+        >
+          <LogOut className="w-5 h-5" />
+        </button>
+      </div>
+    </aside>
+
     <aside className="hidden lg:flex flex-col w-64 h-screen fixed left-0 top-0 glass-strong border-r border-border z-40">
       <div className="p-5 border-b border-border">
         <Link href="/" className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-gradient-primary flex items-center justify-center">
-            <Sparkles className="w-5 h-5 text-white" />
+          <Logo size={36} />
+          <div className="min-w-0">
+            <span className="block text-lg font-bold text-gradient leading-none">NOVAX</span>
+            <span className="block text-[9px] text-muted-foreground tracking-wide truncate">Think Beyond Social</span>
           </div>
-          <span className="text-lg font-bold text-gradient">NOVA AI</span>
         </Link>
         {user && (
           <div className="mt-3 flex items-center gap-2.5">
@@ -144,5 +191,6 @@ export default function Sidebar() {
         </button>
       </div>
     </aside>
+    </>
   );
 }

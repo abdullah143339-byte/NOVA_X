@@ -6,7 +6,7 @@ import { Eye, Heart, Scale, ShoppingCart, Truck, BadgeCheck, Check } from "lucid
 import { useMarketplace } from "./MarketplaceProvider";
 import StarRating from "./StarRating";
 import PriceTag from "./PriceTag";
-import { getDiscount, getItemImages, getPrimaryImage, formatNumber, getTypeLabel, getTypeColor } from "./format";
+import { getItemImages, getPrimaryImage, formatNumber, getTypeLabel, getTypeColor } from "./format";
 import { cn } from "@/lib/utils";
 import type { MarketplaceItem } from "./types";
 
@@ -22,7 +22,6 @@ export default function ProductCard({ item, onQuickView }: ProductCardProps) {
 
   const images = getItemImages(item);
   const primary = getPrimaryImage(item);
-  const discount = getDiscount(item);
   const inCart = isInCart(item.id);
   const wished = isWishlisted(item.id);
   const compared = isCompared(item.id);
@@ -73,9 +72,6 @@ export default function ProductCard({ item, onQuickView }: ProductCardProps) {
         )}
 
         <div className="absolute top-2 left-2 flex flex-col gap-1 items-start">
-          {discount > 0 && (
-            <span className="px-1.5 py-0.5 rounded-md bg-red-500 text-white text-[10px] font-bold">-{discount}%</span>
-          )}
           {item.isFeatured && (
             <span className="px-1.5 py-0.5 rounded-md bg-gradient-primary text-white text-[10px] font-bold flex items-center gap-1">
               <BadgeCheck className="w-2.5 h-2.5" /> Featured
@@ -153,7 +149,7 @@ export default function ProductCard({ item, onQuickView }: ProductCardProps) {
 
         <div className="flex items-center justify-between mt-auto pt-2">
           <div className="min-w-0">
-            <PriceTag price={item.price} currency={item.currency} discount={discount} />
+            <PriceTag price={item.price} currency={item.currency} />
             <div className="flex items-center gap-1 mt-1">
               <StarRating rating={item.rating ?? 0} count={item.reviewCount ?? 0} />
             </div>

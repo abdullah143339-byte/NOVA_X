@@ -9,7 +9,7 @@ let socket: Socket | null = null;
 
 export function getSocket(): Socket {
   if (!socket) {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('nova_token') : null;
+    const token = typeof window !== 'undefined' ? localStorage.getItem('novax_token') : null;
     socket = io(SOCKET_URL, {
       auth: { token },
       autoConnect: false,
@@ -22,7 +22,7 @@ export function getSocket(): Socket {
 export function connectSocket() {
   const s = getSocket();
   if (!s.connected) {
-    const token = localStorage.getItem('nova_token');
+    const token = localStorage.getItem('novax_token');
     if (token) {
       s.auth = { token };
       s.connect();
@@ -43,7 +43,7 @@ export function useSocket() {
   const [connected, setConnected] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem('nova_token');
+    const token = localStorage.getItem('novax_token');
     if (!token) return;
 
     const s = io(SOCKET_URL, {

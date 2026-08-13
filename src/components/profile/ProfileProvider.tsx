@@ -13,19 +13,13 @@ interface ProfileContextValue {
   toggleFollow: (userId: string) => void;
   isRemoved: (userId: string) => boolean;
   removeFollower: (userId: string) => void;
-  visitorCount: number;
-  profileViews: number;
-  recordVisit: () => void;
-  recordView: () => void;
 }
 
 const ProfileContext = createContext<ProfileContextValue | undefined>(undefined);
 
-const PREFS_KEY = "nova_profile_prefs";
-const FOLLOW_KEY = "nova_profile_following";
-const REMOVED_KEY = "nova_profile_removed";
-const VISITOR_KEY = "nova_profile_visitors";
-const VIEWS_KEY = "nova_profile_views";
+const PREFS_KEY = "novax_profile_prefs";
+const FOLLOW_KEY = "novax_profile_following";
+const REMOVED_KEY = "novax_profile_removed";
 
 const DEFAULT_PREFS: ProfilePrefs = {
   accentColor: "#6C63FF",
@@ -52,8 +46,6 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [following, setFollowing] = useState<Record<string, boolean>>({});
   const [removed, setRemoved] = useState<string[]>([]);
-  const [visitorCount, setVisitorCount] = useState(0);
-  const [profileViews, setProfileViews] = useState(0);
   const hydratedRef = useRef(false);
   const toastTimers = useRef<number[]>([]);
 
@@ -62,8 +54,6 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
       setPrefsState({ ...DEFAULT_PREFS, ...readStorage<Partial<ProfilePrefs>>(PREFS_KEY, {}) });
       setFollowing(readStorage<Record<string, boolean>>(FOLLOW_KEY, {}));
       setRemoved(readStorage<string[]>(REMOVED_KEY, []));
-      setVisitorCount(readStorage<number>(VISITOR_KEY, 0));
-      setProfileViews(readStorage<number>(VIEWS_KEY, 0));
       hydratedRef.current = true;
     });
     return () => cancelAnimationFrame(raf);
@@ -83,16 +73,6 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     if (!hydratedRef.current) return;
     window.localStorage.setItem(REMOVED_KEY, JSON.stringify(removed));
   }, [removed]);
-
-  useEffect(() => {
-    if (!hydratedRef.current) return;
-    window.localStorage.setItem(VISITOR_KEY, JSON.stringify(visitorCount));
-  }, [visitorCount]);
-
-  useEffect(() => {
-    if (!hydratedRef.current) return;
-    window.localStorage.setItem(VIEWS_KEY, JSON.stringify(profileViews));
-  }, [profileViews]);
 
   useEffect(() => {
     const timers = toastTimers.current;
@@ -126,14 +106,6 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     setRemoved((prev) => (prev.includes(userId) ? prev : [...prev, userId]));
   }, []);
 
-  const recordVisit = useCallback(() => {
-    setVisitorCount((prev) => prev + 1);
-  }, []);
-
-  const recordView = useCallback(() => {
-    setProfileViews((prev) => prev + 1);
-  }, []);
-
   return (
     <ProfileContext.Provider
       value={{
@@ -146,10 +118,6 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
         toggleFollow,
         isRemoved,
         removeFollower,
-        visitorCount,
-        profileViews,
-        recordVisit,
-        recordView,
       }}
     >
       {children}

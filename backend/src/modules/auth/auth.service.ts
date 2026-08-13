@@ -44,7 +44,7 @@ export class AuthService {
     const existingUsername = await this.prisma.user.findUnique({ where: { username: dto.username.toLowerCase() } });
     if (existingUsername) throw new ConflictException('Username already taken');
 
-    const reservedNames = ['admin', 'system', 'support', 'nova', 'api', 'root', 'moderator', 'help'];
+    const reservedNames = ['admin', 'system', 'support', 'nova', 'novax', 'api', 'root', 'moderator', 'help'];
     if (reservedNames.includes(dto.username.toLowerCase())) {
       throw new ConflictException('Username is reserved');
     }

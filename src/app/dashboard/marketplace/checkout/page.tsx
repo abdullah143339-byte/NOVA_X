@@ -38,7 +38,7 @@ const PAYMENT_METHODS: { id: PaymentMethod; label: string; emoji: string; note: 
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { cart, cartSubtotal, couponDiscount, couponCode, placeOrder, prefs, notify } = useMarketplace();
+  const { cart, cartSubtotal, placeOrder, prefs, notify } = useMarketplace();
   const [delivery, setDelivery] = useState<DeliveryOption>("standard");
   const [payment, setPayment] = useState<PaymentMethod>("card");
   const [placing, setPlacing] = useState(false);
@@ -55,7 +55,7 @@ export default function CheckoutPage() {
   });
 
   const shipping = calcShipping(cartSubtotal, delivery);
-  const { tax, total } = calcTotals(cartSubtotal, couponDiscount, shipping);
+  const { tax, total } = calcTotals(cartSubtotal, 0, shipping);
 
   const formValid = useMemo(
     () =>
@@ -81,7 +81,6 @@ export default function CheckoutPage() {
         address: { ...form, zip: form.zip },
         payment,
         delivery,
-        couponCode: couponCode ?? undefined,
       });
       if (order) {
         setOrderId(order.id);
@@ -103,7 +102,7 @@ export default function CheckoutPage() {
         </div>
         <h1 className="text-2xl font-bold text-foreground">Order Confirmed!</h1>
         <p className="text-sm text-muted-foreground mt-2">
-          Thank you for shopping with NOVA Market. Your order <span className="font-semibold text-foreground">{orderId}</span> is
+          Thank you for shopping with NOVAX Market. Your order <span className="font-semibold text-foreground">{orderId}</span> is
           being processed.
         </p>
         <div className="flex items-center justify-center gap-3 mt-6">
@@ -281,12 +280,6 @@ export default function CheckoutPage() {
                 <span className="text-muted-foreground">Subtotal</span>
                 <span className="font-medium text-foreground">{formatPrice(cartSubtotal, prefs.currency)}</span>
               </div>
-              {couponDiscount > 0 && (
-                <div className="flex justify-between text-green-500">
-                  <span>Coupon ({couponCode})</span>
-                  <span>-{formatPrice(couponDiscount, prefs.currency)}</span>
-                </div>
-              )}
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Shipping</span>
                 <span className="font-medium text-foreground">{shipping === 0 ? "Free" : formatPrice(shipping, prefs.currency)}</span>

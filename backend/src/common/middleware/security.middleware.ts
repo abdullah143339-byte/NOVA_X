@@ -58,8 +58,8 @@ export class SecurityMiddleware implements NestMiddleware {
       }
     }
 
-    // Cleanup old entries every 1000 requests
-    if (Math.random() < 0.001) {
+    // Deterministic cleanup of expired entries to bound memory usage
+    if (RATE_LIMIT_STORE.size > 10000) {
       for (const [k, v] of RATE_LIMIT_STORE.entries()) {
         if (now > v.resetAt) RATE_LIMIT_STORE.delete(k);
       }

@@ -58,7 +58,7 @@ export class Enable2FADto {
 }
 
 export class Verify2FADto {
-  @ApiProperty({ example: '123456' })
+  @ApiProperty({ description: 'The 2FA verification code' })
   @IsString()
   code: string;
 

@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { MapPin, Calendar, Globe, Briefcase, Users, UserPlus, UserCheck, Send, Share2, Sparkles, PenLine, MessageCircle, ShoppingBag, Package } from "lucide-react";
 import { motion } from "framer-motion";
 import Button from "@/components/ui/Button";
@@ -139,14 +138,14 @@ export default function ProfileHeader({
         )}
 
         <div className="flex flex-wrap items-center gap-x-5 gap-y-3 mt-5">
-          <Link href="/dashboard/profile/followers" className="group" aria-label={`${counts.followers} followers`}>
-            <span className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">{formatCount(stats[0].value)}</span>{" "}
+          <span className="inline-flex items-center gap-1.5">
+            <span className="text-sm font-bold text-foreground">{formatCount(stats[0].value)}</span>{" "}
             <span className="text-xs text-muted-foreground">Followers</span>
-          </Link>
-          <Link href="/dashboard/profile/following" className="group" aria-label={`${counts.following} following`}>
-            <span className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">{formatCount(stats[1].value)}</span>{" "}
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="text-sm font-bold text-foreground">{formatCount(stats[1].value)}</span>{" "}
             <span className="text-xs text-muted-foreground">Following</span>
-          </Link>
+          </span>
           {stats.slice(2).map((s) => (
             <span key={s.label} className="inline-flex items-center gap-1.5">
               {s.label === "Communities" && <Users className="w-3.5 h-3.5 text-muted-foreground/60" />}

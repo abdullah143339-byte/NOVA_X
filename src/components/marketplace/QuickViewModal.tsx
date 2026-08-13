@@ -7,7 +7,7 @@ import Button from "@/components/ui/Button";
 import StarRating from "./StarRating";
 import PriceTag from "./PriceTag";
 import { useMarketplace } from "./MarketplaceProvider";
-import { getDiscount, getItemImages, getTypeColor, getTypeLabel } from "./format";
+import { getItemImages, getTypeColor, getTypeLabel } from "./format";
 import { cn } from "@/lib/utils";
 import type { MarketplaceItem } from "./types";
 
@@ -22,7 +22,6 @@ export default function QuickViewModal({ item, onClose }: QuickViewModalProps) {
   const [imgError, setImgError] = useState(false);
 
   const images = getItemImages(item);
-  const discount = getDiscount(item);
   const inCart = isInCart(item.id);
   const wished = isWishlisted(item.id);
   const currentImage = images[imageIndex];
@@ -75,7 +74,7 @@ export default function QuickViewModal({ item, onClose }: QuickViewModalProps) {
                 <span className="text-xs text-muted-foreground">· {item.salesCount ?? 0} sold</span>
               </div>
               <div className="mt-3">
-                <PriceTag price={item.price} currency={item.currency} discount={discount} />
+                <PriceTag price={item.price} currency={item.currency} />
               </div>
               <p className="text-sm text-muted-foreground mt-3 line-clamp-3">{item.description}</p>
 

@@ -378,22 +378,22 @@ export default function PostCard({ post, currentUserId, onDelete }: PostCardProp
             <motion.span animate={{ scale: isLiked ? [1, 1.3, 1] : 1 }} transition={{ duration: 0.3 }}>
               <Heart className={`w-4 h-4 ${isLiked ? "fill-red-500" : ""}`} />
             </motion.span>
-            Like
+            <span className="hidden sm:inline">Like</span>
           </button>
           <button onClick={loadComments} aria-label="Comment"
             className={`flex items-center gap-1.5 text-xs font-medium transition-all py-2 px-3 rounded-xl ${showComments ? "text-primary" : "text-muted-foreground hover:text-primary"} hover:bg-primary/5`}>
             <MessageCircle className="w-4 h-4" />
-            Comment
+            <span className="hidden sm:inline">Comment</span>
           </button>
           <button onClick={() => setShareOpen(true)} aria-label="Share"
             className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-accent py-2 px-3 rounded-xl hover:bg-accent/5 transition-all">
             <Share2 className="w-4 h-4" />
-            Share
+            <span className="hidden sm:inline">Share</span>
           </button>
           <button onClick={handleSend} aria-label="Send" title="Copy link"
             className={`flex items-center gap-1.5 text-xs font-medium py-2 px-3 rounded-xl transition-all ${copied ? "text-success" : "text-muted-foreground hover:text-primary"} hover:bg-primary/5`}>
             {copied ? <Check className="w-4 h-4" /> : <Send className="w-4 h-4" />}
-            Send
+            <span className="hidden sm:inline">Send</span>
           </button>
           <button onClick={toggleBookmark} aria-label="Bookmark"
             className={`flex items-center gap-1.5 text-xs font-medium py-2 px-3 rounded-xl transition-all ${isBookmarked ? "text-amber-500" : "text-muted-foreground hover:text-amber-500"} hover:bg-amber-500/5`}>

@@ -16,7 +16,7 @@ class ApiClient {
   }
 
   private getAuthHeaders(token?: string): Record<string, string> {
-    const stored = typeof window !== 'undefined' ? localStorage.getItem('nova_token') : null;
+    const stored = typeof window !== 'undefined' ? localStorage.getItem('novax_token') : null;
     const authToken = token || stored;
     return authToken ? { Authorization: `Bearer ${authToken}` } : {};
   }
@@ -25,7 +25,7 @@ class ApiClient {
     return /^\/auth\/(login|refresh|forgot-password|reset-password|2fa\/verify-login|password-reset|google|github)/.test(endpoint);
   }
 
-  // Refresh the access token using the HttpOnly `nova_refresh` cookie, once per
+  // Refresh the access token using the HttpOnly `novax_refresh` cookie, once per
   // burst of 401s. Returns the new token or null if the refresh failed.
   private tryRefresh(): Promise<string | null> {
     if (!this.refreshPromise) {
@@ -39,7 +39,7 @@ class ApiClient {
           if (!res.ok) return null;
           const data = await res.json();
           const token = data?.accessToken || data?.data?.accessToken || null;
-          if (token) localStorage.setItem('nova_token', token);
+          if (token) localStorage.setItem('novax_token', token);
           return token;
         })
         .catch(() => null)
@@ -94,7 +94,7 @@ class ApiClient {
   }
 
   async uploadFile(file: File, type: string, duration?: number) {
-    const token = localStorage.getItem('nova_token');
+    const token = localStorage.getItem('novax_token');
     const formData = new FormData();
     formData.append('file', file);
     formData.append('type', type);
@@ -137,7 +137,7 @@ class ApiClient {
   login(data: any) { return this.post('/auth/login', data); }
   verify2faLogin(tempToken: string, code: string) { return this.post('/auth/2fa/verify-login', { tempToken, code }); }
   refresh(refreshToken?: string) {
-    // Prefer the HttpOnly `nova_refresh` cookie; body token kept for backward compat.
+    // Prefer the HttpOnly `novax_refresh` cookie; body token kept for backward compat.
     return this.post('/auth/refresh', refreshToken ? { refreshToken } : {});
   }
   logout() { return this.post('/auth/logout'); }
@@ -182,7 +182,7 @@ class ApiClient {
       const xhr = new XMLHttpRequest();
       xhr.open('POST', `${this.baseUrl}/uploads/post-media`);
       xhr.withCredentials = true;
-      const token = typeof window !== 'undefined' ? localStorage.getItem('nova_token') : null;
+      const token = typeof window !== 'undefined' ? localStorage.getItem('novax_token') : null;
       if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
       xhr.upload.onprogress = (e) => {
         if (e.lengthComputable && onProgress) onProgress(Math.round((e.loaded / e.total) * 100));

@@ -34,10 +34,8 @@ import {
   getItemVideos,
   getTypeColor,
   getTypeLabel,
-  getDiscount,
   formatNumber,
 } from "@/components/marketplace/format";
-import { OFFICIAL_STORES } from "@/components/marketplace/catalog";
 import { cn } from "@/lib/utils";
 import type { MarketplaceItem } from "@/components/marketplace/types";
 
@@ -56,23 +54,6 @@ function extractItems(raw: unknown): MarketplaceItem[] {
   }
   return [];
 }
-
-interface ReviewSeed {
-  author: string;
-  rating: number;
-  title: string;
-  content: string;
-  date: string;
-  verified: boolean;
-}
-
-const REVIEW_SEEDS: ReviewSeed[] = [
-  { author: "Ayesha K.", rating: 5, title: "Exceeded expectations", content: "Exactly what I was looking for. Great quality and the seller responded quickly.", date: "2 days ago", verified: true },
-  { author: "Bilal R.", rating: 5, title: "Highly recommend", content: "Very professional product. The documentation is thorough and easy to follow.", date: "1 week ago", verified: true },
-  { author: "Fatima S.", rating: 4, title: "Really good", content: "Solid product overall. Would love to see a few more examples included.", date: "2 weeks ago", verified: true },
-  { author: "Hassan M.", rating: 5, title: "Worth every cent", content: "Saved me hours of work. The quality is top notch.", date: "3 weeks ago", verified: false },
-  { author: "Zara A.", rating: 4, title: "Great value", content: "Very good for the price. Customer support was helpful when I had questions.", date: "1 month ago", verified: true },
-];
 
 export default function ProductDetailClient() {
   const { id } = useParams<{ id: string }>();
@@ -119,14 +100,6 @@ export default function ProductDetailClient() {
   const wished = isWishlisted(item?.id ?? "");
   const compared = isCompared(item?.id ?? "");
   const inCart = isInCart(item?.id ?? "");
-  const discount = getDiscount(item);
-  const store = useMemo(() => OFFICIAL_STORES[(item?.id.length ?? 0) % OFFICIAL_STORES.length], [item]);
-
-  const reviews = useMemo(() => {
-    if (!item) return [];
-    const start = (item.id.charCodeAt(0) + item.id.length) % REVIEW_SEEDS.length;
-    return Array.from({ length: 5 }).map((_, i) => REVIEW_SEEDS[(start + i) % REVIEW_SEEDS.length]);
-  }, [item]);
 
   const specs = useMemo(() => {
     if (!item) return [];
@@ -159,7 +132,7 @@ export default function ProductDetailClient() {
   const handleShare = () => {
     const url = window.location.href;
     if (navigator.share) {
-      navigator.share({ title: item?.title ?? "NOVA Market", url }).catch(() => {});
+      navigator.share({ title: item?.title ?? "NOVAX Market", url }).catch(() => {});
     } else {
       window.navigator.clipboard?.writeText(url).then(() => notify("Link copied to clipboard", "info")).catch(() => {});
     }
@@ -226,9 +199,6 @@ export default function ProductDetailClient() {
                 <span className="text-8xl">{item.type === "SERVICE" ? "🛠️" : item.type === "AI_MODEL" ? "🤖" : "📦"}</span>
               </div>
             )}
-            {discount > 0 && (
-              <span className="absolute top-3 left-3 px-2 py-1 rounded-md bg-red-500 text-white text-xs font-bold">-{discount}% OFF</span>
-            )}
           </div>
 
           {images.length > 1 && (
@@ -288,7 +258,7 @@ export default function ProductDetailClient() {
           </div>
 
           <div className="mt-4">
-            <PriceTag price={item.price} currency={item.currency} discount={discount} className="[&>span:first-child]:text-3xl" />
+            <PriceTag price={item.price} currency={item.currency} className="[&>span:first-child]:text-3xl" />
           </div>
 
           <p className="text-sm text-muted-foreground mt-4 leading-relaxed">{item.description}</p>
@@ -305,7 +275,7 @@ export default function ProductDetailClient() {
               <ShieldCheck className="w-4 h-4 text-primary shrink-0 mt-0.5" />
               <div>
                 <p className="text-xs font-medium text-foreground">Secure Payment</p>
-                <p className="text-[10px] text-muted-foreground">Protected by NOVA Pay</p>
+                <p className="text-[10px] text-muted-foreground">Protected by NOVAX Pay</p>
               </div>
             </div>
             <div className="flex items-start gap-2 rounded-xl bg-muted/40 p-3">
@@ -375,15 +345,15 @@ export default function ProductDetailClient() {
           {/* Seller card */}
           <div className="mt-6 p-4 rounded-2xl border border-border bg-surface/40">
             <div className="flex items-center gap-3">
-              <div className={cn("w-12 h-12 rounded-xl bg-gradient-to-br flex items-center justify-center text-xl", store.gradient)}>
-                {store.emoji}
+              <div className="w-12 h-12 rounded-xl bg-gradient-primary flex items-center justify-center">
+                <Store className="w-5 h-5 text-white" />
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-bold text-foreground flex items-center gap-1.5">
-                  <Store className="w-3.5 h-3.5 text-muted-foreground" /> {store.name}
-                  {store.verified && <BadgeCheck className="w-3.5 h-3.5 text-primary" />}
+                  NOVAX Seller
+                  <BadgeCheck className="w-3.5 h-3.5 text-primary" />
                 </p>
-                <p className="text-[11px] text-muted-foreground">⭐ {store.rating} · {store.followers.toLocaleString()} followers · ~1 hr response</p>
+                <p className="text-[11px] text-muted-foreground">{item.sellerId ? `Seller ID: ${item.sellerId}` : "Verified marketplace seller"}</p>
               </div>
             </div>
             {item.contact && (
@@ -449,34 +419,12 @@ export default function ProductDetailClient() {
           <h2 className="text-base font-bold text-foreground flex items-center gap-2">
             <Star className="w-4 h-4 text-amber-500 fill-amber-500" /> Customer Reviews
           </h2>
-          <span className="text-sm text-muted-foreground">{(item.reviewCount ?? 0) + 5} total</span>
+          <span className="text-sm text-muted-foreground">{item.reviewCount ?? 0} total</span>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {reviews.map((r, i) => (
-            <div key={i} className="rounded-xl bg-muted/40 p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-lg bg-gradient-primary flex items-center justify-center text-white text-xs font-bold">
-                    {r.author[0]}
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-foreground">{r.author}</p>
-                    <div className="flex items-center gap-1.5">
-                      <StarRating rating={r.rating} showCount={false} />
-                      {r.verified && (
-                        <span className="text-[9px] font-medium text-green-500 flex items-center gap-0.5">
-                          <BadgeCheck className="w-3 h-3" /> Verified Purchase
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <span className="text-[10px] text-muted-foreground">{r.date}</span>
-              </div>
-              <p className="text-sm font-semibold text-foreground mt-3">{r.title}</p>
-              <p className="text-xs text-muted-foreground mt-1">{r.content}</p>
-            </div>
-          ))}
+        <div className="text-center py-8 rounded-xl bg-muted/40">
+          <MessageSquare className="w-8 h-8 text-muted-foreground/40 mx-auto mb-2" />
+          <p className="text-sm text-foreground font-medium">No reviews yet</p>
+          <p className="text-xs text-muted-foreground mt-1">Reviews from verified purchases will appear here.</p>
         </div>
       </div>
 

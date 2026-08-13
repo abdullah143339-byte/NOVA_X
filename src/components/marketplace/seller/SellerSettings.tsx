@@ -7,7 +7,7 @@ interface SellerSettingsProps {
   onSave: () => void;
 }
 
-const CONTACT_KEY = "nova_store_contact";
+const CONTACT_KEY = "novax_store_contact";
 const INPUT_CLASS =
   "w-full h-10 rounded-xl bg-muted border border-border px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all";
 const TEXTAREA_CLASS =

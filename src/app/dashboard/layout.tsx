@@ -45,7 +45,7 @@ export default function DashboardLayout({
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-8 h-8 text-primary animate-spin mx-auto mb-4" />
-          <p className="text-sm text-muted-foreground">Loading NOVA AI...</p>
+          <p className="text-sm text-muted-foreground">Loading NOVAX...</p>
         </div>
       </div>
     );
@@ -58,12 +58,12 @@ export default function DashboardLayout({
       <Sidebar />
       <MobileNav />
 
-      <div className="lg:pl-64 pt-14 lg:pt-0 pb-20 lg:pb-0">
+      <div className="md:pl-16 lg:pl-64 pt-14 lg:pt-0 pb-20 md:pb-0">
         <header className="hidden lg:flex items-center justify-between px-8 h-16 border-b border-border bg-surface/30 backdrop-blur-md">
           <div className="flex items-center gap-3">
             <Link href="/dashboard/search" className="flex items-center gap-2 px-4 py-2 rounded-xl bg-muted/50 text-muted-foreground text-sm hover:bg-muted transition-all">
               <Search className="w-4 h-4" />
-              Search NOVA AI...
+              Search NOVAX...
               <kbd className="hidden sm:inline px-1.5 py-0.5 rounded-md bg-background text-[10px] text-muted-foreground border border-border">
                 ⌘K
               </kbd>

@@ -41,7 +41,7 @@ export default function ComparePage() {
         <table className="w-full min-w-[640px] border-separate border-spacing-0">
           <thead>
             <tr>
-              <th className="text-left text-xs font-semibold text-muted-foreground p-3 w-32">Product</th>
+              <th className="text-left text-xs font-semibold text-muted-foreground p-3 w-32 sticky left-0 z-10 bg-background">Product</th>
               {compare.map((item) => (
                 <th key={item.id} className="p-3 text-left align-top w-40">
                   <div className="relative">
@@ -95,7 +95,7 @@ export default function ComparePage() {
               } },
             ].map((row) => (
               <tr key={row.label}>
-                <td className="p-3 border-t border-border text-xs font-semibold text-muted-foreground">{row.label}</td>
+                <td className="p-3 border-t border-border text-xs font-semibold text-muted-foreground sticky left-0 z-10 bg-background">{row.label}</td>
                 {compare.map((item) => (
                   <td key={item.id} className="p-3 border-t border-border align-top">
                     {row.render(item)}

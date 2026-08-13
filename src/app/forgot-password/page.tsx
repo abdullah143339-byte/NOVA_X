@@ -6,10 +6,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+import Logo from "@/components/ui/Logo";
 import api from "@/lib/api";
 import {
   Mail,
-  Sparkles,
   ArrowLeft,
   Send,
   Loader2,
@@ -115,11 +115,9 @@ export default function ForgotPasswordPage() {
           style={{ background: "rgba(23, 27, 34, 0.85)" }}
         >
           <div className="text-center mb-8">
-            <Link href="/" className="inline-flex items-center gap-2.5 mb-6" aria-label="NOVA AI home">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "linear-gradient(135deg, #6C63FF, #7C3AED)" }}>
-                <Sparkles className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-xl font-bold tracking-tight text-white">NOVA AI</span>
+            <Link href="/" className="inline-flex items-center gap-2.5 mb-6" aria-label="NOVAX home">
+              <Logo size={40} rounded="rounded-xl" />
+              <span className="text-xl font-bold tracking-tight text-white">NOVAX</span>
             </Link>
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
               {step === "otp" ? "Verify your identity" : "Reset password"}

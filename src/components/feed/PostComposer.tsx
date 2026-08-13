@@ -164,7 +164,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
             </div>
           )}
 
-          <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
+          <div className="flex flex-wrap items-center justify-between gap-2 mt-3 pt-3 border-t border-border">
             <div className="flex items-center gap-0.5">
               <button onClick={() => photoInputRef.current?.click()} aria-label="Add photo" title="Photo"
                 className="p-2 rounded-xl text-primary hover:bg-primary/10 transition-all">
@@ -252,7 +252,7 @@ export default function PostComposer({ onPostCreated }: PostComposerProps) {
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
                   <Sparkles className="w-5 h-5 text-pink-500" />
-                  Generate with NOVA AI
+                  Generate with NOVAX
                 </h3>
                 <button onClick={() => setAiModal(false)} className="p-1.5 rounded-lg hover:bg-muted" aria-label="Close">
                   <X className="w-5 h-5" />
