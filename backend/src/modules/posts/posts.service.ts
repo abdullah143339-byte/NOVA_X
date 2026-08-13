@@ -26,6 +26,25 @@ export class PostsService {
     });
   }
 
+  async reportPost(reporterId: string, postId: string, reason: string, description?: string) {
+    const post = await this.prisma.post.findUnique({ where: { id: postId } });
+    if (!post) throw new NotFoundException('Post not found');
+
+    const reasonValue = (reason || 'OTHER').toUpperCase().replace(/[ -]/g, '_');
+    const valid = ['SPAM', 'HARASSMENT', 'HATE_SPEECH', 'VIOLENCE', 'MISINFORMATION', 'COPYRIGHT', 'SELF_HARM', 'NUDITY', 'SCAM', 'OTHER'];
+    const normalized = valid.includes(reasonValue) ? reasonValue : 'OTHER';
+
+    return this.prisma.report.create({
+      data: {
+        reporterId,
+        targetType: 'POST',
+        targetId: postId,
+        reason: normalized as any,
+        description: description || null,
+      },
+    });
+  }
+
   // Public, no-auth reels feed for guests (TikTok-style landing). Supports
   // "trending" (most reactions) and "latest" ordering.
   async getPublicReels(page = 1, limit = 8, sort?: string) {

@@ -29,13 +29,14 @@ interface ChatDetailsProps {
   messages: ChatMessage[];
   open: boolean;
   onClose: () => void;
+  onAction?: (action: "mute" | "block" | "report" | "clear" | "delete") => void;
 }
 
 function initials(name: string): string {
   return name.split(/\s+/).filter(Boolean).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
 }
 
-export default function ChatDetails({ conversation: conv, currentUserId, online, messages, open, onClose }: ChatDetailsProps) {
+export default function ChatDetails({ conversation: conv, currentUserId, online, messages, open, onClose, onAction }: ChatDetailsProps) {
   const other = conv.participants.find((p) => p.userId !== currentUserId)?.user;
   const verified = conv.type === "DIRECT" ? isVerifiedUser(other) : false;
   const isGroup = conv.type === "GROUP";
@@ -59,11 +60,11 @@ export default function ChatDetails({ conversation: conv, currentUserId, online,
   }, [messages]);
 
   const actions = [
-    { icon: BellOff, label: "Mute", note: "Coming soon", enabled: false },
-    { icon: ShieldOff, label: "Block", note: "Coming soon", enabled: false },
-    { icon: Flag, label: "Report", note: "Coming soon", enabled: false },
-    { icon: Trash2, label: "Clear Chat", note: "Coming soon", enabled: false },
-    { icon: Trash2, label: "Delete Chat", note: "Coming soon", enabled: false, danger: true },
+    { id: "mute" as const, icon: BellOff, label: "Mute", note: "Stop notifications", enabled: true },
+    { id: "block" as const, icon: ShieldOff, label: "Block", note: "Block this contact", enabled: false },
+    { id: "report" as const, icon: Flag, label: "Report", note: "Report this chat", enabled: false },
+    { id: "clear" as const, icon: Trash2, label: "Clear Chat", note: "Delete all messages", enabled: true },
+    { id: "delete" as const, icon: Trash2, label: "Delete Chat", note: "Remove conversation", enabled: true, danger: true },
   ];
 
   return (
@@ -232,6 +233,12 @@ export default function ChatDetails({ conversation: conv, currentUserId, online,
                   <button
                     key={a.label}
                     title={a.note}
+                    onClick={() => {
+                      if (onAction) {
+                        onAction(a.id);
+                        onClose();
+                      }
+                    }}
                     className={cn(
                       "w-full flex items-center gap-2.5 px-3 h-9 rounded-xl text-sm transition-colors",
                       a.danger ? "text-red-500 hover:bg-red-500/10" : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
@@ -243,9 +250,8 @@ export default function ChatDetails({ conversation: conv, currentUserId, online,
                   </button>
                 ))}
               </div>
-              {/* TODO(backend): mute/pin/archive/block/report/clear/delete endpoints for
-                  ConversationParticipant + Conversation are not implemented yet. Wire the above
-                  actions when those exist. */}
+              {/* TODO(backend): block/report endpoints for conversations are not implemented yet.
+                  mute/clear/delete are handled locally until server-side routes exist. */}
             </div>
           </motion.aside>
         </>

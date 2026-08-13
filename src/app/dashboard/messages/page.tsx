@@ -692,6 +692,26 @@ export default function MessagesPage() {
             messages={messages}
             open={detailsOpen}
             onClose={() => setDetailsOpen(false)}
+            onAction={(action) => {
+              const convId = activeConv.id;
+              if (action === "mute") {
+                setConversations((prev) => prev.map((c) => (c.id === convId ? { ...c, isMuted: !c.isMuted } : c)));
+              } else if (action === "clear") {
+                if (confirm("Clear all messages in this chat?")) {
+                  setMessages([]);
+                }
+              } else if (action === "delete") {
+                if (confirm("Delete this conversation?")) {
+                  setConversations((prev) => prev.filter((c) => c.id !== convId));
+                  setMessages([]);
+                  setActiveId(null);
+                  setDetailsOpen(false);
+                  setMobileView("list");
+                }
+              } else if (action === "block" || action === "report") {
+                alert(`TODO(backend): the ${action} endpoint isn't implemented on the server yet.`);
+              }
+            }}
           />
         )}
       </div>

@@ -32,9 +32,9 @@ const TYPE_COLORS: Record<string, string> = {
 };
 
 const featuredDeals = [
-  { title: "AI Engineering Bundle", discount: 40, color: "from-primary/20 to-accent/20", emoji: "🚀" },
-  { title: "Design System Pro", discount: 25, color: "from-amber-500/10 to-orange-500/10", emoji: "🎨" },
-  { title: "Starter Kits Sale", discount: 50, color: "from-emerald-500/10 to-teal-500/10", emoji: "⚡" },
+  { title: "AI Engineering Bundle", discount: 40, color: "from-primary/20 to-accent/20", emoji: "🚀", category: "AI Models" },
+  { title: "Design System Pro", discount: 25, color: "from-amber-500/10 to-orange-500/10", emoji: "🎨", category: "Digital Art" },
+  { title: "Starter Kits Sale", discount: 50, color: "from-emerald-500/10 to-teal-500/10", emoji: "⚡", category: "Templates" },
 ];
 
 const categories = [
@@ -187,15 +187,22 @@ export default function MarketplacePage() {
           {/* Featured Deals Banner */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {featuredDeals.map((deal, i) => (
-              <div key={i} className={`rounded-2xl p-5 bg-gradient-to-r ${deal.color} border border-border/50 relative overflow-hidden group cursor-pointer hover-glow`}>
+              <button
+                key={i}
+                onClick={() => { setActiveCategory(deal.category); setSearchQuery(""); }}
+                className={`rounded-2xl p-5 bg-gradient-to-r ${deal.color} border border-border/50 relative overflow-hidden group cursor-pointer hover-glow text-left`}
+              >
                 <span className="text-3xl mb-2 block">{deal.emoji}</span>
                 <p className="text-sm font-semibold text-foreground">{deal.title}</p>
                 <div className="flex items-center gap-1.5 mt-1">
                   <Percent className="w-3.5 h-3.5 text-red-500" />
                   <span className="text-lg font-bold text-red-500">-{deal.discount}%</span>
                 </div>
+                <span className="text-[10px] text-muted-foreground mt-2 inline-block group-hover:text-primary transition-colors">
+                  Shop {deal.category} →
+                </span>
                 <div className="absolute -bottom-4 -right-4 w-20 h-20 rounded-full bg-foreground/5" />
-              </div>
+              </button>
             ))}
           </div>
 

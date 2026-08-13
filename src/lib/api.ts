@@ -222,6 +222,7 @@ class ApiClient {
 
   // Share
   sharePost(postId: string, platform?: string) { return this.post(`/posts/${postId}/share`, { platform }); }
+  reportPost(postId: string, reason: string, description?: string) { return this.post(`/posts/${postId}/report`, { reason, description }); }
 
   // Notifications
   getNotifications(page = 1) { return this.get(`/notifications?page=${page}`); }

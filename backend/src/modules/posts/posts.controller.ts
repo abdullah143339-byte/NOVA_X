@@ -92,4 +92,11 @@ export class PostsController {
   async sharePost(@CurrentUser('id') userId: string, @Param('id') postId: string, @Body('platform') platform?: string) {
     return ApiResponseDto.ok(await this.postsService.sharePost(userId, postId, platform));
   }
+
+  @Post(':id/report')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  async reportPost(@CurrentUser('id') userId: string, @Param('id') postId: string, @Body() body: any) {
+    return ApiResponseDto.ok(await this.postsService.reportPost(userId, postId, body?.reason || 'OTHER', body?.description), 'Post reported');
+  }
 }

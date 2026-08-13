@@ -72,6 +72,9 @@ export function ProjectDetailView({ id }: { id: string }) {
   const [aiOpen, setAiOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [reportReason, setReportReason] = useState("Spam or misleading content");
+  const [reportDetail, setReportDetail] = useState("");
+  const [reportSubmitting, setReportSubmitting] = useState(false);
+  const [reportSent, setReportSent] = useState(false);
   const [origin, setOrigin] = useState("");
   const [deleting, setDeleting] = useState(false);
   const [contactMsg, setContactMsg] = useState("");
@@ -156,8 +159,18 @@ export function ProjectDetailView({ id }: { id: string }) {
   }, [project]);
 
   const handleFollow = useCallback(() => {
-    setSocial((prev) => ({ ...prev, followed: !prev.followed }));
-  }, []);
+    if (!project) return;
+    const prev = social.followed;
+    setSocial((s) => ({ ...s, followed: !s.followed }));
+    if (project.creator.id) {
+      void api.followUser(project.creator.id)
+        .then((res) => {
+          const next = res?.data?.following ?? !prev;
+          setSocial((s) => ({ ...s, followed: next }));
+        })
+        .catch(() => setSocial((s) => ({ ...s, followed: prev })));
+    }
+  }, [project, social.followed]);
 
   const addComment = useCallback(
     async (content: string) => {
@@ -575,32 +588,61 @@ export function ProjectDetailView({ id }: { id: string }) {
 
       <ShareSheet open={shareOpen} onClose={() => setShareOpen(false)} title={project.title} url={`${origin}/dashboard/projects/${project.id}`} />
       {aiOpen && <ProjectAIAssistant project={project} open={aiOpen} onClose={() => setAiOpen(false)} />}
-      <Modal open={reportOpen} onClose={() => setReportOpen(false)} title="Report this project">
-        <div className="space-y-3">
-          <select
-            value={reportReason}
-            onChange={(e) => setReportReason(e.target.value)}
-            aria-label="Reason"
-            className="w-full h-10 px-3 rounded-xl bg-muted border border-border text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-          >
-            {["Spam or misleading content", "Inappropriate content", "Stolen / copied work", "Harassment", "Other"].map((r) => (
-              <option key={r} value={r}>
-                {r}
-              </option>
-            ))}
-          </select>
-          <textarea
-            rows={3}
-            placeholder="Add details (optional)"
-            className="w-full rounded-xl bg-muted border border-border p-3 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/50"
-          />
-          <Button size="sm" variant="danger" className="w-full" onClick={() => { setReportOpen(false); }}>
-            <Flag className="w-3.5 h-3.5" /> Submit Report
-          </Button>
-          <p className="text-[11px] text-muted-foreground">
-            {project.source === "post" ? "Your report is tracked and moderators review it." : "TODO: wire to backend reports endpoint when the public reporting API ships."}
-          </p>
-        </div>
+      <Modal open={reportOpen} onClose={() => { setReportOpen(false); setReportSent(false); setReportDetail(""); }} title={reportSent ? "Report submitted" : "Report this project"}>
+        {reportSent ? (
+          <div className="text-center py-6 space-y-3">
+            <div className="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center mx-auto">
+              <CheckCircle2 className="w-6 h-6 text-green-500" />
+            </div>
+            <p className="text-sm font-medium text-foreground">Thanks — your report was submitted for review.</p>
+            <Button size="sm" variant="secondary" onClick={() => { setReportOpen(false); setReportSent(false); setReportDetail(""); }}>Close</Button>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <select
+              value={reportReason}
+              onChange={(e) => setReportReason(e.target.value)}
+              aria-label="Reason"
+              className="w-full h-10 px-3 rounded-xl bg-muted border border-border text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+            >
+              {["Spam or misleading content", "Inappropriate content", "Stolen / copied work", "Harassment", "Other"].map((r) => (
+                <option key={r} value={r}>
+                  {r}
+                </option>
+              ))}
+            </select>
+            <textarea
+              rows={3}
+              value={reportDetail}
+              onChange={(e) => setReportDetail(e.target.value)}
+              placeholder="Add details (optional)"
+              className="w-full rounded-xl bg-muted border border-border p-3 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
+            />
+            <Button
+              size="sm"
+              variant="danger"
+              className="w-full"
+              disabled={reportSubmitting}
+              onClick={async () => {
+                setReportSubmitting(true);
+                try {
+                  if (project.postId) {
+                    await api.reportPost(project.postId, reportReason, reportDetail.trim() || undefined);
+                  } else {
+                    throw new Error("no-post");
+                  }
+                  setReportSent(true);
+                } catch {
+                  alert("TODO(backend): could not submit the report — please try again later.");
+                } finally {
+                  setReportSubmitting(false);
+                }
+              }}
+            >
+              <Flag className="w-3.5 h-3.5" /> {reportSubmitting ? "Submitting..." : "Submit Report"}
+            </Button>
+          </div>
+        )}
       </Modal>
     </div>
   );

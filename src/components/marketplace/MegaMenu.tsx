@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ChevronDown, Menu, ChevronRight, Sparkles, Package, Handshake } from "lucide-react";
 import { MEGA_CATEGORIES } from "./catalog";
 import { cn } from "@/lib/utils";
@@ -11,6 +12,7 @@ interface MegaMenuProps {
 }
 
 export default function MegaMenu({ location }: MegaMenuProps) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(MEGA_CATEGORIES[0].id);
   const closeTimer = useRef<number | null>(null);
@@ -48,6 +50,7 @@ export default function MegaMenu({ location }: MegaMenuProps) {
                   onMouseEnter={() => setActive(cat.id)}
                   onClick={() => {
                     setOpen(false);
+                    router.push(`/dashboard/marketplace/search?q=${encodeURIComponent(cat.label)}`);
                   }}
                   className={cn(
                     "w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm transition-all text-left",
