@@ -24,6 +24,7 @@ interface ProfileHeaderProps {
   onAi: () => void;
   onEditAvatar: () => void;
   onEditCover: () => void;
+  onViewList?: (kind: "followers" | "following") => void;
   gradient: string;
   accent: string;
   initials: string;
@@ -43,6 +44,7 @@ export default function ProfileHeader({
   onAi,
   onEditAvatar,
   onEditCover,
+  onViewList,
   gradient,
   accent,
   initials,
@@ -147,14 +149,20 @@ export default function ProfileHeader({
         )}
 
         <div className="flex flex-wrap items-center gap-x-5 gap-y-3 mt-5">
-          <span className="inline-flex items-center gap-1.5">
+          <button
+            onClick={() => onViewList?.("followers")}
+            className="inline-flex items-center gap-1.5 hover:opacity-80 transition-opacity"
+          >
             <span className="text-sm font-bold text-foreground">{formatCount(stats[0].value)}</span>{" "}
             <span className="text-xs text-muted-foreground">Followers</span>
-          </span>
-          <span className="inline-flex items-center gap-1.5">
+          </button>
+          <button
+            onClick={() => onViewList?.("following")}
+            className="inline-flex items-center gap-1.5 hover:opacity-80 transition-opacity"
+          >
             <span className="text-sm font-bold text-foreground">{formatCount(stats[1].value)}</span>{" "}
             <span className="text-xs text-muted-foreground">Following</span>
-          </span>
+          </button>
           {stats.slice(2).map((s) => (
             <span key={s.label} className="inline-flex items-center gap-1.5">
               {s.label === "Communities" && <Users className="w-3.5 h-3.5 text-muted-foreground/60" />}

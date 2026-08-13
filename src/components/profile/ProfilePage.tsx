@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { SlidersHorizontal, FileDown, Printer, RefreshCw, AlertTriangle } from "lucide-react";
+import { SlidersHorizontal, FileDown, Printer, RefreshCw, AlertTriangle, Users, Loader2, X } from "lucide-react";
 import api from "@/lib/api";
 import { useAuth } from "@/providers/AuthProvider";
 import { useProfile } from "./ProfileProvider";
@@ -14,6 +14,7 @@ import EditProfileModal from "./EditProfileModal";
 import AiPanel from "./AiPanel";
 import CustomizeModal from "./CustomizeModal";
 import ShareProfileModal from "./ShareProfileModal";
+import Button from "@/components/ui/Button";
 import PostsTab from "./PostsTab";
 import ReelsTab from "./ReelsTab";
 import MediaTab from "./MediaTab";
@@ -132,6 +133,7 @@ export default function ProfilePage() {
   const [customizeOpen, setCustomizeOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const [listModal, setListModal] = useState<"followers" | "following" | null>(null);
 
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
@@ -526,6 +528,7 @@ export default function ProfilePage() {
         onAi={() => setAiOpen(true)}
         onEditAvatar={() => avatarInputRef.current?.click()}
         onEditCover={() => coverInputRef.current?.click()}
+        onViewList={setListModal}
         gradient={theme.gradient}
         accent={accent}
         initials={initials}
@@ -593,6 +596,94 @@ export default function ProfilePage() {
       />
       <CustomizeModal open={customizeOpen} onClose={() => setCustomizeOpen(false)} />
       <ShareProfileModal open={shareOpen} onClose={() => setShareOpen(false)} username={profile.username} accent={accent} notify={notify} />
+      <FollowerListModal kind={listModal} onClose={() => setListModal(null)} username={profile.username} notify={notify} />
+    </div>
+  );
+}
+
+function FollowerListModal({
+  kind,
+  onClose,
+  username,
+  notify,
+}: {
+  kind: "followers" | "following" | null;
+  onClose: () => void;
+  username: string;
+  notify: (msg: string, type?: "success" | "info" | "error") => void;
+}) {
+  const [users, setUsers] = useState<{ id: string; username: string; displayName: string; avatar?: string }[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!kind) return;
+    setLoading(true);
+    setUsers([]);
+    const t = window.setTimeout(() => {
+      // TODO(backend): no `GET /users/:username/followers` or `/following` endpoint exists yet.
+      setLoading(false);
+    }, 600);
+    return () => window.clearTimeout(t);
+  }, [kind, username]);
+
+  if (!kind) return null;
+
+  const title = kind === "followers" ? "Followers" : "Following";
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={onClose}>
+      <div className="w-full max-w-sm" onClick={(e) => e.stopPropagation()}>
+        <div className="glass rounded-2xl overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+            <h3 className="font-semibold text-foreground">@{username} — {title}</h3>
+            <button
+              onClick={onClose}
+              aria-label="Close"
+              className="w-7 h-7 rounded-lg bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="p-4">
+            {loading ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="w-6 h-6 text-primary animate-spin" />
+              </div>
+            ) : users.length > 0 ? (
+              <div className="space-y-1">
+                {users.map((u) => (
+                  <button
+                    key={u.id}
+                    onClick={() => { onClose(); window.location.href = `/dashboard/profile?u=${encodeURIComponent(u.username)}`; }}
+                    className="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-muted/60 transition-colors"
+                  >
+                    <div className="w-9 h-9 rounded-xl bg-gradient-primary flex items-center justify-center text-white text-xs font-bold overflow-hidden">
+                      {u.avatar ? <img src={u.avatar} alt="" className="w-full h-full object-cover" /> : (u.displayName || u.username).slice(0, 2).toUpperCase()}
+                    </div>
+                    <div className="text-left min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{u.displayName}</p>
+                      <p className="text-xs text-muted-foreground">@{u.username}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <Users className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
+                <p className="text-sm font-medium text-foreground">Can&apos;t load {title.toLowerCase()} yet</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  The backend doesn&apos;t expose a {title.toLowerCase()} list endpoint yet.
+                </p>
+                <Button size="sm" variant="secondary" className="mt-4" onClick={() => {
+                  notify(`${title} list endpoint not available on the backend yet`, "info");
+                }}>
+                  Notify me
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
