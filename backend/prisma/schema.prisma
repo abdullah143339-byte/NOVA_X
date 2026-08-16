@@ -315,6 +315,10 @@ model Post {
   viewCount       Int      @default(0) @map("view_count")
   aiScore         Float?   @map("ai_score")
   trendingScore   Float?   @map("trending_score")
+  location        String?
+  allowComments   Boolean  @default(true) @map("allow_comments")
+  allowRemix      Boolean  @default(true) @map("allow_remix")
+  allowDownload   Boolean  @default(true) @map("allow_download")
   publishedAt     DateTime? @map("published_at")
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")

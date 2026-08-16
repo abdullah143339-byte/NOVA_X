@@ -10,7 +10,7 @@ export class PostsService {
     private notificationsService: NotificationsService,
   ) {}
 
-  async create(authorId: string, data: { content: string; title?: string; type?: string; tags?: string[]; visibility?: string; media?: any[] }) {
+  async create(authorId: string, data: { content: string; title?: string; type?: string; tags?: string[]; visibility?: string; media?: any[]; location?: string; allowComments?: boolean; allowRemix?: boolean; allowDownload?: boolean; scheduledAt?: string }) {
     return this.prisma.post.create({
       data: {
         authorId,
@@ -20,7 +20,11 @@ export class PostsService {
         visibility: (data.visibility as any) || 'PUBLIC',
         tags: JSON.stringify(data.tags || []),
         media: data.media || undefined,
-        publishedAt: new Date(),
+        location: data.location || null,
+        allowComments: data.allowComments ?? true,
+        allowRemix: data.allowRemix ?? true,
+        allowDownload: data.allowDownload ?? true,
+        publishedAt: data.scheduledAt ? new Date(data.scheduledAt) : new Date(),
       },
       include: { author: { select: { id: true, username: true, displayName: true, avatar: true } } },
     });
@@ -49,7 +53,7 @@ export class PostsService {
   // "trending" (most reactions) and "latest" ordering.
   async getPublicReels(page = 1, limit = 8, sort?: string) {
     const skip = (page - 1) * limit;
-    const where: any = { deletedAt: null, type: 'VIDEO', visibility: 'PUBLIC' };
+    const where: any = { deletedAt: null, type: 'VIDEO', visibility: 'PUBLIC', publishedAt: { lte: new Date() } };
     const orderBy: any = sort === 'trending'
       ? [{ reactionsCount: 'desc' as const }, { trendingScore: 'desc' as const }]
       : { createdAt: 'desc' as const };
@@ -85,6 +89,7 @@ export class PostsService {
     const followingIds = following.map((f) => f.followingId);
     const where: any = {
       deletedAt: null,
+      publishedAt: { lte: new Date() },
       OR: [
         { authorId: { in: followingIds } },
         { visibility: 'PUBLIC' },
