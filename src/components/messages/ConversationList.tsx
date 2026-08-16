@@ -17,7 +17,7 @@ interface ConversationListProps {
   error: boolean;
   connected: boolean;
   onlineIds: Set<string>;
-  typingMap: Record<string, string>;
+  typingMap: Record<string, Record<string, string>>;
   onSearch: (q: string) => void;
   onToggleUnread: () => void;
   onSelect: (id: string) => void;
@@ -241,7 +241,7 @@ export default function ConversationList({
                     active={activeId === c.id}
                     currentUserId={currentUserId}
                     online={onlineIds.has(c.participants.find((p) => p.userId !== currentUserId)?.userId || "")}
-                    typingName={typingMap[c.id]}
+typingName={Object.values(typingMap[c.id] || {}).join(" and ") || undefined}
                     onSelect={() => onSelect(c.id)}
                   />
                 ))}
@@ -258,7 +258,7 @@ export default function ConversationList({
                   active={activeId === c.id}
                   currentUserId={currentUserId}
                   online={onlineIds.has(c.participants.find((p) => p.userId !== currentUserId)?.userId || "")}
-                  typingName={typingMap[c.id]}
+                  typingName={Object.values(typingMap[c.id] || {}).join(" and ") || undefined}
                   onSelect={() => onSelect(c.id)}
                 />
               ))}

@@ -4,8 +4,9 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/providers/AuthProvider";
 import api from "@/lib/api";
+import { getSocket } from "@/lib/socket";
 import { useRouter } from "next/navigation";
-import { Loader2, Send, Link2, X, RefreshCw, Mic, Volume2, Video, Phone } from "lucide-react";
+import { Loader2, Send, Link2, X, RefreshCw, Mic, Volume2, Video, Phone, ShieldOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useMessagesSocket } from "@/components/messages/useMessagesSocket";
 import ConversationList from "@/components/messages/ConversationList";
@@ -16,6 +17,7 @@ import MessageInput from "@/components/messages/MessageInput";
 import ChatDetails from "@/components/messages/ChatDetails";
 import MediaViewer from "@/components/messages/MediaViewer";
 import AiPanel from "@/components/messages/AiPanel";
+import CallOverlay from "@/components/messages/CallOverlay";
 import type {
   ChatMessage,
   Conversation,
@@ -129,29 +131,29 @@ export default function MessagesPage() {
   const [mobileView, setMobileView] = useState<"list" | "chat">("list");
   const [sending, setSending] = useState(false);
   const [onlineIds, setOnlineIds] = useState<Set<string>>(new Set());
-  const [typingMap, setTypingMap] = useState<Record<string, string>>({});
+  const [typingMap, setTypingMap] = useState<Record<string, Record<string, string>>>({});
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [forwardMsg, setForwardMsg] = useState<ChatMessage | null>(null);
-  const [call, setCall] = useState<{ kind: "voice" | "video"; muted: boolean; speakerOff: boolean } | null>(null);
-  const [callRinging, setCallRinging] = useState(true);
-
-  const callTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    if (call) {
-      setCallRinging(true);
-      callTimerRef.current = setTimeout(() => setCallRinging(false), 4000);
-    }
-    return () => {
-      if (callTimerRef.current) clearTimeout(callTimerRef.current);
-    };
-  }, [call]);
+  const [blockedConvId, setBlockedConvId] = useState<string | null>(null);
+  const [call, setCall] = useState<{
+    kind: "voice" | "video";
+    peerUserId: string;
+    conversationId: string;
+    incomingOffer?: RTCSessionDescriptionInit | null;
+  } | null>(null);
+  const [incomingCall, setIncomingCall] = useState<{
+    kind: "voice" | "video";
+    fromUserId: string;
+    user?: { id: string; username: string; firstName?: string; lastName?: string; avatar?: string } | null;
+    offer?: RTCSessionDescriptionInit | null;
+  } | null>(null);
 
   const activeIdRef = useRef<string | null>(null);
   const convsRef = useRef<Conversation[]>([]);
   const messagesRef = useRef<ChatMessage[]>([]);
   const msgPageRef = useRef(1);
   const replyToRef = useRef<ChatMessage | null>(null);
+  const loadConversationsRef = useRef<() => void>(() => {});
 
   useEffect(() => {
     convsRef.current = conversations;
@@ -207,8 +209,11 @@ export default function MessagesPage() {
       } else {
         setLoadingOlder(true);
       }
+      const requestedId = convId;
       try {
         const res = await api.getMessages(convId, page);
+        // Ignore stale responses for conversations that are no longer active.
+        if (activeIdRef.current !== requestedId) return;
         const list = extractList<RawMessage>(res.data);
         const incoming = [...list.map(normalizeMessage)].reverse();
         setMessages((prev) => {
@@ -221,10 +226,12 @@ export default function MessagesPage() {
           prev.map((c) => (c.id === convId ? { ...c, unreadCount: 0 } : c))
         );
       } catch {
-        if (replace) setMsgError(true);
+        if (replace && activeIdRef.current === requestedId) setMsgError(true);
       } finally {
-        setLoadingMsgs(false);
-        setLoadingOlder(false);
+        if (activeIdRef.current === requestedId) {
+          setLoadingMsgs(false);
+          setLoadingOlder(false);
+        }
       }
     },
     []
@@ -247,8 +254,23 @@ export default function MessagesPage() {
       setMobileView("chat");
       if (shareUrl) setDraft(shareUrl);
       loadMessages(id, 1, true);
+      // Check whether the other participant blocked us — in which case
+      // the message input should be disabled and a notice shown.
+      const other = conversations.find((c) => c.id === id)?.participants.find((p) => p.userId !== user?.id)?.userId;
+      if (other && user?.id) {
+        setBlockedConvId(null);
+        api
+          .getBlockStatus(other)
+          .then((res: any) => {
+            const status = res.data || res;
+            if (status?.blockedBy) setBlockedConvId(id);
+          })
+          .catch(() => {});
+      } else {
+        setBlockedConvId(null);
+      }
     },
-    [router, loadMessages, shareUrl]
+    [router, loadMessages, shareUrl, conversations, user?.id]
   );
 
   const loadConversations = useCallback(async () => {
@@ -271,6 +293,10 @@ export default function MessagesPage() {
   }, [user?.id, selectConversation]);
 
   useEffect(() => {
+    loadConversationsRef.current = loadConversations;
+  }, [loadConversations]);
+
+  useEffect(() => {
     if (!user) return;
     const id = requestAnimationFrame(() => loadConversations());
     return () => cancelAnimationFrame(id);
@@ -282,9 +308,11 @@ export default function MessagesPage() {
     const normalized = normalizeMessage(message);
     const preview = messagePreview(normalized);
 
+    let found = false;
     setConversations((prev) => {
       const idx = prev.findIndex((c) => c.id === conversationId);
       if (idx === -1) return prev;
+      found = true;
       const conv = prev[idx];
       const isActive = activeIdRef.current === conversationId;
       const updated: Conversation = {
@@ -300,6 +328,13 @@ export default function MessagesPage() {
       ]);
     });
 
+    // Message for a conversation we don't know about yet (e.g. someone
+    // started a new chat with us) — refresh the conversation list.
+    if (!found) {
+      loadConversationsRef.current?.();
+      return;
+    }
+
     if (activeIdRef.current === conversationId) {
       setMessages((prev) =>
         prev.some((m) => m.id === normalized.id) ? prev : [...prev, normalized]
@@ -312,9 +347,17 @@ export default function MessagesPage() {
       const { conversationId, userId, isTyping } = payload;
       if (!isTyping) {
         setTypingMap((prev) => {
-          if (!prev[conversationId]) return prev;
+          const conv = prev[conversationId];
+          if (!conv) return prev;
+          if (!(userId in conv)) return prev;
+          const nextUsers = { ...conv };
+          delete nextUsers[userId];
           const next = { ...prev };
-          delete next[conversationId];
+          if (Object.keys(nextUsers).length === 0) {
+            delete next[conversationId];
+          } else {
+            next[conversationId] = nextUsers;
+          }
           return next;
         });
         return;
@@ -322,7 +365,10 @@ export default function MessagesPage() {
       const conv = convsRef.current.find((c) => c.id === conversationId);
       const participant = conv?.participants.find((p) => p.userId === userId);
       const name = participant?.user?.displayName || participant?.user?.username || "Someone";
-      setTypingMap((prev) => ({ ...prev, [conversationId]: name }));
+      setTypingMap((prev) => ({
+        ...prev,
+        [conversationId]: { ...prev[conversationId], [userId]: name },
+      }));
     },
     []
   );
@@ -352,17 +398,45 @@ export default function MessagesPage() {
     onOffline: handleOffline,
   });
 
+  // Listen for incoming WebRTC calls and reject them when the user is
+  // already in another call.
+  useEffect(() => {
+    if (!connected) return;
+    const s = getSocket();
+    const onIncoming = (p: { fromUserId: string; kind: "voice" | "video"; user?: any; sdp?: RTCSessionDescriptionInit }) => {
+      if (call) {
+        s.emit("call:reject", { toUserId: p.fromUserId });
+        return;
+      }
+      setIncomingCall({ kind: p.kind, fromUserId: p.fromUserId, user: p.user, offer: p.sdp });
+    };
+    const onCancelled = (p: { userId: string }) => {
+      setIncomingCall((prev) => (prev && prev.fromUserId === p.userId ? null : prev));
+    };
+    const onEnded = (p: { userId: string }) => {
+      setIncomingCall((prev) => (prev && prev.fromUserId === p.userId ? null : prev));
+    };
+    s.on("call:incoming", onIncoming);
+    s.on("call:cancelled", onCancelled);
+    s.on("call:ended", onEnded);
+    return () => {
+      s.off("call:incoming", onIncoming);
+      s.off("call:cancelled", onCancelled);
+      s.off("call:ended", onEnded);
+    };
+  }, [connected, call]);
+
   const activeConv = conversations.find((c) => c.id === activeId) || null;
 
   const otherId = activeConv?.participants.find((p) => p.userId !== user?.id)?.userId || "";
   const activeOnline = onlineIds.has(otherId);
 
   const handleCall = useCallback((kind: "voice" | "video") => {
-    if (!activeConv) return;
-    setCall({ kind, muted: false, speakerOff: false });
-    setCallRinging(true);
-  }, [activeConv]);
-  const activeTypingName = activeId ? typingMap[activeId] : undefined;
+    if (!activeConv || !otherId) return;
+    setCall({ kind, peerUserId: otherId, conversationId: activeConv.id });
+  }, [activeConv, otherId]);
+  const activeTypers = activeId ? Object.values(typingMap[activeId] || {}) : [];
+  const activeTypingName = activeTypers.length > 0 ? activeTypers.join(" and ") : undefined;
   const visibleMessages = msgSearch
     ? messages.filter((m) => m.content.toLowerCase().includes(msgSearch.toLowerCase()))
     : messages;
@@ -642,6 +716,13 @@ export default function MessagesPage() {
                   onUseSuggestion={handleUseSuggestion}
                 />
 
+                {blockedConvId === activeConv.id && (
+                  <div className="px-4 py-3 text-center text-xs text-muted-foreground bg-muted/40 border-t border-border">
+                    <ShieldOff className="w-4 h-4 inline-block mr-1.5 text-red-500" />
+                    You can&apos;t reply to this conversation. The other user has blocked you.
+                  </div>
+                )}
+
                 <MessageInput
                   value={draft}
                   onChange={setDraft}
@@ -657,6 +738,7 @@ export default function MessagesPage() {
                   replyTo={replyTo}
                   onCancelReply={() => { setReplyTo(null); replyToRef.current = null; }}
                   sending={sending}
+                  disabled={blockedConvId === activeConv.id}
                 />
               </div>
             </>
@@ -797,81 +879,80 @@ export default function MessagesPage() {
         )}
       </AnimatePresence>
 
-      <AnimatePresence>
-        {call && (
+      <CallOverlay
+        conversation={activeConv || ({ id: "", name: call?.conversationId || "", participants: [] } as any)}
+        peerUserId={call?.peerUserId || ""}
+        kind={call?.kind || "voice"}
+        open={!!call}
+        incomingOffer={call?.incomingOffer || null}
+        onClose={() => setCall(null)}
+      />
+
+      {incomingCall && !call && (
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 40 }}
+          className="fixed inset-0 z-[80] flex items-end sm:items-center justify-center p-4 bg-black/70 backdrop-blur-md"
+          onClick={() => setIncomingCall(null)}
+        >
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
-            onClick={() => setCall(null)}
+            initial={{ scale: 0.95 }}
+            animate={{ scale: 1 }}
+            className="w-full max-w-sm glass rounded-3xl p-8 text-center"
+            onClick={(e) => e.stopPropagation()}
           >
-            <motion.div
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 20 }}
-              className="w-full max-w-sm glass rounded-3xl p-8 text-center"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="relative w-24 h-24 rounded-full bg-gradient-primary flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4 overflow-hidden">
-                {activeConv?.avatar ? (
-                  <img src={activeConv.avatar} alt="" className="w-full h-full object-cover" />
-                ) : (
-                  (activeConv?.name || "?").slice(0, 2).toUpperCase()
-                )}
-                {activeOnline && <span className="absolute bottom-1 right-1 w-4 h-4 rounded-full bg-emerald-500 ring-2 ring-white" />}
-              </div>
-              <h3 className="text-lg font-bold text-foreground">{activeConv?.name}</h3>
-              <p className={cn("text-sm mt-1 flex items-center justify-center gap-1.5", callRinging ? "text-amber-500" : "text-green-500")}>
-                {callRinging ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Phone className="w-3.5 h-3.5" />}
-                {callRinging ? "Calling..." : call.kind === "voice" ? "Voice call in progress" : "Video call in progress"}
-              </p>
-
-              {call.kind === "video" && (
-                <div className="mt-5 aspect-video rounded-2xl bg-background/60 border border-border flex items-center justify-center overflow-hidden relative">
-                  <Video className="w-8 h-8 text-muted-foreground/40" />
-                  <p className="absolute bottom-2 inset-x-0 text-[10px] text-muted-foreground/60">
-                    Video preview — {callRinging ? "waiting for the other side" : "connected"}
-                  </p>
-                </div>
+            <div className="w-20 h-20 rounded-full bg-gradient-primary flex items-center justify-center text-white text-xl font-bold mx-auto mb-4 overflow-hidden">
+              {incomingCall.user?.avatar ? (
+                <img src={incomingCall.user.avatar} alt="" className="w-full h-full object-cover" />
+              ) : (
+                (incomingCall.user?.firstName || incomingCall.user?.username || "?").slice(0, 2).toUpperCase()
               )}
-
-              <div className="mt-6 grid grid-cols-3 gap-3 max-w-xs mx-auto">
-                <button
-                  onClick={() => setCall((c) => (c ? { ...c, muted: !c.muted } : c))}
-                  aria-label="Toggle mute"
-                  className={cn(
-                    "w-14 h-14 rounded-2xl flex items-center justify-center transition-all",
-                    call.muted ? "bg-red-500 text-white" : "bg-muted text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  <Mic className={cn("w-5 h-5", call.muted && "line-through")} />
-                </button>
-                <button
-                  onClick={() => setCall(null)}
-                  aria-label="End call"
-                  className="w-14 h-14 rounded-2xl bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-all"
-                >
-                  <Phone className="w-5 h-5 rotate-[135deg]" />
-                </button>
-                <button
-                  onClick={() => setCall((c) => (c ? { ...c, speakerOff: !c.speakerOff } : c))}
-                  aria-label="Toggle speaker"
-                  className={cn(
-                    "w-14 h-14 rounded-2xl flex items-center justify-center transition-all",
-                    call.speakerOff ? "bg-red-500 text-white" : "bg-muted text-muted-foreground hover:text-foreground"
-                  )}
-                >
-                  <Volume2 className={cn("w-5 h-5", call.speakerOff && "line-through")} />
-                </button>
-              </div>
-              <p className="text-[10px] text-muted-foreground/60 mt-4">
-                Calls use the WebRTC UI — a server-side signaling backend isn't wired up yet.
-              </p>
-            </motion.div>
+            </div>
+            <h3 className="text-lg font-bold text-foreground">
+              {incomingCall.user?.firstName
+                ? `${incomingCall.user.firstName} ${incomingCall.user.lastName || ""}`.trim()
+                : incomingCall.user?.username || "Someone"}
+            </h3>
+            <p className="text-sm text-muted-foreground mt-1">
+              {incomingCall.kind === "video" ? "Incoming video call" : "Incoming voice call"}
+            </p>
+            <div className="mt-6 flex items-center justify-center gap-4">
+              <button
+                onClick={() => {
+                  getSocket().emit("call:reject", { toUserId: incomingCall.fromUserId });
+                  setIncomingCall(null);
+                }}
+                aria-label="Decline call"
+                className="w-14 h-14 rounded-2xl bg-red-500 text-white flex items-center justify-center hover:bg-red-600 transition-all"
+              >
+                <Phone className="w-5 h-5 rotate-[135deg]" />
+              </button>
+              <button
+                onClick={() => {
+                  const conv = conversations.find((c) =>
+                    c.type === "DIRECT" && c.participants.some((p) => p.userId === incomingCall.fromUserId)
+                  );
+                  setCall({
+                    kind: incomingCall.kind,
+                    peerUserId: incomingCall.fromUserId,
+                    conversationId: conv?.id || "",
+                    incomingOffer: incomingCall.offer,
+                  });
+                  setIncomingCall(null);
+                }}
+                aria-label="Accept call"
+                className="w-14 h-14 rounded-2xl bg-green-500 text-white flex items-center justify-center hover:bg-green-600 transition-all"
+              >
+                <Phone className="w-5 h-5" />
+              </button>
+            </div>
+            <p className="text-[10px] text-muted-foreground/60 mt-4">
+              Incoming call — please enable camera/microphone permissions.
+            </p>
           </motion.div>
-        )}
-      </AnimatePresence>
+        </motion.div>
+      )}
     </div>
   );
 }
