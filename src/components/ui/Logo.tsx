@@ -5,17 +5,23 @@ interface LogoProps {
   size?: number;
   className?: string;
   rounded?: string;
+  bgClassName?: string;
 }
 
-export default function Logo({ size = 36, className, rounded = "rounded-xl" }: LogoProps) {
+export default function Logo({ size = 36, className, rounded = "rounded-xl", bgClassName = "bg-white" }: LogoProps) {
   return (
-    <Image
-      src="/novax.png"
-      alt="NOVAX"
-      width={size}
-      height={size}
-      className={cn("object-contain shrink-0", rounded, className)}
-      priority
-    />
+    <div
+      className={cn("flex items-center justify-center shrink-0 overflow-hidden", rounded, bgClassName, className)}
+      style={{ width: size, height: size }}
+    >
+      <Image
+        src="/novax.png"
+        alt="NOVAX"
+        width={size}
+        height={size}
+        className="object-contain w-full h-full"
+        priority
+      />
+    </div>
   );
 }
