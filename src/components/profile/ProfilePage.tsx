@@ -612,19 +612,65 @@ function FollowerListModal({
   username: string;
   notify: (msg: string, type?: "success" | "info" | "error") => void;
 }) {
-  const [users, setUsers] = useState<{ id: string; username: string; displayName: string; avatar?: string }[]>([]);
+  const [users, setUsers] = useState<{ id: string; username: string; displayName: string; avatar?: string; bio?: string; isFollowing?: boolean; followsYou?: boolean }[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [listPage, setListPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [myUsername, setMyUsername] = useState("");
+  const [reloadKey, setReloadKey] = useState(0);
+  const { user } = useAuth();
 
   useEffect(() => {
     if (!kind) return;
     setLoading(true);
     setUsers([]);
-    const t = window.setTimeout(() => {
-      // TODO(backend): no `GET /users/:username/followers` or `/following` endpoint exists yet.
-      setLoading(false);
-    }, 600);
+    setError(null);
+    setListPage(1);
+    setTotalPages(1);
+    setMyUsername(user?.username ?? "");
+    const load = async () => {
+      try {
+        const res = kind === "followers"
+          ? await api.getFollowers(username)
+          : await api.getFollowing(username);
+        const data = res?.data;
+        setUsers((data?.users as any[]) || []);
+        setTotalPages(data?.totalPages ?? 1);
+      } catch {
+        setError("Could not load the list. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    const t = window.setTimeout(load, 0);
     return () => window.clearTimeout(t);
-  }, [kind, username]);
+  }, [kind, username, user?.username, reloadKey]);
+
+  const loadMore = async () => {
+    if (listPage >= totalPages) return;
+    const next = listPage + 1;
+    try {
+      const res = kind === "followers"
+        ? await api.getFollowers(username, next)
+        : await api.getFollowing(username, next);
+      const data = res?.data;
+      setUsers((prev) => [...prev, ...((data?.users as any[]) || [])]);
+      setTotalPages(data?.totalPages ?? 1);
+      setListPage(next);
+    } catch {}
+  };
+
+  const handleFollowToggle = async (u: { id: string; username: string }) => {
+    try {
+      const res = await api.followUser(u.id);
+      const next = Boolean(res?.data?.following ?? false);
+      setUsers((prev) => prev.map((x) => (x.id === u.id ? { ...x, isFollowing: next } : x)));
+      notify(next ? `Following @${u.username}` : `Unfollowed @${u.username}`);
+    } catch {
+      notify("Could not update follow", "error");
+    }
+  };
 
   if (!kind) return null;
 
@@ -649,36 +695,61 @@ function FollowerListModal({
               <div className="flex justify-center py-8">
                 <Loader2 className="w-6 h-6 text-primary animate-spin" />
               </div>
+            ) : error ? (
+              <div className="text-center py-8">
+                <Users className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
+                <p className="text-sm font-medium text-foreground">Couldn&apos;t load {title.toLowerCase()}</p>
+                <p className="text-xs text-muted-foreground mt-1">{error}</p>
+                <Button size="sm" variant="secondary" className="mt-4" onClick={() => setReloadKey((k) => k + 1)}>
+                  Retry
+                </Button>
+              </div>
             ) : users.length > 0 ? (
               <div className="space-y-1">
                 {users.map((u) => (
-                  <button
-                    key={u.id}
-                    onClick={() => { onClose(); window.location.href = `/dashboard/profile?u=${encodeURIComponent(u.username)}`; }}
-                    className="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-muted/60 transition-colors"
-                  >
-                    <div className="w-9 h-9 rounded-xl bg-gradient-primary flex items-center justify-center text-white text-xs font-bold overflow-hidden">
-                      {u.avatar ? <img src={u.avatar} alt="" className="w-full h-full object-cover" /> : (u.displayName || u.username).slice(0, 2).toUpperCase()}
-                    </div>
-                    <div className="text-left min-w-0">
-                      <p className="text-sm font-medium text-foreground truncate">{u.displayName}</p>
-                      <p className="text-xs text-muted-foreground">@{u.username}</p>
-                    </div>
-                  </button>
+                  <div key={u.id} className="flex items-center gap-3 p-2 rounded-xl hover:bg-muted/60 transition-colors">
+                    <button
+                      onClick={() => { onClose(); window.location.href = `/dashboard/profile?u=${encodeURIComponent(u.username)}`; }}
+                      className="flex items-center gap-3 min-w-0 flex-1 text-left"
+                    >
+                      <div className="w-9 h-9 rounded-xl bg-gradient-primary flex items-center justify-center text-white text-xs font-bold overflow-hidden shrink-0">
+                        {u.avatar ? <img src={u.avatar} alt="" className="w-full h-full object-cover" /> : (u.displayName || u.username).slice(0, 2).toUpperCase()}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">{u.displayName || u.username}</p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          @{u.username}
+                          {u.followsYou && <span className="text-primary"> · Follows you</span>}
+                        </p>
+                      </div>
+                    </button>
+                    {u.username !== myUsername && (
+                      <Button
+                        size="sm"
+                        variant={u.isFollowing ? "secondary" : "primary"}
+                        onClick={() => handleFollowToggle(u)}
+                        className="shrink-0"
+                      >
+                        {u.isFollowing ? "Following" : "Follow"}
+                      </Button>
+                    )}
+                  </div>
                 ))}
+                {listPage < totalPages && (
+                  <div className="flex justify-center pt-2">
+                    <Button size="sm" variant="secondary" onClick={loadMore}>
+                      Load more
+                    </Button>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="text-center py-8">
                 <Users className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
-                <p className="text-sm font-medium text-foreground">Can&apos;t load {title.toLowerCase()} yet</p>
+                <p className="text-sm font-medium text-foreground">No {title.toLowerCase()} yet</p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  The backend doesn&apos;t expose a {title.toLowerCase()} list endpoint yet.
+                  {kind === "followers" ? "Be the first to follow this profile." : "This user isn't following anyone yet."}
                 </p>
-                <Button size="sm" variant="secondary" className="mt-4" onClick={() => {
-                  notify(`${title} list endpoint not available on the backend yet`, "info");
-                }}>
-                  Notify me
-                </Button>
               </div>
             )}
           </div>

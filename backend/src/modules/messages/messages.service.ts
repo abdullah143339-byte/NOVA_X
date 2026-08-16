@@ -66,6 +66,32 @@ export class MessagesService {
     return new Map(users.map((u) => [u.id, u]));
   }
 
+  private async findBlockedPair(userId: string, participantIds: string[]) {
+    const others = participantIds.filter((id) => id !== userId);
+    if (others.length === 0) return false;
+    const block = await this.prisma.block.findFirst({
+      where: {
+        OR: [
+          { blockerId: userId, blockedId: { in: others } },
+          { blockerId: { in: others }, blockedId: userId },
+        ],
+      },
+      select: { id: true },
+    });
+    return !!block;
+  }
+
+  private async conversationBlocked(userId: string, conversationId: string) {
+    const conv = await this.prisma.conversation.findUnique({
+      where: { id: conversationId },
+      include: { participants: { where: { userId: { not: userId } }, select: { userId: true } } },
+    });
+    if (!conv) return false;
+    const others = conv.participants.map((p) => p.userId);
+    if (others.length === 0) return false;
+    return this.findBlockedPair(userId, others);
+  }
+
   private async attachUsersToConversation(conversation: any) {
     const userMap = await this.getParticipantUserMap(conversation.participants.map((x: any) => x.userId));
     return {
@@ -76,6 +102,11 @@ export class MessagesService {
 
   async createConversation(userId: string, participantIds: string[], type = 'DIRECT', name?: string) {
     const allParticipantIds = [...new Set([userId, ...participantIds])];
+
+    if (type === 'DIRECT') {
+      const blocked = await this.findBlockedPair(userId, allParticipantIds);
+      if (blocked) throw new ForbiddenException('Unable to start a conversation with this user');
+    }
 
     if (type === 'DIRECT' && allParticipantIds.length === 2) {
       const existing = await this.prisma.conversation.findFirst({
@@ -117,6 +148,9 @@ export class MessagesService {
       where: { conversationId, userId: senderId, leftAt: null },
     });
     if (!participant) throw new ForbiddenException('Not a participant');
+
+    const isBlocked = await this.conversationBlocked(senderId, conversationId);
+    if (isBlocked) throw new ForbiddenException('You cannot send messages to this user');
 
     const message = await this.prisma.message.create({
       data: {

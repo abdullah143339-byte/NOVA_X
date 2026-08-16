@@ -692,8 +692,9 @@ export default function MessagesPage() {
             messages={messages}
             open={detailsOpen}
             onClose={() => setDetailsOpen(false)}
-            onAction={(action) => {
+            onAction={async (action) => {
               const convId = activeConv.id;
+              const otherId = activeConv.participants.find((p) => p.userId !== user?.id)?.userId;
               if (action === "mute") {
                 setConversations((prev) => prev.map((c) => (c.id === convId ? { ...c, isMuted: !c.isMuted } : c)));
               } else if (action === "clear") {
@@ -708,8 +709,31 @@ export default function MessagesPage() {
                   setDetailsOpen(false);
                   setMobileView("list");
                 }
-              } else if (action === "block" || action === "report") {
-                alert(`TODO(backend): the ${action} endpoint isn't implemented on the server yet.`);
+              } else if (action === "block") {
+                if (!otherId) return;
+                if (confirm(`Block ${activeConv.name}? They will no longer be able to message you.`)) {
+                  try {
+                    await api.blockUser(otherId);
+                    setConversations((prev) => prev.filter((c) => c.id !== convId));
+                    setMessages([]);
+                    setActiveId(null);
+                    setDetailsOpen(false);
+                    setMobileView("list");
+                    alert(`${activeConv.name} has been blocked.`);
+                  } catch (err: any) {
+                    alert(err?.message || "Failed to block user.");
+                  }
+                }
+              } else if (action === "report") {
+                if (!otherId) return;
+                const reason = prompt("Report reason (e.g. Spam, Harassment, Hate speech, Other):", "HARASSMENT");
+                if (!reason || !reason.trim()) return;
+                try {
+                  await api.reportUser(otherId, reason.trim().toUpperCase().replace(/[ -]/g, "_"));
+                  alert("Thanks for reporting. Our team will review this account.");
+                } catch (err: any) {
+                  alert(err?.message || "Failed to submit report.");
+                }
               }
             }}
           />

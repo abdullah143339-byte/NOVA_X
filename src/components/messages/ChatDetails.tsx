@@ -61,8 +61,8 @@ export default function ChatDetails({ conversation: conv, currentUserId, online,
 
   const actions = [
     { id: "mute" as const, icon: BellOff, label: "Mute", note: "Stop notifications", enabled: true },
-    { id: "block" as const, icon: ShieldOff, label: "Block", note: "Block this contact", enabled: false },
-    { id: "report" as const, icon: Flag, label: "Report", note: "Report this chat", enabled: false },
+    { id: "block" as const, icon: ShieldOff, label: "Block", note: "Block this contact", enabled: true, danger: !isGroup },
+    { id: "report" as const, icon: Flag, label: "Report", note: "Report this chat", enabled: true },
     { id: "clear" as const, icon: Trash2, label: "Clear Chat", note: "Delete all messages", enabled: true },
     { id: "delete" as const, icon: Trash2, label: "Delete Chat", note: "Remove conversation", enabled: true, danger: true },
   ];

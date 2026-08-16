@@ -132,6 +132,10 @@ class ApiClient {
     return this.request<T>(endpoint, { method: 'DELETE', token });
   }
 
+  deleteWithBody<T = any>(endpoint: string, body?: any, token?: string) {
+    return this.request<T>(endpoint, { method: 'DELETE', body, token });
+  }
+
   // Auth
   register(data: any) { return this.post('/auth/register', data); }
   login(data: any) { return this.post('/auth/login', data); }
@@ -146,6 +150,7 @@ class ApiClient {
   resetPassword(token: string, password: string) { return this.post('/auth/reset-password', { token, password }); }
   validateResetToken(token: string) { return this.get(`/auth/password-reset/validate?token=${encodeURIComponent(token)}`); }
   changePassword(currentPassword: string, newPassword: string) { return this.post('/auth/change-password', { currentPassword, newPassword }); }
+  deleteAccount(password?: string) { return this.deleteWithBody('/auth/account', { password }); }
   setup2FA() { return this.post('/auth/2fa/setup'); }
   enable2FA(token: string) { return this.post('/auth/2fa/enable', { token }); }
   disable2FA(token: string) { return this.post('/auth/2fa/disable', { token }); }
@@ -155,6 +160,13 @@ class ApiClient {
   getUserProfile(username: string) { return this.get(`/users/${username}`); }
   updateProfile(data: any) { return this.patch('/users/me', data); }
   followUser(id: string) { return this.post(`/users/${id}/follow`); }
+  getFollowers(username: string, page = 1) { return this.get(`/users/${username}/followers?page=${page}`); }
+  getFollowing(username: string, page = 1) { return this.get(`/users/${username}/following?page=${page}`); }
+  blockUser(id: string) { return this.post(`/users/${id}/block`, {}); }
+  unblockUser(id: string) { return this.delete(`/users/${id}/block`); }
+  getBlockedUsers(page = 1) { return this.get(`/users/me/blocked?page=${page}`); }
+  getBlockStatus(id: string) { return this.get(`/users/${id}/block-status`); }
+  reportUser(id: string, reason: string, description?: string) { return this.post(`/users/${id}/report`, { reason, description }); }
   searchUsers(q: string) { return this.get(`/users/search/q?q=${encodeURIComponent(q)}`); }
   getRecommendedPeople(limit = 6) { return this.get(`/users/recommended?limit=${limit}`); }
 
@@ -167,6 +179,14 @@ class ApiClient {
   commentOnPost(id: string, content: string, parentId?: string) { return this.post(`/posts/${id}/comment`, { content, parentId }); }
   getPostComments(id: string, page = 1) { return this.get(`/posts/${id}/comments?page=${page}`); }
   getUserPosts(userId: string, page = 1) { return this.get(`/posts/user/${userId}?page=${page}`); }
+
+  // Stories
+  getStoryFeed(page = 1) { return this.get(`/stories/feed?page=${page}`); }
+  createStory(media: string, mediaType = 'IMAGE', caption?: string) { return this.post('/stories', { media, mediaType, caption }); }
+  getUserStories(userId: string) { return this.get(`/stories/user/${userId}`); }
+  markStoryViewed(storyId: string) { return this.post(`/stories/${storyId}/view`); }
+  getStoryViews(storyId: string) { return this.get(`/stories/${storyId}/views`); }
+  deleteStory(storyId: string) { return this.delete(`/stories/${storyId}`); }
 
   // Reels
   getReelsFeed(category: string, page = 1, limit = 8) {

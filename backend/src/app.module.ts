@@ -18,6 +18,7 @@ import { AiRouterModule } from './modules/ai-router/ai-router.module';
 import { MediaModule } from './modules/media/media.module';
 import { LearningModule } from './modules/learning/learning.module';
 import { AdminModule } from './modules/admin/admin.module';
+import { StoriesModule } from './modules/stories/stories.module';
 import { SecurityMiddleware } from './common/middleware/security.middleware';
 import { SanitizerMiddleware } from './common/middleware/sanitizer.middleware';
 import { AuditService } from './common/services/audit.service';
@@ -53,6 +54,7 @@ import { ProviderFallbackService } from './common/services/provider-fallback.ser
     AdminModule,
     MediaModule,
     LearningModule,
+    StoriesModule,
   ],
   providers: [SecurityMiddleware, AuditService, ReputationService, WalletService, SearchService, NovaAiOsService, RagService, AiIntegrationService, ProviderFallbackService],
   exports: [AuditService, ReputationService, WalletService, SearchService, NovaAiOsService, RagService, AiIntegrationService, ProviderFallbackService],

@@ -79,6 +79,10 @@ model User {
   wishlistItems   WishlistItem[]
   orders          Order[] @relation("buyer")
   sellerOrders    OrderItem[] @relation("seller")
+  stories         Story[] @relation("story_owner")
+  storyViews      StoryView[] @relation("story_viewer")
+  blocks          Block[] @relation("blocked_by")
+  blockedBy       Block[] @relation("blocked_user")
 
   @@map("users")
 }
@@ -1522,4 +1526,66 @@ enum OrderItemStatus {
   FULFILLED
   CANCELLED
   REFUNDED
+}
+
+// ==========================================
+// STORIES
+// ==========================================
+
+model Story {
+  id         String     @id @default(uuid())
+  ownerId    String     @map("owner_id")
+  media      String
+  mediaType  StoryMediaType @default(IMAGE) @map("media_type")
+  caption    String?
+  expiresAt  DateTime   @map("expires_at")
+  createdAt  DateTime   @default(now()) @map("created_at")
+  deletedAt  DateTime?  @map("deleted_at")
+
+  owner      User       @relation("story_owner", fields: [ownerId], references: [id], onDelete: Cascade)
+  views      StoryView[]
+
+  @@index([ownerId, expiresAt])
+  @@index([expiresAt])
+  @@map("stories")
+}
+
+enum StoryMediaType {
+  IMAGE
+  VIDEO
+  TEXT
+}
+
+model StoryView {
+  id         String   @id @default(uuid())
+  storyId    String   @map("story_id")
+  viewerId   String   @map("viewer_id")
+  viewedAt   DateTime @default(now()) @map("viewed_at")
+
+  story      Story    @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  viewer     User     @relation("story_viewer", fields: [viewerId], references: [id], onDelete: Cascade)
+
+  @@unique([storyId, viewerId])
+  @@index([storyId])
+  @@map("story_views")
+}
+
+// ==========================================
+// BLOCKS (user blocking)
+// ==========================================
+
+model Block {
+  id         String   @id @default(uuid())
+  blockerId  String   @map("blocker_id")
+  blockedId  String   @map("blocked_id")
+  reason     String?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  blocker    User     @relation("blocked_by", fields: [blockerId], references: [id], onDelete: Cascade)
+  blocked    User     @relation("blocked_user", fields: [blockedId], references: [id], onDelete: Cascade)
+
+  @@unique([blockerId, blockedId])
+  @@index([blockerId])
+  @@index([blockedId])
+  @@map("blocks")
 }

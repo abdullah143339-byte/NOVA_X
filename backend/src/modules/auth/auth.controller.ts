@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Req, Res, UseGuards, HttpCode, HttpStatus, Query, UnauthorizedException } from '@nestjs/common';
+import { Controller, Post, Body, Get, Req, Res, UseGuards, HttpCode, HttpStatus, Query, UnauthorizedException, Delete } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { TwoFactorService } from './two-factor.service';
@@ -189,6 +189,17 @@ export class AuthController {
   async changePassword(@CurrentUser('id') userId: string, @Body() dto: ChangePasswordDto) {
     const result = await this.authService.changePassword(userId, dto.currentPassword, dto.newPassword);
     return ApiResponseDto.ok(result, 'Password updated. Please sign in again.');
+  }
+
+  @Delete('account')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Permanently delete the current user account' })
+  async deleteAccount(@CurrentUser('id') userId: string, @Body() body: { password?: string }, @Res({ passthrough: true }) res: Response) {
+    const result = await this.authService.deleteAccount(userId, body.password);
+    this.clearRefreshCookie(res);
+    return ApiResponseDto.ok(result, 'Account deleted');
   }
 
   @Post('2fa/setup')

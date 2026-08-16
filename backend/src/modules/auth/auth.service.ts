@@ -450,6 +450,83 @@ export class AuthService {
     return { message: 'Password has been reset successfully. You can now sign in.' };
   }
 
+  async deleteAccount(userId: string, password?: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+
+    if (!user) throw new NotFoundException('User not found');
+
+    if (user.passwordHash) {
+      if (!password) {
+        throw new BadRequestException('Password confirmation is required');
+      }
+      const isValid = await bcrypt.compare(password, user.passwordHash);
+      if (!isValid) {
+        throw new UnauthorizedException('Password is incorrect');
+      }
+    }
+
+    // Marketplace items owned by this user must have their dependent
+    // records (reviews, purchases, orderItems, carts, wishlists) cleaned
+    // before the items themselves are removed.
+    const items = await this.prisma.marketplaceItem.findMany({
+      where: { sellerId: userId },
+      select: { id: true },
+    });
+    const itemIds = items.map((i) => i.id);
+
+    await this.prisma.$transaction([
+      // Social graph
+      this.prisma.follow.deleteMany({
+        where: { OR: [{ followerId: userId }, { followingId: userId }] },
+      }),
+      this.prisma.reaction.deleteMany({ where: { userId } }),
+      this.prisma.comment.deleteMany({ where: { authorId: userId } }),
+      this.prisma.post.deleteMany({ where: { authorId: userId } }),
+      this.prisma.bookmark.deleteMany({ where: { userId } }),
+      this.prisma.share.deleteMany({ where: { userId } }),
+      this.prisma.notification.deleteMany({
+        where: { OR: [{ userId }, { actorId: userId }] },
+      }),
+      // Messaging
+      this.prisma.conversationParticipant.deleteMany({ where: { userId } }),
+      this.prisma.message.deleteMany({ where: { senderId: userId } }),
+      // Marketplace
+      ...(itemIds.length > 0
+        ? [
+            this.prisma.review.deleteMany({ where: { itemId: { in: itemIds } } }),
+            this.prisma.purchase.deleteMany({ where: { itemId: { in: itemIds } } }),
+            this.prisma.orderItem.deleteMany({ where: { itemId: { in: itemIds } } }),
+            this.prisma.marketplaceItem.deleteMany({ where: { id: { in: itemIds } } }),
+          ]
+        : []),
+      this.prisma.cartItem.deleteMany({ where: { userId } }),
+      this.prisma.wishlistItem.deleteMany({ where: { userId } }),
+      this.prisma.order.deleteMany({ where: { buyerId: userId } }),
+      this.prisma.orderItem.deleteMany({ where: { sellerId: userId } }),
+      // Communities & learning memberships
+      this.prisma.communityMember.deleteMany({ where: { userId } }),
+      this.prisma.courseEnrollment.deleteMany({ where: { userId } }),
+      this.prisma.enrolledLearningPath.deleteMany({ where: { userId } }),
+      this.prisma.aIConversation.deleteMany({ where: { userId } }),
+      this.prisma.learningProgress.deleteMany({ where: { userId } }),
+      this.prisma.userAchievement.deleteMany({ where: { userId } }),
+      this.prisma.transaction.deleteMany({ where: { wallet: { userId } } }),
+      this.prisma.wallet.deleteMany({ where: { userId } }),
+      // Sessions must go (self-referential FK via user onDelete)
+      this.prisma.session.deleteMany({ where: { userId } }),
+      // Finally the user itself — dependent rows with onDelete: Cascade
+      // (profile, reputation, settings, stories, blocks, AI, etc.)
+      // are removed automatically.
+      this.prisma.user.delete({ where: { id: userId } }),
+    ]);
+
+    await this.prisma.securityEvent.create({
+      data: { userId, type: 'ACCOUNT_DELETION', severity: 'MEDIUM', description: 'Account deleted by user' },
+    });
+
+    return { deleted: true };
+  }
+
   private async generateTokens(userId: string, email: string, username: string, role: string) {
     const payload: JwtPayload = { sub: userId, email, username, role };
 

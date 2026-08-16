@@ -90,6 +90,8 @@ export default function SettingsPage() {
 
   const [deleting, setDeleting] = useState(false);
   const [delMsg, setDelMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -264,10 +266,21 @@ export default function SettingsPage() {
 
   const handleDeleteAccount = async () => {
     setDelMsg(null);
-    if (!window.confirm("Are you sure you want to permanently delete your account? This cannot be undone.")) return;
+    if (!window.confirm("Are you sure you want to permanently delete your account? This cannot be undone and all your data will be removed.")) return;
+    if (!deleteConfirm) {
+      setDelMsg({ type: "error", text: "Please confirm deletion by checking the confirmation box." });
+      return;
+    }
     setDeleting(true);
     try {
-      setDelMsg({ type: "error", text: "Account deletion requires a backend endpoint that isn't available yet." });
+      await api.deleteAccount(deletePassword);
+      localStorage.removeItem("novax_token");
+      setDelMsg({ type: "success", text: "Your account has been deleted. Redirecting..." });
+      window.setTimeout(() => {
+        window.location.href = "/login";
+      }, 1200);
+    } catch (err: any) {
+      setDelMsg({ type: "error", text: err?.message || "Failed to delete account. Please try again." });
     } finally {
       setDeleting(false);
     }
@@ -474,11 +487,29 @@ export default function SettingsPage() {
                 <p className="text-sm text-muted-foreground mb-4">
                   Permanently delete your account and all associated data. This action cannot be undone.
                 </p>
+                <div className="space-y-3 mb-4">
+                  <Input
+                    label="Password"
+                    type="password"
+                    value={deletePassword}
+                    onChange={(e) => setDeletePassword(e.target.value)}
+                    placeholder="Enter your password to confirm"
+                  />
+                  <label className="flex items-start gap-2 text-sm text-muted-foreground cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={deleteConfirm}
+                      onChange={(e) => setDeleteConfirm(e.target.checked)}
+                      className="w-4 h-4 mt-0.5 rounded border-border bg-muted accent-red-500 shrink-0"
+                    />
+                    <span>I understand that deleting my account is permanent and all my data, posts, and conversations will be removed.</span>
+                  </label>
+                </div>
                 <Button size="sm" variant="danger" onClick={handleDeleteAccount} disabled={deleting}>
                   {deleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <AlertTriangle className="w-3.5 h-3.5" />}
-                  Delete Account
+                  {deleting ? "Deleting..." : "Delete Account"}
                 </Button>
-                {delMsg && <p className="text-xs text-red-500 mt-3">{delMsg.text}</p>}
+                {delMsg && <p className={cn("text-xs mt-3", delMsg.type === "success" ? "text-green-500" : "text-red-500")}>{delMsg.text}</p>}
               </GlassCard>
             </>
           )}
