@@ -19,9 +19,11 @@ export const metadata: Metadata = {
   title: "NOVAX — Think Beyond Social",
   description: "NOVAX · Think Beyond Social — AI-first social media platform with intelligent feeds, voice-first interactions, community learning, and creator economy.",
   icons: {
-    icon: "/novax.png",
-    apple: "/novax.png",
+    icon: "/favicon.ico?v=2",
+    apple: "/apple-touch-icon.png",
+    shortcut: "/favicon.ico?v=2",
   },
+  manifest: "/manifest.webmanifest",
 };
 
 export default function RootLayout({

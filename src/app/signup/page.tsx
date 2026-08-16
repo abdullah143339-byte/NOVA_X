@@ -20,6 +20,8 @@ export default function SignupPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [agreeTerms, setAgreeTerms] = useState(false);
+  const [legalModal, setLegalModal] = useState<null | "terms" | "privacy">(null);
   const { register } = useAuth();
   const router = useRouter();
 
@@ -32,6 +34,10 @@ export default function SignupPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    if (!agreeTerms) {
+      setError("Please agree to the Terms and Privacy Policy to continue");
+      return;
+    }
     if (!hasLength || !hasUpper || !hasLower || !hasNumber || !hasSpecial) {
       setError("Password doesn't meet requirements");
       return;
@@ -154,17 +160,22 @@ export default function SignupPage() {
               <PasswordRule label="One special character (@$!%*?&#)" met={hasSpecial} />
             </div>
 
-            <label className="flex items-start gap-2 text-sm text-muted-foreground cursor-pointer">
+            <label className="flex items-start gap-2 text-sm text-muted-foreground cursor-pointer select-none">
               <input
                 type="checkbox"
-                className="w-4 h-4 mt-0.5 rounded border-border bg-muted accent-primary"
-                required
+                checked={agreeTerms}
+                onChange={(e) => setAgreeTerms(e.target.checked)}
+                className="w-4 h-4 mt-0.5 rounded border-border bg-muted accent-primary shrink-0"
               />
               <span>
                 I agree to the{" "}
-                <a href="#" className="text-primary hover:text-primary/80">Terms</a>
+                <button type="button" onClick={() => setLegalModal("terms")} className="text-primary hover:text-primary/80 underline underline-offset-2">
+                  Terms
+                </button>
                 {" "}and{" "}
-                <a href="#" className="text-primary hover:text-primary/80">Privacy Policy</a>
+                <button type="button" onClick={() => setLegalModal("privacy")} className="text-primary hover:text-primary/80 underline underline-offset-2">
+                  Privacy Policy
+                </button>
               </span>
             </label>
 
@@ -230,6 +241,42 @@ export default function SignupPage() {
           </p>
         </div>
       </motion.div>
+
+      {legalModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          onClick={() => setLegalModal(null)}
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="glass-strong rounded-2xl w-full max-w-md p-6 max-h-[70vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-lg font-bold text-foreground mb-3">
+              {legalModal === "terms" ? "NOVAX Terms of Service" : "NOVAX Privacy Policy"}
+            </h2>
+            <div className="space-y-3 text-sm text-muted-foreground leading-relaxed">
+              {legalModal === "terms" ? (
+                <>
+                  <p>By creating an account you agree to use NOVAX responsibly. You are responsible for content you post, and you agree not to share hateful, illegal, or harmful material.</p>
+                  <p>We may update these Terms from time to time. Continued use after changes means you accept the updated Terms.</p>
+                  <p>NOVAX may suspend accounts that violate these Terms. You can delete your account at any time from Settings.</p>
+                </>
+              ) : (
+                <>
+                  <p>NOVAX collects basic account information (name, email, username) to provide the service. Your data is never sold to third parties.</p>
+                  <p>Content you make public is visible to other users. Private data such as your email stays private.</p>
+                  <p>You can request a copy or deletion of your data at any time by contacting support.</p>
+                </>
+              )}
+            </div>
+            <Button className="w-full mt-5" size="md" onClick={() => setLegalModal(null)}>
+              Close
+            </Button>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }
