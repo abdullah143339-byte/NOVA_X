@@ -47,14 +47,14 @@ export default function ShareProfileModal({ open, onClose, username, notify }: S
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+          className="fixed inset-0 z-50 sheet-overlay bg-black/60 backdrop-blur-sm"
           onClick={onClose}
         >
           <motion.div
-            initial={{ opacity: 0, scale: 0.96, y: 12 }}
+            initial={{ opacity: 0, scale: 0.96, y: 40 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.96, y: 12 }}
-            className="glass-strong rounded-2xl w-full max-w-sm overflow-hidden"
+            exit={{ opacity: 0, scale: 0.96, y: 40 }}
+            className="glass-strong rounded-2xl w-full max-w-sm sheet-panel"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between px-6 py-4 border-b border-border">

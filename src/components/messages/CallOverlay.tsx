@@ -74,35 +74,42 @@ export default function CallOverlay({ conversation: conv, peerUserId, kind, open
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md"
+          className="fixed inset-0 z-[80] flex items-end sm:items-center justify-center bg-black/85 backdrop-blur-md"
           onClick={() => {
             if (call.phase === "ended" || call.phase === "error") onClose();
           }}
         >
           <motion.div
-            initial={{ scale: 0.92, y: 20 }}
-            animate={{ scale: 1, y: 0 }}
-            exit={{ scale: 0.92, y: 20 }}
-            className="w-full max-w-lg glass rounded-3xl p-6 sm:p-8 text-center overflow-hidden relative"
+            initial={{ y: 40, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 40, opacity: 0 }}
+            className={cn(
+              "relative overflow-hidden text-center w-full",
+              isVideo ? "sm:max-w-lg" : "max-w-lg",
+              "sm:rounded-3xl",
+              isVideo
+                ? "h-full sm:h-auto sm:max-h-[90dvh] bg-black flex flex-col justify-center px-4 pb-[calc(env(safe-area-inset-bottom)+2rem)] pt-[calc(env(safe-area-inset-top)+2rem)]"
+                : "glass rounded-t-3xl sm:rounded-3xl p-6 sm:p-8 pb-[calc(env(safe-area-inset-bottom)+2rem)]"
+            )}
             onClick={(e) => e.stopPropagation()}
           >
             {isVideo && call.remoteStream && (
-              <div className="relative aspect-video rounded-2xl bg-black overflow-hidden mb-4 border border-border">
-                <video ref={remoteRef} autoPlay playsInline data-remote className="w-full h-full object-cover" />
+              <div className="relative flex-1 min-h-0 w-full rounded-2xl bg-black overflow-hidden mb-4 sm:aspect-video sm:flex-none border border-border">
+                <video ref={remoteRef} autoPlay playsInline data-remote className="w-full h-full object-contain" />
+                {isVideo && call.localStream && (
+                  <video
+                    ref={localRef}
+                    autoPlay
+                    playsInline
+                    muted={call.muted || call.speakerOff}
+                    className="absolute top-3 right-3 w-20 h-28 sm:w-24 sm:h-32 rounded-xl object-cover border border-white/20 shadow-lg z-10"
+                  />
+                )}
               </div>
             )}
 
             <div className="relative mx-auto mb-3 overflow-hidden">
-              {isVideo && call.localStream && (
-                <video
-                  ref={localRef}
-                  autoPlay
-                  playsInline
-                  muted={call.muted || call.speakerOff}
-                  className="w-24 h-32 sm:w-28 sm:h-36 rounded-2xl object-cover border border-border shadow-lg"
-                />
-              )}
-              {(!isVideo || !call.localStream) && (
+              {(!isVideo || !call.remoteStream) && (
                 <div className={cn("rounded-full bg-gradient-primary flex items-center justify-center text-white font-bold", isVideo ? "w-16 h-16 text-lg" : "w-24 h-24 text-2xl")}>
                   {conv.avatar ? <img src={conv.avatar} alt="" className="w-full h-full object-cover" /> : initials(conv.name)}
                 </div>

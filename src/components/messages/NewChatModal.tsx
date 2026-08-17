@@ -133,18 +133,18 @@ export default function NewChatModal({ open, onClose, currentUserId, onCreated }
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+          className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm"
           onClick={onClose}
         >
           <motion.div
             role="dialog"
             aria-label="New chat"
-            initial={{ scale: 0.94, opacity: 0, y: 12 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.94, opacity: 0, y: 12 }}
+            initial={{ y: 40, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 40, opacity: 0 }}
             transition={{ type: "spring", damping: 26, stiffness: 300 }}
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-md glass-strong rounded-2xl overflow-hidden border border-border shadow-premium"
+            className="w-full sm:max-w-md max-h-[88dvh] flex flex-col glass-strong rounded-t-2xl sm:rounded-2xl overflow-hidden border-border border-t sm:border shadow-premium"
           >
             <div className="flex items-center justify-between px-5 py-4 border-b border-border">
               <div className="flex items-center gap-2 rounded-xl bg-muted/60 p-1">
@@ -166,7 +166,7 @@ export default function NewChatModal({ open, onClose, currentUserId, onCreated }
               </button>
             </div>
 
-            <div className="p-5">
+            <div className="p-5 overflow-y-auto overscroll-contain flex-1 min-h-0">
               {mode === "group" && (
                 <input
                   type="text"

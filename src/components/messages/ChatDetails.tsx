@@ -75,7 +75,7 @@ export default function ChatDetails({ conversation: conv, currentUserId, online,
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-30 bg-black/50 backdrop-blur-sm lg:hidden"
+            className="fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm lg:hidden"
             onClick={onClose}
           />
           <motion.aside
@@ -85,7 +85,7 @@ export default function ChatDetails({ conversation: conv, currentUserId, online,
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 30, stiffness: 300 }}
-            className="fixed lg:static inset-y-0 right-0 z-40 w-full sm:w-80 lg:w-72 xl:w-80 shrink-0 border-l border-border bg-surface/80 backdrop-blur-xl overflow-y-auto no-scrollbar"
+            className="fixed lg:static inset-y-0 right-0 z-[70] w-full sm:w-80 lg:w-72 xl:w-80 shrink-0 border-l border-border bg-surface/80 backdrop-blur-xl overflow-y-auto no-scrollbar pb-[env(safe-area-inset-bottom)]"
           >
             <div className="sticky top-0 flex items-center justify-between px-4 py-3 border-b border-border bg-surface/60 backdrop-blur-md">
               <h4 className="text-sm font-semibold text-foreground">Details</h4>
@@ -250,8 +250,6 @@ export default function ChatDetails({ conversation: conv, currentUserId, online,
                   </button>
                 ))}
               </div>
-              {/* TODO(backend): block/report endpoints for conversations are not implemented yet.
-                  mute/clear/delete are handled locally until server-side routes exist. */}
             </div>
           </motion.aside>
         </>

@@ -129,6 +129,7 @@ export default function MessagesPage() {
   const [draft, setDraft] = useState("");
   const [msgSearch, setMsgSearch] = useState("");
   const [mobileView, setMobileView] = useState<"list" | "chat">("list");
+  const [kbInset, setKbInset] = useState(0);
   const [sending, setSending] = useState(false);
   const [onlineIds, setOnlineIds] = useState<Set<string>>(new Set());
   const [typingMap, setTypingMap] = useState<Record<string, Record<string, string>>>({});
@@ -197,6 +198,20 @@ export default function MessagesPage() {
       return () => cancelAnimationFrame(id);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Keep the chat container above the on-screen keyboard on mobile.
+  useEffect(() => {
+    if (typeof window === "undefined" || !("visualViewport" in window)) return;
+    const vv = (window as any).visualViewport;
+    const onResize = () => {
+      const win = window as any;
+      const visible = vv.height;
+      const diff = win.innerHeight - visible;
+      setKbInset(diff > 0 ? diff : 0);
+    };
+    vv.addEventListener("resize", onResize);
+    return () => vv.removeEventListener("resize", onResize);
   }, []);
 
   const loadMessages = useCallback(
@@ -613,7 +628,7 @@ export default function MessagesPage() {
   };
 
   return (
-    <div className="-m-4 lg:-m-8 h-[calc(100dvh-9rem)] lg:h-[calc(100dvh-4rem)]">
+    <div className="-m-4 lg:-m-8 h-[calc(100dvh-calc(env(safe-area-inset-top)+env(safe-area-inset-bottom))-9rem)] lg:h-[calc(100dvh-4rem)]" style={kbInset > 0 ? { height: `calc(100dvh - ${kbInset}px - calc(env(safe-area-inset-top) + env(safe-area-inset-bottom)) - 9rem)` } : undefined}>
       <div className="flex h-full overflow-hidden glass rounded-2xl lg:rounded-none border border-border lg:border-0">
         {/* LEFT: conversation list */}
         <aside

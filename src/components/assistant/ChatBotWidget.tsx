@@ -114,7 +114,7 @@ export default function ChatBotWidget() {
   return (
     <>
       {open && (
-        <div className="fixed bottom-24 right-6 z-50 w-80 sm:w-96 glass-strong rounded-2xl shadow-elevated border border-border overflow-hidden animate-scale-in" style={{ maxHeight: "500px" }}>
+        <div className="fixed bottom-[calc(env(safe-area-inset-bottom)+8rem)] md:bottom-24 right-4 md:right-6 left-4 md:left-auto z-50 sm:w-96 max-h-[60dvh] md:max-h-[500px] glass-strong rounded-2xl shadow-elevated border border-border overflow-hidden animate-scale-in flex flex-col">
           <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-surface/50">
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 rounded-lg bg-gradient-primary flex items-center justify-center">
@@ -172,7 +172,7 @@ export default function ChatBotWidget() {
 
       <button
         onClick={() => setOpen(!open)}
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-2xl bg-gradient-primary shadow-lg shadow-primary/30 flex items-center justify-center hover:scale-105 active:scale-95 transition-all animate-float"
+        className="fixed bottom-[calc(env(safe-area-inset-bottom)+5.5rem)] md:bottom-6 right-4 md:right-6 z-50 w-14 h-14 rounded-2xl bg-gradient-primary shadow-lg shadow-primary/30 flex items-center justify-center hover:scale-105 active:scale-95 transition-all animate-float"
         style={{ animationDuration: "4s" }}
       >
         {open ? <X className="w-6 h-6 text-white" /> : <MessageCircle className="w-6 h-6 text-white" />}

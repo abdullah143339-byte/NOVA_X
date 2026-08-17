@@ -9,7 +9,7 @@ export default function ProfileToasts() {
   const { toasts, dismissToast } = useProfile();
 
   return (
-    <div className="fixed bottom-5 right-5 z-[70] flex flex-col gap-2 w-80 max-w-[calc(100vw-2.5rem)]">
+    <div className="fixed bottom-[calc(env(safe-area-inset-bottom)+5rem)] md:bottom-5 right-4 md:right-5 z-[70] flex flex-col gap-2 w-80 max-w-[calc(100vw-2rem)]">
       <AnimatePresence>
         {toasts.map((toast) => (
           <motion.div

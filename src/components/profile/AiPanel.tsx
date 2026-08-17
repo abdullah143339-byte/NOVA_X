@@ -88,15 +88,15 @@ export default function AiPanel({ open, onClose, displayName, username, bio, pro
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+          className="fixed inset-0 z-50 sheet-overlay bg-black/60 backdrop-blur-sm"
           onClick={onClose}
         >
           <motion.div
-            initial={{ opacity: 0, scale: 0.96, y: 12 }}
+            initial={{ opacity: 0, scale: 0.96, y: 40 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.96, y: 12 }}
+            exit={{ opacity: 0, scale: 0.96, y: 40 }}
             transition={{ type: "spring", stiffness: 320, damping: 28 }}
-            className="glass-strong rounded-2xl w-full max-w-2xl max-h-[82vh] overflow-hidden flex flex-col"
+            className="glass-strong rounded-2xl w-full max-w-2xl sheet-panel flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between px-6 py-4 border-b border-border">

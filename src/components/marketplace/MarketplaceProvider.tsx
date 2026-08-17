@@ -313,7 +313,7 @@ export function MarketplaceProvider({ children }: { children: ReactNode }) {
 
 function ToastStack({ toasts, onDismiss }: { toasts: ToastMessage[]; onDismiss: (id: string) => void }) {
   return (
-    <div className="fixed bottom-20 lg:bottom-6 right-4 z-[70] flex flex-col gap-2 w-[calc(100vw-2rem)] sm:w-80">
+    <div className="fixed bottom-[calc(env(safe-area-inset-bottom)+5rem)] lg:bottom-6 right-4 z-[70] flex flex-col gap-2 w-[calc(100vw-2rem)] sm:w-80">
       {toasts.map((t) => (
         <button
           key={t.id}

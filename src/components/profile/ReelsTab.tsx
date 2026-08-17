@@ -60,14 +60,14 @@ export default function ReelsTab({ reels, isOwner, onDelete }: ReelsTabProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
             onClick={() => setActiveReel(null)}
           >
             <motion.div
               initial={{ scale: 0.94 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.94 }}
-              className={cn("relative w-full max-w-sm aspect-[9/16] rounded-2xl overflow-hidden bg-black")}
+              className="relative w-full max-w-sm h-full sm:h-auto sm:aspect-[9/16] sm:max-h-[85dvh] rounded-none sm:rounded-2xl overflow-hidden bg-black"
               onClick={(e) => e.stopPropagation()}
             >
               {mediaUrl(activeReel) && <video src={mediaUrl(activeReel)} className="w-full h-full object-contain" controls autoPlay playsInline />}

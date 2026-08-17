@@ -148,17 +148,19 @@ export default function ProfileHeader({
           </motion.p>
         )}
 
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-3 mt-5">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mt-5">
           <button
             onClick={() => onViewList?.("followers")}
-            className="inline-flex items-center gap-1.5 hover:opacity-80 transition-opacity"
+            className="inline-flex items-center gap-1.5 min-h-[44px] px-2 -mx-2 rounded-xl hover:bg-muted/60 transition-colors"
+            aria-label="View followers"
           >
             <span className="text-sm font-bold text-foreground">{formatCount(stats[0].value)}</span>{" "}
             <span className="text-xs text-muted-foreground">Followers</span>
           </button>
           <button
             onClick={() => onViewList?.("following")}
-            className="inline-flex items-center gap-1.5 hover:opacity-80 transition-opacity"
+            className="inline-flex items-center gap-1.5 min-h-[44px] px-2 -mx-2 rounded-xl hover:bg-muted/60 transition-colors"
+            aria-label="View following"
           >
             <span className="text-sm font-bold text-foreground">{formatCount(stats[1].value)}</span>{" "}
             <span className="text-xs text-muted-foreground">Following</span>

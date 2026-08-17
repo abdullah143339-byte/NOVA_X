@@ -239,12 +239,12 @@ export default function StoryStrip() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex items-center justify-center p-0 sm:p-4"
+            className="fixed inset-0 z-[60] bg-black/95 backdrop-blur-md flex items-center justify-center p-0 sm:p-4"
             onClick={() => setViewingIndex(null)}
           >
             <div className="relative max-w-lg w-full h-full sm:h-[80vh] aspect-auto sm:aspect-[9/16] rounded-none sm:rounded-2xl overflow-hidden bg-black" onClick={(e) => e.stopPropagation()}>
               {/* Progress bars */}
-              <div className="absolute top-0 inset-x-0 z-20 flex gap-1 p-2 sm:p-3">
+              <div className="absolute top-0 inset-x-0 z-20 flex gap-1 p-2 pt-[calc(env(safe-area-inset-top)+0.5rem)] sm:p-3">
                 {currentGroup.stories.map((s, i) => (
                   <div key={s.id} className="h-1 flex-1 rounded-full bg-white/20 overflow-hidden">
                     <motion.div
@@ -258,7 +258,7 @@ export default function StoryStrip() {
               </div>
 
               {/* Header */}
-              <div className="absolute top-4 sm:top-5 inset-x-0 z-20 flex items-center gap-2 px-3 sm:px-4 pt-1">
+              <div className="absolute top-4 sm:top-5 inset-x-0 z-20 flex items-center gap-2 px-3 sm:px-4 pt-[env(safe-area-inset-top)]">
                 <div className="w-9 h-9 rounded-full overflow-hidden bg-surface ring-2 ring-white/20 shrink-0">
                   {currentGroup.user.avatar ? (
                     <img src={currentGroup.user.avatar} alt="" className="w-full h-full object-cover" />
@@ -309,7 +309,7 @@ export default function StoryStrip() {
               </div>
 
               {currentStory.caption && (
-                <div className="absolute bottom-16 inset-x-0 z-20 flex justify-center px-4">
+                <div className="absolute bottom-[calc(env(safe-area-inset-bottom)+3.5rem)] inset-x-0 z-20 flex justify-center px-4">
                   <p className="text-sm text-white/90 bg-black/40 backdrop-blur rounded-xl px-4 py-2 text-center max-w-md">{currentStory.caption}</p>
                 </div>
               )}

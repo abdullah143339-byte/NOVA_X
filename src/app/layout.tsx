@@ -33,7 +33,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} dark`} suppressHydrationWarning>
-      <body className="min-h-screen antialiased">
+      <body className="min-h-dvh antialiased">
         <ThemeProvider>
           <AuthProvider>
             {children}

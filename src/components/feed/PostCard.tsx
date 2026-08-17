@@ -301,9 +301,9 @@ export default function PostCard({ post, currentUserId, onDelete }: PostCardProp
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: "easeOut" }}
-      className="glass rounded-2xl shadow-premium animate-fade-in"
+      className="glass rounded-xl sm:rounded-2xl shadow-premium animate-fade-in"
     >
-      <div className="p-4 pb-0">
+      <div className="p-3 sm:p-4 pb-0">
         <div className="flex items-start gap-3">
           <Link href={`/dashboard/profile?u=${encodeURIComponent(post.author.username)}`} className="shrink-0">
             <div className="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center text-white text-xs font-bold shrink-0 overflow-hidden ring-1 ring-border hover:opacity-90 transition-opacity">
@@ -379,31 +379,31 @@ export default function PostCard({ post, currentUserId, onDelete }: PostCardProp
           <span className="flex items-center gap-1 ml-auto"><Eye className="w-3.5 h-3.5" /> {formatCount(post.viewCount ?? 0)}</span>
         </div>
 
-        <div className="flex items-center justify-between mt-2 pt-2 border-t border-border">
+        <div className="flex items-center gap-1 mt-2 pt-2 border-t border-border">
           <button onClick={triggerLike} aria-label="Like"
-            className={`flex items-center gap-1.5 text-xs font-medium transition-all ${isLiked ? "text-red-500" : "text-muted-foreground hover:text-red-500"} py-2 px-3 rounded-xl hover:bg-red-500/5`}>
+            className={`flex flex-1 items-center justify-center gap-1.5 text-xs font-medium transition-all min-h-[44px] rounded-xl ${isLiked ? "text-red-500" : "text-muted-foreground hover:text-red-500"} active:bg-red-500/10`}>
             <motion.span animate={{ scale: isLiked ? [1, 1.3, 1] : 1 }} transition={{ duration: 0.3 }}>
               <Heart className={`w-4 h-4 ${isLiked ? "fill-red-500" : ""}`} />
             </motion.span>
             <span className="hidden sm:inline">Like</span>
           </button>
           <button onClick={loadComments} aria-label="Comment"
-            className={`flex items-center gap-1.5 text-xs font-medium transition-all py-2 px-3 rounded-xl ${showComments ? "text-primary" : "text-muted-foreground hover:text-primary"} hover:bg-primary/5`}>
+            className={`flex flex-1 items-center justify-center gap-1.5 text-xs font-medium transition-all min-h-[44px] rounded-xl ${showComments ? "text-primary" : "text-muted-foreground hover:text-primary"} active:bg-primary/10`}>
             <MessageCircle className="w-4 h-4" />
             <span className="hidden sm:inline">Comment</span>
           </button>
           <button onClick={() => setShareOpen(true)} aria-label="Share"
-            className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-accent py-2 px-3 rounded-xl hover:bg-accent/5 transition-all">
+            className="flex flex-1 items-center justify-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-accent min-h-[44px] rounded-xl active:bg-accent/10 transition-all">
             <Share2 className="w-4 h-4" />
             <span className="hidden sm:inline">Share</span>
           </button>
           <button onClick={handleSend} aria-label="Send" title="Copy link"
-            className={`flex items-center gap-1.5 text-xs font-medium py-2 px-3 rounded-xl transition-all ${copied ? "text-success" : "text-muted-foreground hover:text-primary"} hover:bg-primary/5`}>
+            className={`flex flex-1 items-center justify-center gap-1.5 text-xs font-medium min-h-[44px] rounded-xl transition-all ${copied ? "text-success" : "text-muted-foreground hover:text-primary"} active:bg-primary/10`}>
             {copied ? <Check className="w-4 h-4" /> : <Send className="w-4 h-4" />}
             <span className="hidden sm:inline">Send</span>
           </button>
           <button onClick={toggleBookmark} aria-label="Bookmark"
-            className={`flex items-center gap-1.5 text-xs font-medium py-2 px-3 rounded-xl transition-all ${isBookmarked ? "text-amber-500" : "text-muted-foreground hover:text-amber-500"} hover:bg-amber-500/5`}>
+            className={`flex flex-1 items-center justify-center gap-1.5 text-xs font-medium min-h-[44px] rounded-xl transition-all ${isBookmarked ? "text-amber-500" : "text-muted-foreground hover:text-amber-500"} active:bg-amber-500/10`}>
             <motion.span animate={{ scale: bookmarkAnim ? [1, 1.25, 1] : 1 }} transition={{ duration: 0.35 }} onAnimationComplete={() => setBookmarkAnim(false)}>
               {isBookmarked ? <BookmarkCheck className="w-4 h-4 fill-amber-500" /> : <Bookmark className="w-4 h-4" />}
             </motion.span>
@@ -469,14 +469,14 @@ export default function PostCard({ post, currentUserId, onDelete }: PostCardProp
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center"
             onClick={() => setShareOpen(false)}
           >
             <motion.div
-              initial={{ scale: 0.95, y: 12 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.95, y: 12 }}
-              className="glass-strong rounded-2xl p-6 w-full max-w-sm"
+              initial={{ y: 40, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 40, opacity: 0 }}
+              className="glass-strong rounded-t-2xl sm:rounded-2xl p-6 w-full sm:max-w-sm pb-[calc(env(safe-area-inset-bottom)+1.5rem)]"
               onClick={(e) => e.stopPropagation()}
               role="dialog"
               aria-label="Share post"

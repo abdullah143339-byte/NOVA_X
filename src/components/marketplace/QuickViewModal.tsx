@@ -27,8 +27,8 @@ export default function QuickViewModal({ item, onClose }: QuickViewModalProps) {
   const currentImage = images[imageIndex];
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={onClose}>
-      <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto no-scrollbar" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 z-[60] sheet-overlay bg-black/60 backdrop-blur-sm" onClick={onClose}>
+      <div className="w-full max-w-2xl sheet-panel no-scrollbar" onClick={(e) => e.stopPropagation()}>
         <div className="glass-strong rounded-2xl border border-border overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3 border-b border-border">
             <span className="text-sm font-semibold text-foreground flex items-center gap-1.5">

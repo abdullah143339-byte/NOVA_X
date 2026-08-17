@@ -677,20 +677,26 @@ function FollowerListModal({
   const title = kind === "followers" ? "Followers" : "Following";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={onClose}>
-      <div className="w-full max-w-sm" onClick={(e) => e.stopPropagation()}>
-        <div className="glass rounded-2xl overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+    <div
+      className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-sm sm:rounded-2xl rounded-t-2xl max-h-[85dvh] flex flex-col sm:rounded-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="glass rounded-t-2xl sm:rounded-2xl overflow-hidden flex flex-col max-h-[85dvh]">
+          <div className="flex items-center justify-between px-4 pt-[calc(env(safe-area-inset-top)+0.75rem)] pb-3 border-b border-border">
             <h3 className="font-semibold text-foreground">@{username} — {title}</h3>
             <button
               onClick={onClose}
               aria-label="Close"
-              className="w-7 h-7 rounded-lg bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground"
+              className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
-          <div className="p-4">
+          <div className="p-4 overflow-y-auto overscroll-contain">
             {loading ? (
               <div className="flex justify-center py-8">
                 <Loader2 className="w-6 h-6 text-primary animate-spin" />

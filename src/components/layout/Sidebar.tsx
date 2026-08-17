@@ -68,7 +68,7 @@ export default function Sidebar() {
 
   return (
     <>
-    <aside className="hidden md:flex lg:hidden flex-col w-16 h-screen fixed left-0 top-0 z-40 glass-strong border-r border-border pt-14">
+    <aside className="hidden md:flex lg:hidden flex-col w-16 h-dvh fixed left-0 top-0 z-40 glass-strong border-r border-border pt-14">
       <nav className="flex-1 overflow-y-auto py-3 flex flex-col items-center gap-1">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
@@ -113,7 +113,7 @@ export default function Sidebar() {
       </div>
     </aside>
 
-    <aside className="hidden lg:flex flex-col w-64 h-screen fixed left-0 top-0 glass-strong border-r border-border z-40">
+    <aside className="hidden lg:flex flex-col w-64 h-dvh fixed left-0 top-0 glass-strong border-r border-border z-40">
       <div className="p-5 border-b border-border">
         <Link href="/" className="flex items-center gap-2.5">
           <Logo size={36} />

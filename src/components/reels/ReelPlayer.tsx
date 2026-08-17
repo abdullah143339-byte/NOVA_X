@@ -39,6 +39,20 @@ export default function ReelPlayer({ src, poster, active, paused = false, onDoub
   const [duration, setDuration] = useState(0);
   const [buffered, setBuffered] = useState(0);
   const [fullscreen, setFullscreen] = useState(false);
+  const [controlsVisible, setControlsVisible] = useState(true);
+
+  useEffect(() => {
+    // On touch devices there is no hover; keep controls visible by default.
+    const isTouch = typeof window !== "undefined" && window.matchMedia("(hover: none)").matches;
+    setControlsVisible(!isTouch);
+  }, []);
+
+  useEffect(() => {
+    if (!controlsVisible) {
+      const t = setTimeout(() => setControlsVisible(true), 3000);
+      return () => clearTimeout(t);
+    }
+  }, [controlsVisible]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -192,7 +206,7 @@ export default function ReelPlayer({ src, poster, active, paused = false, onDoub
         <>
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/40 pointer-events-none" />
 
-          <div className="absolute inset-x-0 bottom-0 z-20 px-4 pb-3 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-300">
+          <div className={`absolute inset-x-0 bottom-0 z-20 px-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] transition-opacity duration-300 ${controlsVisible ? "opacity-100" : "opacity-0"}`}>
             <div className="relative h-1 rounded-full bg-white/25 overflow-hidden">
               <div className="absolute inset-y-0 left-0 bg-white/30" style={{ width: `${bufPct}%` }} />
               <input
@@ -203,25 +217,25 @@ export default function ReelPlayer({ src, poster, active, paused = false, onDoub
                 value={currentTime}
                 onChange={(e) => seek(Number(e.target.value))}
                 aria-label="Seek"
-                className="absolute inset-0 w-full opacity-0 cursor-pointer"
+                className="absolute inset-0 w-full opacity-0 cursor-pointer h-6"
               />
               <div className="absolute inset-y-0 left-0 bg-white" style={{ width: `${pct}%` }} />
             </div>
-            <div className="flex items-center gap-3 mt-2 text-white/90">
-              <button onClick={togglePlay} aria-label={playing ? "Pause" : "Play"} className="hover:scale-110 transition-transform">
+            <div className="flex items-center gap-1 mt-2 text-white/90">
+              <button onClick={togglePlay} aria-label={playing ? "Pause" : "Play"} className="w-10 h-10 flex items-center justify-center rounded-full active:bg-white/20 transition-colors">
                 {playing ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
               </button>
-              <button onClick={toggleMute} aria-label={muted ? "Unmute" : "Mute"} className="hover:scale-110 transition-transform">
+              <button onClick={toggleMute} aria-label={muted ? "Unmute" : "Mute"} className="w-10 h-10 flex items-center justify-center rounded-full active:bg-white/20 transition-colors">
                 {muted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
               </button>
-              <span className="text-[11px] font-medium tabular-nums">{fmt(currentTime)} / {fmt(duration)}</span>
+              <span className="text-[11px] font-medium tabular-nums ml-1">{fmt(currentTime)} / {fmt(duration)}</span>
               <span className="flex-1" />
               {document.pictureInPictureEnabled && (
-                <button onClick={togglePip} aria-label="Picture in picture" className="hover:scale-110 transition-transform">
+                <button onClick={togglePip} aria-label="Picture in picture" className="w-10 h-10 flex items-center justify-center rounded-full active:bg-white/20 transition-colors">
                   <PictureInPicture2 className="w-5 h-5" />
                 </button>
               )}
-              <button onClick={toggleFullscreen} aria-label="Fullscreen" className="hover:scale-110 transition-transform">
+              <button onClick={toggleFullscreen} aria-label="Fullscreen" className="w-10 h-10 flex items-center justify-center rounded-full active:bg-white/20 transition-colors">
                 {fullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
               </button>
             </div>

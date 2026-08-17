@@ -87,7 +87,7 @@ export default function ProductCard({ item, onQuickView }: ProductCardProps) {
             onClick={handleToggleWishlist}
             aria-label={wished ? "Remove from wishlist" : "Add to wishlist"}
             className={cn(
-              "w-8 h-8 rounded-lg flex items-center justify-center backdrop-blur-md transition-all",
+              "w-9 h-9 rounded-lg flex items-center justify-center backdrop-blur-md transition-all active:scale-95",
               wished ? "bg-red-500 text-white" : "bg-black/40 text-white hover:bg-black/60"
             )}
           >
@@ -96,7 +96,7 @@ export default function ProductCard({ item, onQuickView }: ProductCardProps) {
           <button
             onClick={handleQuickView}
             aria-label="Quick view"
-            className="w-8 h-8 rounded-lg bg-black/40 text-white flex items-center justify-center backdrop-blur-md hover:bg-black/60 transition-all"
+            className="w-9 h-9 rounded-lg bg-black/40 text-white flex items-center justify-center backdrop-blur-md hover:bg-black/60 transition-all active:scale-95"
           >
             <Eye className="w-4 h-4" />
           </button>
@@ -104,7 +104,7 @@ export default function ProductCard({ item, onQuickView }: ProductCardProps) {
             onClick={handleToggleCompare}
             aria-label={compared ? "Remove from compare" : "Add to compare"}
             className={cn(
-              "w-8 h-8 rounded-lg flex items-center justify-center backdrop-blur-md transition-all",
+              "w-9 h-9 rounded-lg flex items-center justify-center backdrop-blur-md transition-all active:scale-95",
               compared ? "bg-primary text-white" : "bg-black/40 text-white hover:bg-black/60"
             )}
           >

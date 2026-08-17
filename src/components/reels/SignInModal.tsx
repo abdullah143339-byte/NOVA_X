@@ -47,17 +47,17 @@ export default function SignInModal({ open, onClose, onSuccess, message }: SignI
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+          className="fixed inset-0 z-[100] sheet-overlay bg-black/70 backdrop-blur-sm"
           aria-modal="true"
           role="dialog"
         >
           <motion.div
-            initial={{ scale: 0.92, opacity: 0, y: 16 }}
+            initial={{ scale: 0.92, opacity: 0, y: 40 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.95, opacity: 0, y: 10 }}
+            exit={{ scale: 0.95, opacity: 0, y: 40 }}
             transition={{ type: "spring", damping: 24, stiffness: 300 }}
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-md glass-strong rounded-3xl p-7 shadow-2xl"
+            className="w-full max-w-md glass-strong rounded-3xl p-7 shadow-2xl sheet-panel"
           >
             <div className="flex items-start justify-between mb-5">
               <div className="flex items-center gap-3">
