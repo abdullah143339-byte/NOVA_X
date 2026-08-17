@@ -48,7 +48,8 @@ export class AuthController {
   async register(@Body() dto: RegisterDto, @Res({ passthrough: true }) res: Response) {
     const result = await this.authService.register(dto);
     this.setRefreshCookie(res, result.refreshToken);
-    return ApiResponseDto.ok(result, 'Account created successfully');
+    const { refreshToken: _rt, ...safe } = result;
+    return ApiResponseDto.ok(safe, 'Account created successfully');
   }
 
   @Post('login')
@@ -59,6 +60,10 @@ export class AuthController {
     const result = await this.authService.login(dto, req.ip, req.get('user-agent'));
     if ('refreshToken' in result && result.refreshToken) {
       this.setRefreshCookie(res, result.refreshToken);
+    }
+    if ('refreshToken' in result) {
+      const { refreshToken: _rt, ...safe } = result;
+      return ApiResponseDto.ok(safe, 'Login successful');
     }
     return ApiResponseDto.ok(result, 'Login successful');
   }

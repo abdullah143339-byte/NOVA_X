@@ -10,6 +10,15 @@ import { GitHubStrategy } from './github.strategy';
 import { TwoFactorService } from './two-factor.service';
 import { MailModule } from '../mail/mail.module';
 
+function jwtSecret(configService: ConfigService): string {
+  const secret = configService.get<string>('JWT_SECRET');
+  if (secret) return secret;
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('JWT_SECRET environment variable is required');
+  }
+  return 'dev-only-fallback-secret';
+}
+
 @Module({
   imports: [
     MailModule,
@@ -17,7 +26,7 @@ import { MailModule } from '../mail/mail.module';
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
-        secret: configService.get('JWT_SECRET') || 'fallback-secret',
+        secret: jwtSecret(configService),
         signOptions: { expiresIn: configService.get('JWT_EXPIRES_IN') || '15m' },
       }),
       inject: [ConfigService],

@@ -93,11 +93,18 @@ export class StoriesService {
     });
     if (!owner) throw new NotFoundException('User not found');
 
-    if (owner.isPrivate && viewerId && viewerId !== ownerId) {
-      const isFollowing = await this.prisma.follow.findUnique({
-        where: { followerId_followingId: { followerId: viewerId, followingId: ownerId } },
-      });
-      if (!isFollowing) return { user: owner, stories: [] };
+    if (owner.isPrivate) {
+      if (viewerId === ownerId) {
+        // owner always sees their own
+      } else if (viewerId) {
+        const isFollowing = await this.prisma.follow.findUnique({
+          where: { followerId_followingId: { followerId: viewerId, followingId: ownerId } },
+        });
+        if (!isFollowing) return { user: owner, stories: [] };
+      } else {
+        // Anonymous viewers cannot see private accounts' stories.
+        return { user: owner, stories: [] };
+      }
     }
 
     const stories = await this.prisma.story.findMany({

@@ -352,7 +352,7 @@ export class AuthService {
       where: { email: email.toLowerCase() },
     });
 
-    const showDevOtp = process.env.SHOW_DEV_OTP === 'true';
+    const showDevOtp = process.env.NODE_ENV !== 'production' && process.env.SHOW_DEV_OTP === 'true';
 
     if (!user) {
       return {

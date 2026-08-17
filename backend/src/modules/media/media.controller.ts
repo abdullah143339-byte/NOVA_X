@@ -64,7 +64,7 @@ export class UploadsController {
         const mime = (file.mimetype || '').toLowerCase();
         const ext = extname(file.originalname || '').toLowerCase();
         const allowedExts = [
-          '.jpg', '.jpeg', '.png', '.gif', '.webp', '.heic', '.heif', '.avif', '.bmp', '.svg',
+          '.jpg', '.jpeg', '.png', '.gif', '.webp', '.heic', '.heif', '.avif', '.bmp',
           '.mp4', '.webm', '.mov', '.m4v', '.mkv', '.3gp', '.avi',
           '.mp3', '.wav', '.ogg', '.m4a', '.aac', '.flac', '.opus',
           '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.txt', '.csv', '.md', '.json', '.zip', '.rar',
@@ -105,7 +105,7 @@ export class UploadsController {
     const extMimes: Record<string, string> = {
       '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.gif': 'image/gif',
       '.webp': 'image/webp', '.heic': 'image/heic', '.heif': 'image/heif', '.avif': 'image/avif',
-      '.bmp': 'image/bmp', '.svg': 'image/svg+xml',
+      '.bmp': 'image/bmp',
       '.mp4': 'video/mp4', '.webm': 'video/webm', '.mov': 'video/quicktime',
       '.m4v': 'video/x-m4v', '.mkv': 'video/x-matroska', '.3gp': 'video/3gpp', '.avi': 'video/x-msvideo',
       '.mp3': 'audio/mpeg', '.wav': 'audio/wav', '.ogg': 'audio/ogg', '.m4a': 'audio/mp4',

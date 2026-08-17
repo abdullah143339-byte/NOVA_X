@@ -4,6 +4,16 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
 
+function jwtSecret(configService: ConfigService): string {
+  const secret = configService.get<string>('JWT_SECRET');
+  if (secret) return secret;
+  // Fail fast in production instead of silently using a known literal.
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('JWT_SECRET environment variable is required');
+  }
+  return 'dev-only-fallback-secret';
+}
+
 export interface JwtPayload {
   sub: string;
   email: string;
@@ -20,7 +30,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: configService.get('JWT_SECRET') || 'fallback-secret',
+      secretOrKey: jwtSecret(configService),
     });
   }
 

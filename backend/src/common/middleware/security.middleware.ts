@@ -38,8 +38,18 @@ export class SecurityMiddleware implements NestMiddleware {
       }
     }
 
-    // Strict auth rate limiting
-    if (req.path.includes('/auth/login') || req.path.includes('/auth/register')) {
+    // Strict auth rate limiting — covers login, register, password reset and
+    // 2FA verification to prevent brute-force of 6-digit codes.
+    const authPaths = [
+      '/auth/login',
+      '/auth/register',
+      '/auth/forgot-password',
+      '/auth/reset-password',
+      '/auth/password-reset/validate',
+      '/auth/2fa/verify-login',
+    ];
+    const isAuthPath = authPaths.some((p) => req.path.includes(p));
+    if (isAuthPath) {
       const authKey = `auth:${ip}`;
       const authRecord = RATE_LIMIT_STORE.get(authKey);
 

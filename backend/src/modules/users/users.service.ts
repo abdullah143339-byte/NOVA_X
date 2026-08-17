@@ -15,7 +15,7 @@ export class UsersService {
       where: { id: userId },
       select: {
         id: true, username: true, displayName: true, avatar: true, coverImage: true,
-        bio: true, location: true, website: true, isEmailVerified: true, createdAt: true,
+        bio: true, location: true, website: true, isPrivate: true, isEmailVerified: true, createdAt: true,
         profile: true, reputation: true,
         _count: { select: { followers: true, following: true, posts: true } },
       },
@@ -47,12 +47,22 @@ export class UsersService {
   }
 
   async updateProfile(userId: string, data: any) {
-    const allowed = ['displayName', 'bio', 'location', 'website', 'avatar', 'coverImage'];
+    const allowed = ['displayName', 'bio', 'location', 'website', 'avatar', 'coverImage', 'isPrivate'];
     const updateData: any = {};
     for (const key of allowed) {
       if (data[key] !== undefined) updateData[key] = data[key];
     }
-    return this.prisma.user.update({ where: { id: userId }, data: updateData });
+    // Never return credential fields (passwordHash, email, phone, reset tokens).
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: updateData,
+      select: {
+        id: true, username: true, displayName: true, avatar: true, coverImage: true,
+        bio: true, location: true, website: true, isPrivate: true, isEmailVerified: true, createdAt: true,
+        profile: true, reputation: true,
+        _count: { select: { followers: true, following: true, posts: true } },
+      },
+    });
   }
 
   async follow(followerId: string, followingId: string) {

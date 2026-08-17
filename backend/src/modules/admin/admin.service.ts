@@ -162,6 +162,18 @@ export class AdminService {
     if (!user) throw new NotFoundException('User not found');
     if (userId === adminId) throw new ForbiddenException('You cannot change your own role');
 
+    const admin = await this.prisma.user.findUnique({ where: { id: adminId }, select: { role: true } });
+    // Only SUPER_ADMIN can grant/demote other admin-level roles, to prevent
+    // privilege escalation by a single ADMIN account.
+    if (role === 'SUPER_ADMIN' && admin?.role !== 'SUPER_ADMIN') {
+      throw new ForbiddenException('Only a SUPER_ADMIN can grant the SUPER_ADMIN role');
+    }
+    const targetIsPrivileged = ['ADMIN', 'SUPER_ADMIN', 'MODERATOR'].includes(user.role);
+    const newIsPrivileged = ['ADMIN', 'SUPER_ADMIN', 'MODERATOR'].includes(role);
+    if ((targetIsPrivileged || newIsPrivileged) && admin?.role !== 'SUPER_ADMIN') {
+      throw new ForbiddenException('Only a SUPER_ADMIN can change admin-level roles');
+    }
+
     await this.prisma.user.update({
       where: { id: userId },
       data: { role: role as any },
