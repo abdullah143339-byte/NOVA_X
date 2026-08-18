@@ -26,7 +26,7 @@ interface UseCallOptions {
 
 const RTC_CONFIG = {
   iceServers: (() => {
-    const stun = process.env.NEXT_PUBLIC_STUN_SERVERS || "stun:stun.l.google.com:19302";
+    const stun = process.env.NEXT_PUBLIC_STUN_SERVERS || "stun:stun.l.google.com:19302,stun:stun1.l.google.com:19302,stun:stun.cloudflare.com:3478";
     const turnRaw = process.env.NEXT_PUBLIC_TURN_SERVERS;
     const servers: RTCIceServer[] = stun
       .split(",")
@@ -46,6 +46,20 @@ const RTC_CONFIG = {
     return servers.length > 0 ? servers : [{ urls: "stun:stun.l.google.com:19302" }];
   })(),
 };
+
+function waitForIceGathering(pc: RTCPeerConnection): Promise<void> {
+  return new Promise((resolve) => {
+    if (pc.iceGatheringState === "complete") {
+      resolve();
+      return;
+    }
+    const onComplete = () => {
+      pc.removeEventListener("icegatheringstatechange", onComplete);
+      resolve();
+    };
+    pc.addEventListener("icegatheringstatechange", onComplete);
+  });
+}
 
 export function useCall({ peerUserId, kind, onClose }: UseCallOptions) {
   const socketRef = useRef<Socket | null>(null);
@@ -80,6 +94,9 @@ export function useCall({ peerUserId, kind, onClose }: UseCallOptions) {
   useEffect(() => {
     peerRef.current = peerUserId;
   }, [peerUserId]);
+
+  const remoteDescSetRef = useRef(false);
+  const iceBufferRef = useRef<RTCIceCandidateInit[]>([]);
 
   const ensurePC = useCallback(() => {
     if (pcRef.current) return pcRef.current;
@@ -132,6 +149,8 @@ export function useCall({ peerUserId, kind, onClose }: UseCallOptions) {
     streamRef.current = null;
     setLocalStream(null);
     setRemoteStream(null);
+    remoteDescSetRef.current = false;
+    iceBufferRef.current = [];
     pcRef.current?.close();
     pcRef.current = null;
   }, []);
@@ -149,7 +168,11 @@ export function useCall({ peerUserId, kind, onClose }: UseCallOptions) {
     try {
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
-      socket().emit("call:offer", { toUserId: peerRef.current, kind, sdp: offer });
+      // Wait for ICE gathering so the SDP carries all candidates. This
+      // avoids relying on trickle ICE (which is lost if the callee is not
+      // listening for candidates before the call is answered).
+      await waitForIceGathering(pc);
+      socket().emit("call:offer", { toUserId: peerRef.current, kind, sdp: pc.localDescription });
     } catch {
       setPhase("error");
     }
@@ -167,10 +190,19 @@ export function useCall({ peerUserId, kind, onClose }: UseCallOptions) {
       stream.getTracks().forEach((t) => pc.addTrack(t, stream));
       try {
         await pc.setRemoteDescription(offer);
+        remoteDescSetRef.current = true;
+        // Flush any ICE candidates that arrived while we were ringing.
+        for (const candidate of iceBufferRef.current) {
+          try {
+            await pc.addIceCandidate(candidate);
+          } catch {}
+        }
+        iceBufferRef.current = [];
         const answer = await pc.createAnswer();
         await pc.setLocalDescription(answer);
+        await waitForIceGathering(pc);
         setPhase("connecting");
-        socket().emit("call:answer", { toUserId: peerRef.current, sdp: answer });
+        socket().emit("call:answer", { toUserId: peerRef.current, sdp: pc.localDescription });
       } catch {
         setPhase("error");
       }
@@ -233,6 +265,13 @@ export function useCall({ peerUserId, kind, onClose }: UseCallOptions) {
       if (!pc) return;
       try {
         await pc.setRemoteDescription(p.sdp);
+        remoteDescSetRef.current = true;
+        for (const candidate of iceBufferRef.current) {
+          try {
+            await pc.addIceCandidate(candidate);
+          } catch {}
+        }
+        iceBufferRef.current = [];
         setPhase("connecting");
       } catch {
         setError("Call handshake failed.");
@@ -242,6 +281,12 @@ export function useCall({ peerUserId, kind, onClose }: UseCallOptions) {
       if (p.userId !== peerRef.current) return;
       const pc = pcRef.current;
       if (!pc || !p.candidate) return;
+      // Candidates can arrive before the remote description is set (e.g.
+      // trickled during ringing). Buffer them and add after setRemoteDescription.
+      if (!remoteDescSetRef.current) {
+        iceBufferRef.current.push(p.candidate);
+        return;
+      }
       try {
         await pc.addIceCandidate(p.candidate);
       } catch {}

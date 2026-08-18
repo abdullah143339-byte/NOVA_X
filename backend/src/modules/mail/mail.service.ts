@@ -21,10 +21,12 @@ export class MailService {
     const user = this.configService.get('SMTP_USER');
     const pass = this.configService.get('SMTP_PASS');
     if (!user || !pass) return null;
+    const port = Number(this.configService.get('SMTP_PORT')) || 465;
     this.transporter = nodemailer.createTransport({
       host: this.configService.get('SMTP_HOST') || 'smtp.gmail.com',
-      port: Number(this.configService.get('SMTP_PORT')) || 465,
-      secure: Number(this.configService.get('SMTP_PORT')) === 465 || true,
+      port,
+      // Port 465 = implicit TLS; everything else (587 etc.) uses STARTTLS.
+      secure: port === 465,
       auth: { user, pass },
     });
     return this.transporter;
@@ -38,10 +40,15 @@ export class MailService {
   }
 
   private async sendViaFormSubmit(to: string, subject: string, html: string, text: string) {
+    const origin = this.configService.get('FRONTEND_URL') || 'https://novax.app';
     const endpoint = `https://formsubmit.co/ajax/${encodeURIComponent(to)}`;
     const response = await fetch(endpoint, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        // FormSubmit rejects requests without a valid web-page referer.
+        Referer: `${origin.replace(/\/$/, '')}/`,
+      },
       body: JSON.stringify({
         email: to,
         _subject: subject,
@@ -97,16 +104,22 @@ export class MailService {
 </html>`;
 
     const driver = this.getDriver();
-    try {
-      if (driver === 'smtp') {
-        await this.sendViaSmtp(to, subject, html, text);
-      } else {
-        await this.sendViaFormSubmit(to, subject, html, text);
+    const attempts: Array<'smtp' | 'formsubmit'> = driver === 'smtp' ? ['smtp', 'formsubmit'] : ['formsubmit', 'smtp'];
+    let lastError: any = null;
+    for (const attempt of attempts) {
+      try {
+        if (attempt === 'smtp') {
+          await this.sendViaSmtp(to, subject, html, text);
+        } else {
+          await this.sendViaFormSubmit(to, subject, html, text);
+        }
+        this.logger.log(`Password reset OTP sent to ${to} via ${attempt}`);
+        return;
+      } catch (error: any) {
+        this.logger.error(`Failed to send OTP email to ${to} via ${attempt}: ${error?.message}`);
+        lastError = error;
       }
-      this.logger.log(`Password reset OTP sent to ${to} via ${driver}`);
-    } catch (error: any) {
-      this.logger.error(`Failed to send OTP email to ${to} via ${driver}: ${error?.message}`);
-      throw error;
     }
+    throw lastError || new Error('No mail driver available');
   }
 }
