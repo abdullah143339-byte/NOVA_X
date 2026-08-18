@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/providers/AuthProvider";
 import api from "@/lib/api";
 import { getSocket } from "@/lib/socket";
-import { useRouter } from "next/navigation";
 import { Loader2, Send, Link2, X, RefreshCw, Mic, Volume2, Video, Phone, ShieldOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useMessagesSocket } from "@/components/messages/useMessagesSocket";
@@ -18,6 +17,7 @@ import ChatDetails from "@/components/messages/ChatDetails";
 import MediaViewer from "@/components/messages/MediaViewer";
 import AiPanel from "@/components/messages/AiPanel";
 import CallOverlay from "@/components/messages/CallOverlay";
+import AIConversation from "@/components/messages/AIConversation";
 import type {
   ChatMessage,
   Conversation,
@@ -108,7 +108,6 @@ function sortConversations(list: Conversation[]): Conversation[] {
 
 export default function MessagesPage() {
   const { user } = useAuth();
-  const router = useRouter();
 
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -255,7 +254,13 @@ export default function MessagesPage() {
   const selectConversation = useCallback(
     (id: string) => {
       if (id === "__ai__") {
-        router.push("/dashboard/learning/ai-search");
+        setActiveId("__ai__");
+        setDetailsOpen(false);
+        setReplyTo(null);
+        replyToRef.current = null;
+        setAiOpen(false);
+        setMsgSearch("");
+        setMobileView("chat");
         return;
       }
       if (id === activeIdRef.current) return;
@@ -285,7 +290,7 @@ export default function MessagesPage() {
         setBlockedConvId(null);
       }
     },
-    [router, loadMessages, shareUrl, conversations, user?.id]
+    [loadMessages, shareUrl, conversations, user?.id]
   );
 
   const loadConversations = useCallback(async () => {
@@ -658,7 +663,9 @@ export default function MessagesPage() {
 
         {/* CENTER: chat window */}
         <section className={cnChat(mobileView === "list")}>
-          {activeConv ? (
+          {activeId === "__ai__" ? (
+            <AIConversation onBack={() => setMobileView("list")} />
+          ) : activeConv ? (
             <>
               <ChatHeader
                 conversation={activeConv}
