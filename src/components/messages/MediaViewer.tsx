@@ -50,21 +50,21 @@ export default function MediaViewer({ message, onClose }: MediaViewerProps) {
               <button
                 onClick={() => setScale((s) => Math.max(0.5, s - 0.25))}
                 aria-label="Zoom out"
-                className="w-9 h-9 rounded-xl glass-strong flex items-center justify-center text-white hover:scale-105 transition-transform"
+                className="w-10 h-10 rounded-full bg-white/10 backdrop-blur flex items-center justify-center text-white hover:bg-white/20 transition-colors"
               >
                 <ZoomOut className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setScale((s) => Math.min(3, s + 0.25))}
                 aria-label="Zoom in"
-                className="w-9 h-9 rounded-xl glass-strong flex items-center justify-center text-white hover:scale-105 transition-transform"
+                className="w-10 h-10 rounded-full bg-white/10 backdrop-blur flex items-center justify-center text-white hover:bg-white/20 transition-colors"
               >
                 <ZoomIn className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setScale(1)}
                 aria-label="Reset zoom"
-                className="h-9 px-3 rounded-xl glass-strong text-xs text-white hover:scale-105 transition-transform"
+                className="h-10 px-4 rounded-full bg-white/10 backdrop-blur text-xs text-white hover:bg-white/20 transition-colors"
               >
                 {Math.round(scale * 100)}%
               </button>
@@ -76,14 +76,14 @@ export default function MediaViewer({ message, onClose }: MediaViewerProps) {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Download"
-                className="w-9 h-9 rounded-xl glass-strong flex items-center justify-center text-white hover:scale-105 transition-transform"
+                className="w-10 h-10 rounded-full bg-white/10 backdrop-blur flex items-center justify-center text-white hover:bg-white/20 transition-colors"
               >
                 <Download className="w-4 h-4" />
               </a>
               <button
                 onClick={onClose}
                 aria-label="Close viewer"
-                className="w-9 h-9 rounded-xl glass-strong flex items-center justify-center text-white hover:scale-105 transition-transform"
+                className="w-10 h-10 rounded-full bg-white/10 backdrop-blur flex items-center justify-center text-white hover:bg-white/20 transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>

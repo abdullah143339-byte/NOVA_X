@@ -85,18 +85,18 @@ export default function ChatDetails({ conversation: conv, currentUserId, online,
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 30, stiffness: 300 }}
-            className="fixed lg:static inset-y-0 right-0 z-[70] w-full sm:w-80 lg:w-72 xl:w-80 shrink-0 border-l border-border bg-surface/80 backdrop-blur-xl overflow-y-auto no-scrollbar pb-[env(safe-area-inset-bottom)]"
+            className="fixed lg:static inset-y-0 right-0 z-[70] w-full sm:w-80 lg:w-72 xl:w-80 shrink-0 border-l border-border bg-background/80 backdrop-blur-xl overflow-y-auto no-scrollbar pb-[env(safe-area-inset-bottom)]"
           >
-            <div className="sticky top-0 flex items-center justify-between px-4 py-3 border-b border-border bg-surface/60 backdrop-blur-md">
+            <div className="sticky top-0 flex items-center justify-between px-4 py-3 border-b border-border tactile-raised">
               <h4 className="text-sm font-semibold text-foreground">Details</h4>
-              <button onClick={onClose} aria-label="Close details" className="w-8 h-8 rounded-full hover:bg-muted flex items-center justify-center text-muted-foreground">
+              <button onClick={onClose} aria-label="Close details" className="w-8 h-8 rounded-full tactile-icon-btn text-muted-foreground">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div className="p-5 text-center">
               <div className="relative w-20 h-20 mx-auto mb-3">
-                <div className="w-20 h-20 rounded-2xl flex items-center justify-center text-xl font-bold text-white overflow-hidden">
+                <div className="w-20 h-20 rounded-[1.4rem] flex items-center justify-center text-xl font-bold text-white overflow-hidden shadow-lg">
                   {conv.avatar ? (
                     <img src={conv.avatar} alt="" className="w-full h-full object-cover" />
                   ) : (
@@ -166,7 +166,7 @@ export default function ChatDetails({ conversation: conv, currentUserId, online,
                       href={m.media?.[0]?.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="relative aspect-square rounded-lg overflow-hidden bg-muted/50 group"
+                      className="relative aspect-square rounded-xl overflow-hidden tactile-inset group"
                     >
                       {m.type === "VIDEO" || /\.(mp4|webm)$/i.test(m.media?.[0]?.url || "") ? (
                         <video src={m.media?.[0]?.url} className="w-full h-full object-cover" preload="metadata" muted />
@@ -189,7 +189,7 @@ export default function ChatDetails({ conversation: conv, currentUserId, online,
                 <p className="text-[11px] uppercase tracking-wider text-muted-foreground mb-2">Shared Files</p>
                 <div className="space-y-1.5">
                   {shared.files.map((m) => (
-                    <a key={m.id} href={m.media?.[0]?.url} target="_blank" rel="noopener noreferrer" download className="flex items-center gap-2 px-2.5 py-2 rounded-xl bg-muted/40 hover:bg-muted/70 transition-colors">
+                    <a key={m.id} href={m.media?.[0]?.url} target="_blank" rel="noopener noreferrer" download className="flex items-center gap-2 px-2.5 py-2 rounded-2xl tactile-surface hover:brightness-105 transition-colors">
                       <FileText className="w-4 h-4 text-accent shrink-0" />
                       <div className="min-w-0 flex-1">
                         <p className="text-xs text-foreground truncate">{m.media?.[0]?.name || "File"}</p>
@@ -207,7 +207,7 @@ export default function ChatDetails({ conversation: conv, currentUserId, online,
                 <p className="text-[11px] uppercase tracking-wider text-muted-foreground mb-2">Shared Links</p>
                 <div className="space-y-1.5">
                   {shared.links.map((m) => (
-                    <div key={m.id} className="flex items-center gap-2 px-2.5 py-2 rounded-xl bg-muted/40">
+                    <div key={m.id} className="flex items-center gap-2 px-2.5 py-2 rounded-2xl tactile-surface">
                       <Link2 className="w-4 h-4 text-primary shrink-0" />
                       <p className="text-xs text-foreground truncate">{m.content}</p>
                     </div>
@@ -219,7 +219,7 @@ export default function ChatDetails({ conversation: conv, currentUserId, online,
             {shared.voice.length > 0 && (
               <div className="px-4 mb-4">
                 <p className="text-[11px] uppercase tracking-wider text-muted-foreground mb-2">Voice Notes</p>
-                <div className="flex items-center gap-2 px-2.5 py-2 rounded-xl bg-muted/40">
+                <div className="flex items-center gap-2 px-2.5 py-2 rounded-2xl tactile-surface">
                   <Mic className="w-4 h-4 text-accent shrink-0" />
                   <p className="text-xs text-foreground">{shared.voice.length} voice note{shared.voice.length > 1 ? "s" : ""}</p>
                 </div>
@@ -240,8 +240,8 @@ export default function ChatDetails({ conversation: conv, currentUserId, online,
                       }
                     }}
                     className={cn(
-                      "w-full flex items-center gap-2.5 px-3 h-9 rounded-xl text-sm transition-colors",
-                      a.danger ? "text-red-500 hover:bg-red-500/10" : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                      "w-full flex items-center gap-2.5 px-3 h-11 rounded-2xl text-sm transition-colors tactile-surface",
+                      a.danger ? "text-red-500 hover:bg-red-500/10" : "text-muted-foreground hover:text-foreground hover:brightness-105"
                     )}
                   >
                     <a.icon className="w-4 h-4" />

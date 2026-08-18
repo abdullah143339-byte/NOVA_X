@@ -22,20 +22,20 @@ function urlize(text: string): React.ReactNode[] {
     if (part.startsWith("```")) {
       const code = part.slice(3, -3);
       return (
-        <pre key={i} className="mt-1 mb-1 bg-background/60 border border-border rounded-lg p-2.5 overflow-x-auto text-[12px] leading-relaxed font-mono">
+        <pre key={i} className="mt-1 mb-1 bg-[#101216]/80 border border-white/10 rounded-lg p-2.5 overflow-x-auto text-[12px] leading-relaxed font-mono text-white/90">
           {code}
         </pre>
       );
     }
     if (part.startsWith("`") && part.endsWith("`")) {
-      return <code key={i} className="bg-background/60 border border-border rounded px-1.5 py-0.5 text-[12px] font-mono">{part.slice(1, -1)}</code>;
+      return <code key={i} className="bg-[#101216]/80 border border-white/10 rounded px-1.5 py-0.5 text-[12px] font-mono text-white/90">{part.slice(1, -1)}</code>;
     }
     if (part.startsWith("**") && part.endsWith("**")) {
       return <strong key={i} className="font-semibold">{part.slice(2, -2)}</strong>;
     }
     if (/^https?:\/\//.test(part)) {
       return (
-        <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="text-accent underline underline-offset-2 break-all">
+        <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 break-all font-medium text-[#8b5a2b] dark:text-[#7fb2e8]">
           {part}
         </a>
       );
@@ -111,12 +111,12 @@ export default function MessageBubble({
 
         <div
           className={cn(
-            "relative rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed shadow-sm",
-            isMe ? "bg-gradient-primary text-white rounded-br-md" : "glass text-foreground rounded-bl-md"
+            "relative rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed max-w-full",
+            isMe ? "msg-sent rounded-br-md" : "msg-received rounded-bl-md"
           )}
         >
           {!isMe && m.conversationId && (
-            <p className="text-[11px] font-semibold text-accent mb-0.5">{senderName}</p>
+            <p className="text-[11px] font-semibold text-[#8b5a2b] mb-0.5">{senderName}</p>
           )}
 
           {quoted && (
@@ -125,16 +125,16 @@ export default function MessageBubble({
                 if (onQuoteClick && quoted?.id) onQuoteClick(quoted.id);
               }}
               className={cn(
-                "flex items-center gap-2 w-full max-w-[240px] rounded-lg px-2.5 py-1.5 mb-1.5 border-l-2 border-accent/60 bg-black/20 text-left",
-                isMe ? "bg-white/10" : "bg-muted/60"
+                "flex items-center gap-2 w-full max-w-[240px] rounded-lg px-2.5 py-1.5 mb-1.5 border-l-2 border-accent/60 text-left",
+                isMe ? "bg-white/15" : "bg-[#2b2417]/10"
               )}
             >
               <MessageSquareReply className="w-3.5 h-3.5 shrink-0 opacity-80" />
               <div className="min-w-0">
-                <p className={cn("text-[10px] font-medium truncate", isMe ? "text-white/80" : "text-accent")}>
+                <p className={cn("text-[10px] font-medium truncate", isMe ? "text-white/80" : "text-[#8b5a2b]")}>
                   {quoted.sender?.id === currentUserId ? "You" : quoted.sender?.displayName || quoted.sender?.username || "User"}
                 </p>
-                <p className={cn("text-[11px] truncate", isMe ? "text-white/80" : "text-muted-foreground")}>{replyPreview}</p>
+                <p className={cn("text-[11px] truncate", isMe ? "text-white/75" : "text-[#2b2417]/70")}>{replyPreview}</p>
               </div>
             </button>
           )}
@@ -163,7 +163,7 @@ export default function MessageBubble({
           )}
 
           {isAudio && media?.url && (
-            <div className={cn("flex items-center gap-2 rounded-xl px-2 py-1.5 mb-1 min-w-[200px]", isMe ? "bg-white/10" : "bg-muted/50")}>
+            <div className={cn("flex items-center gap-2 rounded-xl px-2 py-1.5 mb-1 min-w-[200px]", isMe ? "bg-white/15" : "bg-[#2b2417]/10")}>
               <button
                 onClick={() => {
                   const el = voiceRef.current;
@@ -178,10 +178,10 @@ export default function MessageBubble({
               </button>
               <div className="flex-1 flex items-center gap-2">
                 <Volume2 className="w-3.5 h-3.5 opacity-70" />
-                <div className="flex-1 h-1 rounded-full bg-white/25">
-                  <div className="h-full w-0 rounded-full bg-white" />
+                <div className={cn("flex-1 h-1 rounded-full", isMe ? "bg-white/30" : "bg-[#2b2417]/20")}>
+                  <div className="h-full w-0 rounded-full bg-current" />
                 </div>
-                <span className={cn("text-[11px] tabular-nums", isMe ? "text-white/80" : "text-muted-foreground")}>
+                <span className={cn("text-[11px] tabular-nums", isMe ? "text-white/85" : "text-[#2b2417]/70")}>
                   {media.duration ? formatDuration(media.duration) : formatDuration(0)}
                 </span>
               </div>
@@ -190,13 +190,13 @@ export default function MessageBubble({
           )}
 
           {isFile && media?.url && (
-            <div className={cn("flex items-center gap-2.5 rounded-xl px-2.5 py-2 mb-1 min-w-[220px]", isMe ? "bg-white/10" : "bg-muted/50")}>
+            <div className={cn("flex items-center gap-2.5 rounded-xl px-2.5 py-2 mb-1 min-w-[220px]", isMe ? "bg-white/15" : "bg-[#2b2417]/10")}>
               {fileIcon(m)}
               <div className="flex-1 min-w-0">
-                <p className={cn("text-[13px] font-medium truncate", isMe ? "text-white" : "text-foreground")}>
+                <p className={cn("text-[13px] font-medium truncate", isMe ? "text-white" : "text-[#2b2417]")}>
                   {media.name || media.url.split("/").pop()}
                 </p>
-                <p className={cn("text-[11px]", isMe ? "text-white/70" : "text-muted-foreground")}>
+                <p className={cn("text-[11px]", isMe ? "text-white/75" : "text-[#2b2417]/70")}>
                   {formatBytes(media.size) || "File"}
                 </p>
               </div>
@@ -206,7 +206,7 @@ export default function MessageBubble({
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Download file"
-                className={cn("w-8 h-8 rounded-lg flex items-center justify-center transition-colors", isMe ? "hover:bg-white/15" : "hover:bg-muted")}
+                className={cn("w-8 h-8 rounded-lg flex items-center justify-center transition-colors", isMe ? "hover:bg-white/20" : "hover:bg-[#2b2417]/15")}
               >
                 <Download className="w-4 h-4" />
               </a>
@@ -214,11 +214,11 @@ export default function MessageBubble({
           )}
 
           {m.type === "CODE" && m.content && (
-            <pre className="mt-1 mb-1 bg-background/60 border border-border rounded-lg p-2.5 overflow-x-auto text-[12px] leading-relaxed font-mono">{m.content}</pre>
+            <pre className={cn("mt-1 mb-1 rounded-lg p-2.5 overflow-x-auto text-[12px] leading-relaxed font-mono border", isMe ? "bg-[#101216]/70 border-white/10 text-white/90" : "bg-[#2b2417]/10 border-[#2b2417]/15 text-[#2b2417]")}>{m.content}</pre>
           )}
 
           {m.isForwarded && (
-            <p className={cn("text-[10px] flex items-center gap-1 mb-0.5", isMe ? "text-white/60" : "text-muted-foreground")}>
+            <p className={cn("text-[10px] flex items-center gap-1 mb-0.5", isMe ? "text-white/70" : "text-[#2b2417]/60")}>
               <Forward className="w-3 h-3" /> Forwarded
             </p>
           )}
@@ -229,7 +229,7 @@ export default function MessageBubble({
             </div>
           )}
 
-          <div className={cn("flex items-center justify-end gap-1 mt-1", isMe ? "text-white/60" : "text-muted-foreground")}>
+          <div className={cn("flex items-center justify-end gap-1 mt-1", isMe ? "text-white/70" : "text-[#2b2417]/60")}>
             <span className="text-[10px] leading-none">{formatTime(m.createdAt)}</span>
             {m.isEdited && <span className="text-[10px] leading-none">· edited</span>}
             {isMe && m.status === "sent" && (
@@ -253,14 +253,14 @@ export default function MessageBubble({
           isMe ? "flex-row" : "flex-row-reverse"
         )}
       >
-        <button onClick={() => onReply(m)} aria-label="Reply" title="Reply" className="w-7 h-7 rounded-lg hover:bg-muted flex items-center justify-center text-muted-foreground">
+        <button onClick={() => onReply(m)} aria-label="Reply" title="Reply" className="w-7 h-7 rounded-full tactile-icon-btn hover:text-foreground" style={{ width: "1.75rem", height: "1.75rem", borderRadius: "999px" }}>
           <MessageSquareReply className="w-3.5 h-3.5" />
         </button>
-        <button onClick={() => onForward(m)} aria-label="Forward" title="Forward" className="w-7 h-7 rounded-lg hover:bg-muted flex items-center justify-center text-muted-foreground">
+        <button onClick={() => onForward(m)} aria-label="Forward" title="Forward" className="w-7 h-7 rounded-full tactile-icon-btn hover:text-foreground" style={{ width: "1.75rem", height: "1.75rem", borderRadius: "999px" }}>
           <Forward className="w-3.5 h-3.5" />
         </button>
         {canDelete && !m.isDeleted && (
-          <button onClick={() => onDelete(m)} aria-label="Delete" title="Delete" className="w-7 h-7 rounded-lg hover:bg-red-500/10 hover:text-red-500 flex items-center justify-center text-muted-foreground">
+          <button onClick={() => onDelete(m)} aria-label="Delete" title="Delete" className="w-7 h-7 rounded-full tactile-icon-btn hover:text-red-500" style={{ width: "1.75rem", height: "1.75rem", borderRadius: "999px" }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /></svg>
           </button>
         )}

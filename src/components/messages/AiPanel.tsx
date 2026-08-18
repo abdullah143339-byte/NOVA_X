@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, X, Loader2, FileText, Languages, Zap, PenLine, Code, ListTodo } from "lucide-react";
+import { Sparkles, X, FileText, Languages, Zap, PenLine, Code, ListTodo } from "lucide-react";
 import api from "@/lib/api";
 import type { Conversation, ChatMessage } from "./types";
 import { cn } from "@/lib/utils";
@@ -114,13 +114,16 @@ export default function AiPanel({ messages, currentUserId, open, onClose, onUseS
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 12 }}
-          className="absolute bottom-full left-3 right-3 sm:left-auto sm:right-6 sm:w-96 z-30 glass-strong border border-border rounded-2xl shadow-premium overflow-hidden flex flex-col max-h-[55vh]"
+          className="absolute bottom-full left-3 right-3 sm:left-auto sm:right-6 sm:w-96 z-30 tactile-raised rounded-3xl shadow-premium overflow-hidden flex flex-col max-h-[55vh]"
         >
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-accent/8">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-[#6C63FF]/10">
             <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-accent" /> NOVAX
+              <span className="w-6 h-6 rounded-full bg-gradient-to-br from-[#6C63FF] to-[#7C3AED] flex items-center justify-center ai-glow">
+                <Sparkles className="w-3.5 h-3.5 text-white" />
+              </span>
+              NOVAX <span className="text-[10px] font-medium text-accent uppercase tracking-wider">AI Tools</span>
             </h4>
-            <button onClick={onClose} aria-label="Close AI tools" className="w-8 h-8 rounded-full hover:bg-muted flex items-center justify-center text-muted-foreground">
+            <button onClick={onClose} aria-label="Close AI tools" className="w-8 h-8 rounded-full tactile-icon-btn text-muted-foreground">
               <X className="w-4 h-4" />
             </button>
           </div>
@@ -133,8 +136,10 @@ export default function AiPanel({ messages, currentUserId, open, onClose, onUseS
                   onClick={() => run(a.key)}
                   disabled={loading || messages.length === 0}
                   className={cn(
-                    "flex items-center gap-1.5 h-9 px-2.5 rounded-xl text-xs font-medium transition-all text-left",
-                    action === a.key ? "bg-accent/15 text-accent ring-1 ring-accent/40" : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
+                    "flex items-center gap-1.5 h-10 px-2.5 rounded-xl text-xs font-medium transition-all text-left",
+                    action === a.key
+                      ? "tactile-inset text-accent ring-1 ring-accent/40"
+                      : "tactile-surface text-muted-foreground hover:text-foreground hover:brightness-105"
                   )}
                 >
                   <a.icon className="w-3.5 h-3.5 shrink-0" />
@@ -144,16 +149,24 @@ export default function AiPanel({ messages, currentUserId, open, onClose, onUseS
             </div>
 
             {loading && (
-              <div className="flex items-center gap-2 py-4 text-xs text-muted-foreground">
-                <Loader2 className="w-4 h-4 text-accent animate-spin" /> Thinking...
+              <div className="flex items-center gap-2 py-4">
+                <span className="w-6 h-6 rounded-full bg-gradient-to-br from-[#6C63FF] to-[#7C3AED] flex items-center justify-center ai-glow">
+                  <Sparkles className="w-3 h-3 text-white" />
+                </span>
+                <div className="flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent animate-bounce [animation-delay:0ms]" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent animate-bounce [animation-delay:140ms]" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent animate-bounce [animation-delay:280ms]" />
+                </div>
+                <span className="text-xs text-muted-foreground">Thinking...</span>
               </div>
             )}
 
             {error && <p className="text-xs text-red-500 py-2">{error}</p>}
 
             {output && !loading && (
-              <div className="bg-muted/40 border border-border rounded-xl p-3 mb-3">
-                <p className="text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed">{output}</p>
+              <div className="msg-received rounded-2xl p-3 mb-3">
+                <p className="text-sm text-[#2b2417] whitespace-pre-wrap leading-relaxed">{output}</p>
               </div>
             )}
 

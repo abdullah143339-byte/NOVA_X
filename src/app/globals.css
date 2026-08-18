@@ -331,6 +331,150 @@ html.light .bg-gradient-mesh {
 }
 
 /* ============================================
+   TACTILE MESSAGING (Premium Dark UI)
+   ============================================ */
+
+/* Reusable tactile surfaces — theme-aware, dark-first */
+
+.tactile-surface {
+  background: linear-gradient(150deg, var(--surface) 0%, var(--muted) 100%);
+  border: 1px solid var(--border);
+}
+
+.tactile-raised {
+  background: linear-gradient(150deg, var(--surface) 0%, var(--muted) 100%);
+  border: 1px solid var(--border);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 -1px 0 rgba(0, 0, 0, 0.12) inset,
+    0 6px 16px rgba(0, 0, 0, 0.14),
+    0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.tactile-inset {
+  background: var(--muted);
+  border: 1px solid var(--border);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 -1px 0 rgba(0, 0, 0, 0.08) inset,
+    inset 2px 2px 6px rgba(0, 0, 0, 0.12),
+    inset -2px -2px 6px rgba(255, 255, 255, 0.04);
+}
+
+.tactile-pressed {
+  transform: translateY(1px);
+}
+
+/* Tactile icon button */
+.tactile-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 1rem;
+  color: var(--muted-foreground);
+  background: linear-gradient(150deg, var(--surface) 0%, var(--muted) 100%);
+  border: 1px solid var(--border);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 -1px 0 rgba(0, 0, 0, 0.1) inset,
+    0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.tactile-icon-btn:hover {
+  color: var(--foreground);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.08) inset,
+    0 -1px 0 rgba(0, 0, 0, 0.1) inset,
+    0 8px 18px rgba(0, 0, 0, 0.18);
+}
+.tactile-icon-btn:active {
+  transform: translateY(1px);
+  box-shadow:
+    inset 2px 2px 6px rgba(0, 0, 0, 0.18),
+    inset -2px -2px 6px rgba(255, 255, 255, 0.04);
+}
+
+html.dark .tactile-icon-btn {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.08) inset,
+    0 -1px 0 rgba(0, 0, 0, 0.35) inset,
+    0 6px 14px rgba(0, 0, 0, 0.45);
+}
+html.dark .tactile-icon-btn:hover {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.1) inset,
+    0 -1px 0 rgba(0, 0, 0, 0.35) inset,
+    0 10px 22px rgba(0, 0, 0, 0.55);
+}
+html.dark .tactile-icon-btn:active {
+  box-shadow:
+    inset 3px 3px 8px rgba(0, 0, 0, 0.5),
+    inset -2px -2px 6px rgba(255, 255, 255, 0.03);
+}
+
+/* Message bubbles */
+.msg-received {
+  background: linear-gradient(150deg, #f5efe0 0%, #ece3cc 100%);
+  color: #2b2417;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.85) inset,
+    0 2px 6px rgba(0, 0, 0, 0.14),
+    0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.msg-sent {
+  background: linear-gradient(150deg, #4a6f95 0%, #3b5876 100%);
+  color: #f6f9fc;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.18) inset,
+    0 2px 6px rgba(0, 0, 0, 0.28),
+    0 8px 20px rgba(20, 40, 70, 0.28);
+}
+
+/* Tactile badge (unread count) */
+.tactile-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.4rem;
+  height: 1.4rem;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(150deg, #6c63ff, #7c3aed);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.25) inset,
+    0 2px 6px rgba(124, 58, 237, 0.5);
+}
+
+/* Chat background — deep charcoal with soft radial glow */
+.chat-canvas {
+  background:
+    radial-gradient(120% 80% at 20% -10%, rgba(108, 99, 255, 0.12) 0%, transparent 55%),
+    radial-gradient(120% 90% at 90% 110%, rgba(124, 58, 237, 0.1) 0%, transparent 55%),
+    radial-gradient(100% 100% at 50% 50%, var(--surface) 0%, var(--background) 100%);
+}
+
+html.dark .chat-canvas {
+  background:
+    radial-gradient(120% 80% at 20% -10%, rgba(108, 99, 255, 0.1) 0%, transparent 55%),
+    radial-gradient(120% 90% at 90% 110%, rgba(124, 58, 237, 0.08) 0%, transparent 55%),
+    radial-gradient(100% 100% at 50% 50%, #171a21 0%, #101216 100%);
+}
+
+/* AI assistant glow avatar */
+.ai-glow {
+  box-shadow:
+    0 0 0 1px rgba(108, 99, 255, 0.25) inset,
+    0 0 18px rgba(108, 99, 255, 0.4),
+    0 4px 12px rgba(108, 99, 255, 0.3);
+}
+
+/* ============================================
    UTILITIES
    ============================================ */
 

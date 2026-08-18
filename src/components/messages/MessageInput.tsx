@@ -138,7 +138,7 @@ export default function MessageInput({
   const replySender = replyTo ? replyTo.content || "Attachment" : "";
 
   return (
-    <div className="border-t border-border bg-surface/40 backdrop-blur-md shrink-0">
+    <div className="border-t border-border tactile-raised rounded-none shrink-0">
       <AnimatePresence>
         {dragging && (
           <motion.div
@@ -160,11 +160,11 @@ export default function MessageInput({
       >
         {replyTo && (
           <div className="flex items-center gap-2 px-4 pt-3">
-            <div className="flex-1 flex items-center gap-2 rounded-xl bg-muted/60 border border-border px-3 py-2 min-w-0">
+            <div className="flex-1 flex items-center gap-2 rounded-2xl tactile-inset px-3 py-2 min-w-0">
               <span className="text-accent text-xs font-medium shrink-0">Replying to</span>
               <span className="text-xs text-foreground truncate">{replySender}</span>
             </div>
-            <button onClick={onCancelReply} aria-label="Cancel reply" className="w-8 h-8 rounded-lg hover:bg-muted flex items-center justify-center text-muted-foreground shrink-0">
+            <button onClick={onCancelReply} aria-label="Cancel reply" className="w-9 h-9 rounded-full tactile-icon-btn text-muted-foreground shrink-0">
               <X className="w-4 h-4" />
             </button>
           </div>
@@ -195,7 +195,8 @@ export default function MessageInput({
             <button
               onClick={() => { setEmojiOpen((v) => !v); setAttachOpen(false); }}
               aria-label="Emoji"
-              className={cn("w-10 h-10 rounded-xl flex items-center justify-center transition-all", emojiOpen ? "bg-primary/12 text-primary" : "hover:bg-muted text-muted-foreground")}
+              aria-expanded={emojiOpen}
+              className={cn("tactile-icon-btn", emojiOpen ? "text-primary" : "text-muted-foreground")}
             >
               <Smile className="w-5 h-5" />
             </button>
@@ -205,7 +206,7 @@ export default function MessageInput({
                   initial={{ opacity: 0, scale: 0.94, y: 8 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.94, y: 8 }}
-                  className="absolute bottom-12 left-0 z-30 glass-strong border border-border rounded-2xl shadow-premium"
+                  className="absolute bottom-12 left-0 z-30 tactile-raised rounded-2xl shadow-premium"
                 >
                   <EmojiPicker onPick={pickEmoji} />
                 </motion.div>
@@ -217,7 +218,8 @@ export default function MessageInput({
             <button
               onClick={() => { setAttachOpen((v) => !v); setEmojiOpen(false); }}
               aria-label="Attach"
-              className={cn("w-10 h-10 rounded-xl flex items-center justify-center transition-all", attachOpen ? "bg-primary/12 text-primary" : "hover:bg-muted text-muted-foreground")}
+              aria-expanded={attachOpen}
+              className={cn("tactile-icon-btn", attachOpen ? "text-primary" : "text-muted-foreground")}
             >
               <Paperclip className="w-5 h-5" />
             </button>
@@ -227,7 +229,7 @@ export default function MessageInput({
                   initial={{ opacity: 0, scale: 0.94, y: 8 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.94, y: 8 }}
-                  className="absolute bottom-12 left-0 z-30 glass-strong border border-border rounded-2xl shadow-premium p-1.5"
+                  className="absolute bottom-12 left-0 z-30 tactile-raised rounded-2xl shadow-premium p-1.5"
                 >
                   <button
                     onClick={() => { imageInputRef.current?.click(); setAttachOpen(false); }}
@@ -249,7 +251,7 @@ export default function MessageInput({
           <button
             onClick={() => setRecording((v) => !v)}
             aria-label="Voice note"
-            className={cn("w-10 h-10 rounded-xl flex items-center justify-center transition-all", recording ? "bg-red-500/12 text-red-500" : "hover:bg-muted text-muted-foreground")}
+            className={cn("tactile-icon-btn", recording ? "text-red-500" : "text-muted-foreground")}
           >
             <Mic className="w-5 h-5" />
           </button>
@@ -257,7 +259,8 @@ export default function MessageInput({
           <button
             onClick={onToggleAi}
             aria-label="AI tools"
-            className={cn("w-10 h-10 rounded-xl flex items-center justify-center transition-all", aiOpen ? "bg-accent/12 text-accent" : "hover:bg-muted text-muted-foreground")}
+            aria-expanded={aiOpen}
+            className={cn("tactile-icon-btn", aiOpen ? "text-accent ai-glow" : "text-muted-foreground")}
           >
             <Sparkles className="w-5 h-5" />
           </button>
@@ -272,7 +275,7 @@ export default function MessageInput({
               rows={1}
               placeholder="Type a message..."
               aria-label="Message"
-              className="w-full max-h-40 bg-muted/60 border border-border rounded-2xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+              className="w-full max-h-40 rounded-2xl tactile-inset px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 resize-none focus:outline-none focus:ring-2 focus:ring-[#6C63FF]/40 transition-all"
             />
           </div>
 
@@ -281,7 +284,7 @@ export default function MessageInput({
             onClick={handleSend}
             disabled={!value.trim() || sending || disabled}
             aria-label="Send"
-            className="w-10 h-10 rounded-xl bg-gradient-primary text-white flex items-center justify-center hover:shadow-lg hover:shadow-primary/25 transition-all disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+            className="w-11 h-11 rounded-full bg-gradient-to-br from-[#6C63FF] to-[#7C3AED] text-white flex items-center justify-center shadow-lg shadow-[#6C63FF]/30 hover:brightness-110 transition-all disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
           >
             {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
           </motion.button>

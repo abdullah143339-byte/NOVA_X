@@ -144,24 +144,24 @@ export default function NewChatModal({ open, onClose, currentUserId, onCreated }
             exit={{ y: 40, opacity: 0 }}
             transition={{ type: "spring", damping: 26, stiffness: 300 }}
             onClick={(e) => e.stopPropagation()}
-            className="w-full sm:max-w-md max-h-[88dvh] flex flex-col glass-strong rounded-t-2xl sm:rounded-2xl overflow-hidden border-border border-t sm:border shadow-premium"
+            className="w-full sm:max-w-md max-h-[88dvh] flex flex-col tactile-raised rounded-t-3xl sm:rounded-3xl overflow-hidden shadow-premium"
           >
             <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-              <div className="flex items-center gap-2 rounded-xl bg-muted/60 p-1">
+              <div className="flex items-center gap-2 rounded-full tactile-inset p-1">
                 <button
                   onClick={() => { setMode("direct"); setSelected(new Set()); }}
-                  className={cn("h-8 px-3 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5", mode === "direct" ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground")}
+                  className={cn("h-8 px-3.5 rounded-full text-sm font-medium transition-all flex items-center gap-1.5", mode === "direct" ? "bg-gradient-to-br from-[#6C63FF] to-[#7C3AED] text-white shadow-md shadow-[#6C63FF]/30" : "text-muted-foreground hover:text-foreground")}
                 >
                   <UserPlus className="w-3.5 h-3.5" /> Direct
                 </button>
                 <button
                   onClick={() => { setMode("group"); setSelected(new Set()); }}
-                  className={cn("h-8 px-3 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5", mode === "group" ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground")}
+                  className={cn("h-8 px-3.5 rounded-full text-sm font-medium transition-all flex items-center gap-1.5", mode === "group" ? "bg-gradient-to-br from-[#6C63FF] to-[#7C3AED] text-white shadow-md shadow-[#6C63FF]/30" : "text-muted-foreground hover:text-foreground")}
                 >
                   <Users className="w-3.5 h-3.5" /> Group
                 </button>
               </div>
-              <button onClick={onClose} aria-label="Close" className="w-8 h-8 rounded-full hover:bg-muted flex items-center justify-center text-muted-foreground transition-colors">
+              <button onClick={onClose} aria-label="Close" className="w-9 h-9 rounded-full tactile-icon-btn text-muted-foreground transition-colors">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -174,7 +174,7 @@ export default function NewChatModal({ open, onClose, currentUserId, onCreated }
                   onChange={(e) => setGroupName(e.target.value)}
                   placeholder="Group name"
                   aria-label="Group name"
-                  className="w-full h-10 rounded-xl bg-muted/60 border border-border px-4 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all mb-3"
+                  className="w-full h-10 rounded-2xl tactile-inset px-4 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-[#6C63FF]/40 transition-all mb-3"
                 />
               )}
 
@@ -186,16 +186,16 @@ export default function NewChatModal({ open, onClose, currentUserId, onCreated }
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder={mode === "direct" ? "Search people..." : "Search people to add..."}
                   aria-label="Search people"
-                  className="w-full h-10 rounded-xl bg-muted/60 border border-border pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                  className="w-full h-10 rounded-2xl tactile-inset pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-[#6C63FF]/40 transition-all"
                 />
               </div>
 
               {mode === "group" && selectedUsers.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 mb-3">
                   {selectedUsers.map((u) => (
-                    <span key={u.id} className="inline-flex items-center gap-1 h-6 px-2 rounded-full bg-primary/15 text-primary text-xs font-medium">
+                    <span key={u.id} className="inline-flex items-center gap-1 h-7 px-2.5 rounded-full tactile-inset text-primary text-xs font-medium">
                       {u.displayName || u.username}
-                      <button onClick={() => toggle(u.id)} aria-label={`Remove ${u.username}`}>
+                      <button onClick={() => toggle(u.id)} aria-label={`Remove ${u.username}`} className="text-muted-foreground hover:text-foreground">
                         <X className="w-3 h-3" />
                       </button>
                     </span>
@@ -220,18 +220,18 @@ export default function NewChatModal({ open, onClose, currentUserId, onCreated }
                       key={u.id}
                       onClick={() => toggle(u.id)}
                       className={cn(
-                        "w-full flex items-center gap-3 px-2 py-2 rounded-xl text-left transition-all",
-                        checked ? "bg-primary/10 ring-1 ring-primary/30" : "hover:bg-surface/70"
+                        "w-full flex items-center gap-3 px-2 py-2 rounded-2xl text-left transition-all",
+                        checked ? "tactile-inset ring-1 ring-[#6C63FF]/40" : "hover:bg-muted/50"
                       )}
                     >
-                      <div className="w-9 h-9 rounded-xl bg-gradient-primary flex items-center justify-center text-white text-xs font-bold shrink-0 overflow-hidden">
+                      <div className="w-9 h-9 rounded-[0.8rem] bg-gradient-primary flex items-center justify-center text-white text-xs font-bold shrink-0 overflow-hidden shadow-md">
                         {u.avatar ? <img src={u.avatar} alt="" className="w-full h-full object-cover" /> : initials(u.displayName || u.username)}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-foreground truncate">{u.displayName || u.username}</p>
                         <p className="text-xs text-muted-foreground truncate">@{u.username}</p>
                       </div>
-                      <span className={cn("w-5 h-5 rounded-full flex items-center justify-center transition-all", checked ? "bg-primary text-white" : "bg-muted/60 border border-border")}>
+                      <span className={cn("w-5 h-5 rounded-full flex items-center justify-center transition-all", checked ? "bg-gradient-to-br from-[#6C63FF] to-[#7C3AED] text-white shadow-md shadow-[#6C63FF]/30" : "tactile-inset")}>
                         {checked && <Check className="w-3 h-3" />}
                       </span>
                     </button>
@@ -242,7 +242,7 @@ export default function NewChatModal({ open, onClose, currentUserId, onCreated }
               <button
                 onClick={handleCreate}
                 disabled={creating || (mode === "direct" ? selected.size !== 1 : selected.size === 0 || !groupName.trim())}
-                className="w-full mt-4 h-10 rounded-xl bg-gradient-primary text-white text-sm font-medium hover:shadow-lg hover:shadow-primary/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full mt-4 h-11 rounded-full bg-gradient-to-br from-[#6C63FF] to-[#7C3AED] text-white text-sm font-medium shadow-lg shadow-[#6C63FF]/25 hover:brightness-110 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {creating ? (
                   <>

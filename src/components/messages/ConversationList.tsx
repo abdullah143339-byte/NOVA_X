@@ -61,13 +61,16 @@ function ConversationRow({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25 }}
       onClick={onSelect}
+      aria-pressed={active}
       className={cn(
-        "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all duration-200 group",
-        active ? "bg-primary/12 ring-1 ring-primary/30" : "hover:bg-surface/70"
+        "w-full flex items-center gap-3 px-3 py-2.5 rounded-2xl text-left transition-all duration-200 group",
+        active
+          ? "tactile-raised ring-1 ring-[#6C63FF]/25"
+          : "tactile-surface hover:shadow-[0_6px_14px_rgba(0,0,0,0.2)] hover:brightness-105 active:scale-[0.99]"
       )}
     >
       <div className="relative shrink-0">
-        <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center text-sm font-bold text-white", conv.avatar ? "bg-transparent" : "bg-gradient-primary")}>
+        <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center text-sm font-bold text-white overflow-hidden shadow-md", conv.avatar ? "bg-transparent" : "bg-gradient-primary")}>
           {conv.avatar ? (
             <img src={conv.avatar} alt="" className="w-full h-full rounded-2xl object-cover" />
           ) : (
@@ -106,7 +109,7 @@ function ConversationRow({
             {conv.isPinned && <Pin className="w-3 h-3 text-muted-foreground" />}
             {conv.isMuted && <BellOff className="w-3 h-3 text-muted-foreground" />}
             {unread && (
-              <span className="min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center">
+              <span className="tactile-badge">
                 {conv.unreadCount > 99 ? "99+" : conv.unreadCount}
               </span>
             )}
@@ -164,13 +167,13 @@ export default function ConversationList({
           <button
             onClick={onNewChat}
             aria-label="New chat"
-            className="w-9 h-9 rounded-xl bg-primary/12 flex items-center justify-center text-primary hover:bg-primary/20 hover:scale-105 transition-all"
+            className="w-10 h-10 rounded-2xl tactile-icon-btn text-primary"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="relative mb-2">
+        <div className="relative mb-2.5">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             type="text"
@@ -178,7 +181,7 @@ export default function ConversationList({
             onChange={(e) => onSearch(e.target.value)}
             placeholder="Search conversations..."
             aria-label="Search conversations"
-            className="w-full h-10 rounded-xl bg-muted/60 border border-border pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+            className="w-full h-11 rounded-2xl tactile-inset pl-10 pr-3 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-[#6C63FF]/40 transition-all"
           />
         </div>
 
@@ -186,15 +189,17 @@ export default function ConversationList({
           <button
             onClick={onToggleUnread}
             className={cn(
-              "h-7 px-3 rounded-full text-xs font-medium transition-all flex items-center gap-1",
-              unreadOnly ? "bg-primary/15 text-primary ring-1 ring-primary/40" : "bg-muted/60 text-muted-foreground hover:bg-muted"
+              "h-8 px-3.5 rounded-full text-xs font-medium transition-all flex items-center gap-1",
+              unreadOnly
+                ? "tactile-inset text-primary ring-1 ring-[#6C63FF]/30"
+                : "tactile-surface text-muted-foreground hover:text-foreground"
             )}
           >
             <Bell className="w-3 h-3" /> Unread
           </button>
           <button
             onClick={() => onSelect("__ai__")}
-            className="h-7 px-3 rounded-full text-xs font-medium transition-all flex items-center gap-1 bg-accent/12 text-accent hover:bg-accent/20"
+            className="h-8 px-3.5 rounded-full text-xs font-medium transition-all flex items-center gap-1 tactile-inset text-accent ring-1 ring-accent/25 hover:brightness-110"
             aria-label="Open AI Assistant"
           >
             <Sparkles className="w-3 h-3" /> AI Assistant
@@ -202,7 +207,7 @@ export default function ConversationList({
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto no-scrollbar px-2 py-2 space-y-0.5">
+      <div className="flex-1 overflow-y-auto no-scrollbar px-2.5 py-2.5 space-y-1.5">
         {loading && (
           <div className="space-y-2 px-1">
             {[0, 1, 2, 3, 4].map((i) => (
@@ -266,7 +271,7 @@ typingName={Object.values(typingMap[c.id] || {}).join(" and ") || undefined}
 
             {filtered.length === 0 && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="px-4 py-12 text-center">
-                <div className="w-14 h-14 rounded-2xl bg-muted/60 flex items-center justify-center mx-auto mb-3">
+                <div className="w-14 h-14 rounded-3xl tactile-raised flex items-center justify-center mx-auto mb-3">
                   <Users className="w-6 h-6 text-muted-foreground" />
                 </div>
                 <p className="text-sm font-medium text-foreground">

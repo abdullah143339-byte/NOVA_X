@@ -40,18 +40,18 @@ export default function ChatHeader({
   const isGroup = conv.type === "GROUP";
 
   return (
-    <div className="flex items-center justify-between gap-2 px-3 sm:px-5 py-3 border-b border-border bg-surface/40 backdrop-blur-md shrink-0">
+    <div className="flex items-center justify-between gap-2 px-3 sm:px-5 py-2.5 border-b border-border tactile-raised rounded-none shrink-0">
       <div className="flex items-center gap-3 min-w-0">
         <button
           onClick={onBack}
           aria-label="Back to conversations"
-          className="lg:hidden w-9 h-9 rounded-xl hover:bg-muted flex items-center justify-center text-muted-foreground shrink-0"
+          className="lg:hidden w-9 h-9 rounded-full tactile-icon-btn text-muted-foreground shrink-0"
         >
           <ArrowLeft className="w-4 h-4" />
         </button>
 
         <div className="relative shrink-0">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold text-white overflow-hidden">
+          <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-sm font-bold text-white overflow-hidden shadow-md">
             {conv.avatar ? (
               <img src={conv.avatar} alt="" className="w-full h-full object-cover" />
             ) : (
@@ -74,16 +74,16 @@ export default function ChatHeader({
         </div>
       </div>
 
-      <div className="flex items-center gap-1 shrink-0">
-        <button onClick={() => onCall?.("voice")} aria-label="Voice call" title="Voice call" className="w-9 h-9 rounded-xl hover:bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground transition-all">
+      <div className="flex items-center gap-1.5 shrink-0">
+        <button onClick={() => onCall?.("voice")} aria-label="Voice call" title="Voice call" className="w-10 h-10 rounded-full tactile-icon-btn text-muted-foreground hover:text-emerald-500">
           <Phone className="w-4 h-4" />
         </button>
-        <button onClick={() => onCall?.("video")} aria-label="Video call" title="Video call" className="w-9 h-9 rounded-xl hover:bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground transition-all">
+        <button onClick={() => onCall?.("video")} aria-label="Video call" title="Video call" className="w-10 h-10 rounded-full tactile-icon-btn text-muted-foreground hover:text-accent">
           <Video className="w-4 h-4" />
         </button>
 
         {searching ? (
-          <div className="flex items-center gap-1 rounded-xl bg-muted/60 border border-border pl-3 pr-1 py-1">
+          <div className="flex items-center gap-1 rounded-full tactile-inset pl-3 pr-1 py-1">
             <Search className="w-3.5 h-3.5 text-muted-foreground" />
             <input
               autoFocus
@@ -96,13 +96,13 @@ export default function ChatHeader({
             <button
               onClick={() => { setSearching(false); setQuery(""); onSearch(""); }}
               aria-label="Close search"
-              className="w-7 h-7 rounded-lg hover:bg-muted flex items-center justify-center text-muted-foreground"
+              className="w-7 h-7 rounded-full hover:bg-muted flex items-center justify-center text-muted-foreground"
             >
               <X className="w-3.5 h-3.5" />
             </button>
           </div>
         ) : (
-          <button onClick={() => setSearching(true)} aria-label="Search messages" className="w-9 h-9 rounded-xl hover:bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground transition-all">
+          <button onClick={() => setSearching(true)} aria-label="Search messages" className="w-10 h-10 rounded-full tactile-icon-btn text-muted-foreground">
             <Search className="w-4 h-4" />
           </button>
         )}
@@ -110,7 +110,7 @@ export default function ChatHeader({
         <button
           onClick={onToggleDetails}
           aria-label="Chat details"
-          className={cn("w-9 h-9 rounded-xl flex items-center justify-center transition-all", detailsOpen ? "bg-primary/12 text-primary" : "hover:bg-muted text-muted-foreground hover:text-foreground")}
+          className={cn("w-10 h-10 rounded-full tactile-icon-btn", detailsOpen ? "text-primary" : "text-muted-foreground")}
         >
           <Info className="w-4 h-4" />
         </button>

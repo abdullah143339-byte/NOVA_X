@@ -114,54 +114,65 @@ export default function ChatBotWidget() {
   return (
     <>
       {open && (
-        <div className="fixed bottom-[calc(env(safe-area-inset-bottom)+8rem)] md:bottom-24 right-4 md:right-6 left-4 md:left-auto z-50 sm:w-96 max-h-[60dvh] md:max-h-[500px] glass-strong rounded-2xl shadow-elevated border border-border overflow-hidden animate-scale-in flex flex-col">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-surface/50">
+        <div className="fixed bottom-[calc(env(safe-area-inset-bottom)+8rem)] md:bottom-24 right-4 md:right-6 left-4 md:left-auto z-50 sm:w-96 max-h-[60dvh] md:max-h-[500px] tactile-raised rounded-3xl shadow-elevated overflow-hidden animate-scale-in flex flex-col">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-[#6C63FF]/10">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-gradient-primary flex items-center justify-center">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#6C63FF] to-[#7C3AED] flex items-center justify-center ai-glow">
                 <Bot className="w-4 h-4 text-white" />
               </div>
-              <span className="text-sm font-semibold text-foreground">NOVAX</span>
+              <div>
+                <span className="text-sm font-semibold text-foreground block">NOVAX</span>
+                <span className="text-[10px] text-accent flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Online · AI Assistant
+                </span>
+              </div>
             </div>
-            <button onClick={() => setOpen(false)} className="w-7 h-7 rounded-lg flex items-center justify-center hover:bg-muted transition-colors">
-              <X className="w-4 h-4 text-muted-foreground" />
+            <button onClick={() => setOpen(false)} className="w-8 h-8 rounded-full tactile-icon-btn text-muted-foreground">
+              <X className="w-4 h-4" />
             </button>
           </div>
 
-          <div className="p-3 overflow-y-auto space-y-3" style={{ height: "340px" }}>
+          <div className="p-3 overflow-y-auto no-scrollbar space-y-3 chat-canvas" style={{ height: "340px" }}>
             {messages.filter(m => m.role !== "system").map((msg, i) => (
               <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-[85%] px-3 py-2 rounded-xl text-sm ${
+                <div className={`max-w-[85%] px-3 py-2 rounded-2xl text-sm ${
                   msg.role === "user"
-                    ? "bg-primary text-white rounded-tr-md"
-                    : "bg-muted/70 text-foreground rounded-tl-md border border-border/50"
+                    ? "msg-sent rounded-br-md"
+                    : "msg-received rounded-bl-md"
                 }`}>
-                  <p className="whitespace-pre-wrap">{msg.content}</p>
+                  <p className="whitespace-pre-wrap break-words">{msg.content}</p>
                 </div>
               </div>
             ))}
             {loading && (
               <div className="flex justify-start">
-                <div className="bg-muted/70 border border-border/50 px-3 py-2 rounded-xl rounded-tl-md">
-                  <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                <div className="msg-received rounded-2xl rounded-bl-md px-4 py-3">
+                  <div className="flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#2b2417]/50 animate-bounce [animation-delay:0ms]" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#2b2417]/50 animate-bounce [animation-delay:140ms]" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#2b2417]/50 animate-bounce [animation-delay:280ms]" />
+                  </div>
                 </div>
               </div>
             )}
             <div ref={messagesEndRef} />
           </div>
 
-          <div className="p-3 border-t border-border bg-surface/30">
+          <div className="p-3 border-t border-border tactile-surface">
             <div className="flex items-center gap-2">
               <input
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={e => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), handleSend())}
                 placeholder="Ask me about NOVAX..."
-                className="flex-1 rounded-xl bg-muted/70 border border-border px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary/40 transition-all"
+                aria-label="Ask NOVAX AI"
+                className="flex-1 rounded-2xl tactile-inset px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-[#6C63FF]/40 transition-all"
               />
               <button
                 onClick={handleSend}
                 disabled={!input.trim() || loading}
-                className="w-9 h-9 rounded-xl bg-gradient-primary flex items-center justify-center disabled:opacity-40 hover:opacity-90 transition-opacity shrink-0"
+                aria-label="Send message"
+                className="w-11 h-11 rounded-full bg-gradient-to-br from-[#6C63FF] to-[#7C3AED] flex items-center justify-center disabled:opacity-40 shadow-lg shadow-[#6C63FF]/30 hover:brightness-110 transition-all shrink-0"
               >
                 {loading ? <Loader2 className="w-4 h-4 text-white animate-spin" /> : <Send className="w-4 h-4 text-white" />}
               </button>
@@ -172,7 +183,8 @@ export default function ChatBotWidget() {
 
       <button
         onClick={() => setOpen(!open)}
-        className="fixed bottom-[calc(env(safe-area-inset-bottom)+5.5rem)] md:bottom-6 right-4 md:right-6 z-50 w-14 h-14 rounded-2xl bg-gradient-primary shadow-lg shadow-primary/30 flex items-center justify-center hover:scale-105 active:scale-95 transition-all animate-float"
+        aria-label={open ? "Close AI assistant" : "Open AI assistant"}
+        className="fixed bottom-[calc(env(safe-area-inset-bottom)+5.5rem)] md:bottom-6 right-4 md:right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-br from-[#6C63FF] to-[#7C3AED] shadow-lg shadow-[#6C63FF]/40 ai-glow flex items-center justify-center hover:scale-105 active:scale-95 transition-all animate-float"
         style={{ animationDuration: "4s" }}
       >
         {open ? <X className="w-6 h-6 text-white" /> : <MessageCircle className="w-6 h-6 text-white" />}

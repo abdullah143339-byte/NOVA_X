@@ -629,29 +629,31 @@ export default function MessagesPage() {
 
   return (
     <div className="-m-4 lg:-m-8 h-[calc(100dvh-calc(env(safe-area-inset-top)+env(safe-area-inset-bottom))-9rem)] lg:h-[calc(100dvh-4rem)]" style={kbInset > 0 ? { height: `calc(100dvh - ${kbInset}px - calc(env(safe-area-inset-top) + env(safe-area-inset-bottom)) - 9rem)` } : undefined}>
-      <div className="flex h-full overflow-hidden glass rounded-2xl lg:rounded-none border border-border lg:border-0">
+      <div className="flex h-full overflow-hidden rounded-2xl lg:rounded-none border border-border lg:border-0 bg-background chat-canvas">
         {/* LEFT: conversation list */}
         <aside
           className={cnAside(mobileView === "chat")}
           aria-label="Conversations"
         >
-          <ConversationList
-            conversations={conversations}
-            activeId={activeId}
-            currentUserId={user?.id || null}
-            search={search}
-            unreadOnly={unreadOnly}
-            loading={loadingConvs}
-            error={convError}
-            connected={connected}
-            onlineIds={onlineIds}
-            typingMap={typingMap}
-            onSearch={setSearch}
-            onToggleUnread={() => setUnreadOnly((v) => !v)}
-            onSelect={selectConversation}
-            onNewChat={() => setNewChatOpen(true)}
-            onRetry={loadConversations}
-          />
+          <div className="flex flex-col h-full bg-background/60 backdrop-blur-md">
+            <ConversationList
+              conversations={conversations}
+              activeId={activeId}
+              currentUserId={user?.id || null}
+              search={search}
+              unreadOnly={unreadOnly}
+              loading={loadingConvs}
+              error={convError}
+              connected={connected}
+              onlineIds={onlineIds}
+              typingMap={typingMap}
+              onSearch={setSearch}
+              onToggleUnread={() => setUnreadOnly((v) => !v)}
+              onSelect={selectConversation}
+              onNewChat={() => setNewChatOpen(true)}
+              onRetry={loadConversations}
+            />
+          </div>
         </aside>
 
         {/* CENTER: chat window */}
@@ -671,7 +673,7 @@ export default function MessagesPage() {
               />
 
               {shareUrl && (
-                <div className="flex items-center gap-2 px-4 py-2 bg-accent/8 border-b border-accent/20">
+                <div className="flex items-center gap-2 px-4 py-2 bg-[#6C63FF]/10 border-b border-[#6C63FF]/20">
                   <Link2 className="w-3.5 h-3.5 text-accent shrink-0" />
                   <p className="text-xs text-foreground truncate flex-1">
                     Sharing: <span className="text-accent break-all">{shareUrl}</span>
@@ -679,7 +681,7 @@ export default function MessagesPage() {
                   <button
                     onClick={dismissShare}
                     aria-label="Cancel sharing"
-                    className="w-7 h-7 rounded-lg hover:bg-muted flex items-center justify-center text-muted-foreground shrink-0"
+                    className="w-8 h-8 rounded-full tactile-icon-btn text-muted-foreground shrink-0"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -692,15 +694,15 @@ export default function MessagesPage() {
                     <p className="text-sm text-muted-foreground mb-3">Couldn&apos;t load messages.</p>
                     <button
                       onClick={() => { if (activeId) loadMessages(activeId, 1, true); }}
-                      className="h-8 px-4 rounded-xl bg-gradient-primary text-white text-xs font-medium flex items-center gap-1.5 hover:shadow-lg hover:shadow-primary/25 transition-all"
+                      className="h-10 px-5 rounded-full bg-gradient-to-br from-[#6C63FF] to-[#7C3AED] text-white text-xs font-medium flex items-center gap-1.5 shadow-lg shadow-[#6C63FF]/25 hover:brightness-110 transition-all"
                     >
                       <RefreshCw className="w-3.5 h-3.5" /> Retry
                     </button>
                   </div>
                 ) : loadingMsgs && messages.length === 0 ? (
-                  <div className="flex-1 flex flex-col items-center justify-center gap-3">
+                  <div className="flex-1 flex flex-col items-center justify-center gap-3 chat-canvas">
                     {[0, 1, 2].map((i) => (
-                      <div key={i} className="w-3/4 max-w-md h-10 rounded-2xl bg-muted/50 animate-pulse" />
+                      <div key={i} className="w-3/4 max-w-md h-10 rounded-2xl tactile-inset animate-pulse" />
                     ))}
                   </div>
                 ) : (
@@ -732,7 +734,7 @@ export default function MessagesPage() {
                 />
 
                 {blockedConvId === activeConv.id && (
-                  <div className="px-4 py-3 text-center text-xs text-muted-foreground bg-muted/40 border-t border-border">
+                  <div className="px-4 py-3 text-center text-xs text-muted-foreground tactile-inset border-t border-border">
                     <ShieldOff className="w-4 h-4 inline-block mr-1.5 text-red-500" />
                     You can&apos;t reply to this conversation. The other user has blocked you.
                   </div>
@@ -758,19 +760,19 @@ export default function MessagesPage() {
               </div>
             </>
           ) : (
-            <div className="flex-1 flex flex-col items-center justify-center">
+            <div className="flex-1 flex flex-col items-center justify-center chat-canvas">
               {loadingConvs ? (
                 <Loader2 className="w-6 h-6 text-primary animate-spin" />
               ) : (
                 <>
-                  <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
+                  <div className="w-16 h-16 rounded-3xl tactile-raised flex items-center justify-center mb-4">
                     <Send className="w-8 h-8 text-primary" />
                   </div>
                   <p className="text-lg font-medium text-foreground">Select a conversation</p>
                   <p className="text-sm text-muted-foreground mt-1">Choose a chat or start a new one</p>
                   <button
                     onClick={() => setNewChatOpen(true)}
-                    className="mt-4 h-10 px-5 rounded-xl bg-gradient-primary text-white text-sm font-medium hover:shadow-lg hover:shadow-primary/25 transition-all"
+                    className="mt-4 h-11 px-6 rounded-full bg-gradient-to-br from-[#6C63FF] to-[#7C3AED] text-white text-sm font-medium shadow-lg shadow-[#6C63FF]/25 hover:brightness-110 transition-all"
                   >
                     New Chat
                   </button>
@@ -862,7 +864,7 @@ export default function MessagesPage() {
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.94, opacity: 0, y: 12 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-sm glass-strong rounded-2xl border border-border shadow-premium p-5"
+              className="w-full max-w-sm tactile-raised rounded-3xl shadow-premium p-5"
             >
               <h4 className="text-sm font-semibold text-foreground mb-3">Forward to</h4>
               <div className="space-y-1 max-h-64 overflow-y-auto no-scrollbar">
@@ -875,7 +877,7 @@ export default function MessagesPage() {
                     onClick={() => sendForward(c.id)}
                     className="w-full flex items-center gap-2.5 px-2 py-2 rounded-xl hover:bg-muted/60 transition-colors"
                   >
-                    <div className="w-8 h-8 rounded-lg bg-gradient-primary flex items-center justify-center text-white text-[10px] font-bold overflow-hidden shrink-0">
+                    <div className="w-9 h-9 rounded-xl bg-gradient-primary flex items-center justify-center text-white text-[10px] font-bold overflow-hidden shrink-0 shadow-md">
                       {c.avatar ? <img src={c.avatar} alt="" className="w-full h-full object-cover" /> : c.name.slice(0, 2).toUpperCase()}
                     </div>
                     <span className="text-sm text-foreground truncate flex-1">{c.name}</span>
@@ -884,7 +886,7 @@ export default function MessagesPage() {
               </div>
               <button
                 onClick={() => setForwardMsg(null)}
-                className="w-full mt-3 h-9 rounded-xl bg-muted/60 text-sm text-muted-foreground hover:bg-muted transition-colors"
+                className="w-full mt-3 h-10 rounded-full tactile-surface text-sm text-muted-foreground hover:text-foreground hover:brightness-105 transition-colors"
               >
                 Cancel
               </button>

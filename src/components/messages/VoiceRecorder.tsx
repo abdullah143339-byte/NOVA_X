@@ -152,21 +152,21 @@ export default function VoiceRecorder({ onRecorded, onCancel, sending }: VoiceRe
   };
 
   return (
-    <div className="flex items-center gap-2 px-2 py-1.5 rounded-2xl glass-strong border border-border">
+    <div className="flex items-center gap-2 px-2 py-1.5 rounded-2xl tactile-raised">
       {state === "preview" ? (
         <>
-          <button onClick={previewToggle} aria-label={playing ? "Pause" : "Play preview"} className="w-9 h-9 rounded-full bg-gradient-primary text-white flex items-center justify-center shrink-0">
+          <button onClick={previewToggle} aria-label={playing ? "Pause" : "Play preview"} className="w-9 h-9 rounded-full bg-gradient-to-br from-[#6C63FF] to-[#7C3AED] text-white flex items-center justify-center shrink-0 shadow-md shadow-[#6C63FF]/30">
             {playing ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current" />}
           </button>
           {audioUrl && <audio ref={previewRef} src={audioUrl} onEnded={() => setPlaying(false)} className="hidden" />}
           <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden mx-1">
-            <div className="h-full w-full bg-gradient-to-r from-primary to-accent rounded-full" />
+            <div className="h-full w-full bg-gradient-to-r from-[#6C63FF] to-[#7C3AED] rounded-full" />
           </div>
           <span className="text-xs text-muted-foreground tabular-nums shrink-0">{formatDuration(seconds)}</span>
-          <button onClick={cancel} aria-label="Discard voice note" className="w-8 h-8 rounded-lg hover:bg-muted flex items-center justify-center text-muted-foreground shrink-0">
+          <button onClick={cancel} aria-label="Discard voice note" className="w-8 h-8 rounded-full tactile-icon-btn text-muted-foreground shrink-0" style={{ width: "2rem", height: "2rem", borderRadius: "999px" }}>
             <Trash2 className="w-4 h-4" />
           </button>
-          <button onClick={send} disabled={sending} aria-label="Send voice note" className="w-9 h-9 rounded-full bg-gradient-primary text-white flex items-center justify-center shrink-0 disabled:opacity-50">
+          <button onClick={send} disabled={sending} aria-label="Send voice note" className="w-9 h-9 rounded-full bg-gradient-to-br from-[#6C63FF] to-[#7C3AED] text-white flex items-center justify-center shrink-0 disabled:opacity-50 shadow-md shadow-[#6C63FF]/30">
             {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
           </button>
         </>

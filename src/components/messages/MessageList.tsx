@@ -104,7 +104,7 @@ export default function MessageList({
     if (prevDate === null || !isSameDay(prevDate, day)) {
       rendered.push(
         <div key={"date-" + day + "-" + m.id} className="flex justify-center my-4">
-          <span className="text-[11px] font-medium text-muted-foreground bg-surface/80 border border-border rounded-full px-3 py-1">
+          <span className="text-[11px] font-medium text-muted-foreground tactile-inset rounded-full px-3.5 py-1.5">
             {formatDateLabel(day)}
           </span>
         </div>
@@ -128,7 +128,7 @@ export default function MessageList({
   });
 
   return (
-    <div ref={scrollRef} className="flex-1 overflow-y-auto no-scrollbar px-4 sm:px-6 py-4">
+    <div ref={scrollRef} className="flex-1 overflow-y-auto no-scrollbar px-4 sm:px-6 py-4 chat-canvas">
       <div ref={topSentinelRef} className="h-px" />
       {loadingOlder && (
         <div className="flex justify-center py-2">
@@ -138,7 +138,7 @@ export default function MessageList({
 
       {messages.length === 0 && !loadingOlder && (
         <div className="flex flex-col items-center justify-center h-full text-center">
-          <div className="w-14 h-14 rounded-2xl bg-muted/60 flex items-center justify-center mb-3">
+          <div className="w-14 h-14 rounded-2xl tactile-raised flex items-center justify-center mb-3">
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="text-muted-foreground">
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
             </svg>
@@ -152,11 +152,11 @@ export default function MessageList({
         {rendered}
         {typingName && (
           <div className="flex items-end gap-2">
-            <div className="glass rounded-2xl rounded-bl-md px-4 py-3">
+            <div className="msg-received rounded-2xl rounded-bl-md px-4 py-3">
               <div className="flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground animate-bounce [animation-delay:0ms]" />
-                <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground animate-bounce [animation-delay:140ms]" />
-                <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground animate-bounce [animation-delay:280ms]" />
+                <span className="w-1.5 h-1.5 rounded-full bg-[#2b2417]/50 animate-bounce [animation-delay:0ms]" />
+                <span className="w-1.5 h-1.5 rounded-full bg-[#2b2417]/50 animate-bounce [animation-delay:140ms]" />
+                <span className="w-1.5 h-1.5 rounded-full bg-[#2b2417]/50 animate-bounce [animation-delay:280ms]" />
               </div>
             </div>
             <span className="text-[11px] text-muted-foreground">{typingName} is typing...</span>
@@ -168,7 +168,7 @@ export default function MessageList({
         <button
           onClick={() => scrollToBottom()}
           aria-label="Jump to latest"
-          className="fixed lg:absolute bottom-24 left-1/2 -translate-x-1/2 w-10 h-10 rounded-full glass-strong border border-border flex items-center justify-center shadow-premium hover:scale-105 transition-transform z-10"
+          className="fixed lg:absolute bottom-24 left-1/2 -translate-x-1/2 w-11 h-11 rounded-full tactile-raised flex items-center justify-center shadow-premium hover:scale-105 transition-transform z-10"
         >
           <ArrowDown className="w-4 h-4" />
         </button>
