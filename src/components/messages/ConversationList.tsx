@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { Bell, BellOff, Pin, Search, Users, Sparkles, Plus } from "lucide-react";
+import { Bell, BellOff, Pin, Search, Users, Sparkles, Plus, ChevronRight } from "lucide-react";
 import type { Conversation } from "./types";
 import { isVerifiedUser } from "./types";
 import { formatConversationTime } from "./format";
@@ -197,12 +197,36 @@ export default function ConversationList({
           >
             <Bell className="w-3 h-3" /> Unread
           </button>
+        </div>
+
+        {/* AI Assistant — separate section from conversations */}
+        <div className="mt-3">
+          <p className="text-[11px] uppercase tracking-wider text-muted-foreground mb-1.5 px-1">AI</p>
           <button
             onClick={() => onSelect("__ai__")}
-            className="h-8 px-3.5 rounded-full text-xs font-medium transition-all flex items-center gap-1 tactile-inset text-accent ring-1 ring-accent/25 hover:brightness-110"
             aria-label="Open AI Assistant"
+            className={cn(
+              "w-full flex items-center gap-3 px-3 py-3 rounded-2xl text-left transition-all duration-200 group",
+              activeId === "__ai__"
+                ? "tactile-raised ring-1 ring-[#6C63FF]/30"
+                : "tactile-raised hover:brightness-105 active:scale-[0.99]"
+            )}
+            style={{
+              background:
+                "linear-gradient(120deg, rgba(108,99,255,0.14), rgba(124,58,237,0.08)), linear-gradient(150deg, var(--surface), var(--muted))",
+            }}
           >
-            <Sparkles className="w-3 h-3" /> AI Assistant
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#6C63FF] to-[#7C3AED] flex items-center justify-center ai-glow shrink-0">
+              <Sparkles className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-foreground flex items-center gap-1.5 truncate">
+                NOVAX AI Assistant
+                <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[#6C63FF]/15 text-accent font-bold uppercase tracking-wide shrink-0">AI</span>
+              </p>
+              <p className="text-xs text-muted-foreground truncate">Ask anything, get instant answers</p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0 transition-transform group-hover:translate-x-0.5" />
           </button>
         </div>
       </div>

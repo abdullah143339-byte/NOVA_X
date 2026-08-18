@@ -5,7 +5,6 @@ import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/providers/AuthProvider";
 import api from "@/lib/api";
 import PostCard, { type FeedPost, parseTags } from "@/components/feed/PostCard";
-import PostComposer from "@/components/feed/PostComposer";
 import StoryStrip from "@/components/feed/StoryStrip";
 import FeedSkeleton from "@/components/feed/FeedSkeleton";
 import { EmptyFeed, ErrorFeed } from "@/components/feed/FeedStates";
@@ -166,7 +165,6 @@ export default function FeedPage() {
     <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[minmax(0,1fr)_340px] gap-6 max-w-6xl mx-auto items-start">
       <div className="space-y-4 min-w-0">
         <StoryStrip />
-        <PostComposer onPostCreated={refreshFeed} />
 
         {loading ? (
           <FeedSkeleton />
