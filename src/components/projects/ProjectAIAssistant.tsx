@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Sparkles, Wand2, Tags, Cpu, FileText, Code2, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Modal } from "@/components/admin/AdminShared";
+import Markdown from "@/components/ui/Markdown";
 import type { ProjectRow } from "./types";
 import { aiSummarizeProject, aiSuggestTags, aiSuggestTechStack, aiDocsHelper, aiExplainCode } from "./ai";
 
@@ -118,8 +119,8 @@ export function ProjectAIAssistant({
             </button>
           </div>
           {result && (
-            <div className="rounded-xl bg-muted/60 border border-border p-4 text-sm text-foreground whitespace-pre-wrap leading-relaxed">
-              {result}
+            <div className="rounded-xl bg-muted/60 border border-border p-4 text-sm leading-relaxed">
+              <Markdown content={result} />
             </div>
           )}
           {fallbackUsed && <p className="text-[11px] text-amber-500">Shown from local fallback (AI service unavailable).</p>}

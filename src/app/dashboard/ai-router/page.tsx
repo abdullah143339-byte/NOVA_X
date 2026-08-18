@@ -6,6 +6,7 @@ import { useAuth } from "@/providers/AuthProvider";
 import api from "@/lib/api";
 import GlassCard from "@/components/ui/GlassCard";
 import Button from "@/components/ui/Button";
+import Markdown from "@/components/ui/Markdown";
 import {
   Brain, Code, MessageCircle, Globe, Image, Search,
   Send, Loader2, Sparkles, ArrowRight, CheckCircle2, Zap,
@@ -315,8 +316,8 @@ export default function AIRouterPage() {
             {result ? (
               <div className="space-y-3">
                 {result.content && (
-                  <div className="p-3 rounded-xl bg-muted border border-border text-sm text-foreground whitespace-pre-wrap max-h-64 overflow-y-auto">
-                    {result.content}
+                  <div className="p-3 rounded-xl bg-muted border border-border text-sm max-h-64 overflow-y-auto">
+                    <Markdown content={result.content} />
                   </div>
                 )}
                 {result.prompt && result.url && (

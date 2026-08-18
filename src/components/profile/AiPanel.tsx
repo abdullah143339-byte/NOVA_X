@@ -6,6 +6,8 @@ import { Sparkles, Loader2, Check, Copy, X } from "lucide-react";
 import api from "@/lib/api";
 import { AI_PROFILE_ACTIONS, parseJsonArray } from "./data";
 import { cn } from "@/lib/utils";
+import { NOVAX_AI_RULES } from "@/lib/ai";
+import Markdown from "@/components/ui/Markdown";
 
 interface AiPanelProps {
   open: boolean;
@@ -60,7 +62,7 @@ export default function AiPanel({ open, onClose, displayName, username, bio, pro
     const finalPrompt = id === "translate" ? `${prompt}\n\nBio to translate:\n"${bio || displayName + " is a creator on NOVAX."}"` : prompt;
     try {
       const res = await api.aiChat([
-        { role: "system", content: "You are NOVAX's friendly profile assistant. Be concise, warm and practical. Use plain text with short bullet points." },
+        { role: "system", content: "You are NOVAX's friendly profile assistant. Be concise, warm and practical. Use plain text with short bullet points. " + NOVAX_AI_RULES },
         { role: "user", content: `${context}\n\nTask: ${finalPrompt}` },
       ]);
       setOutput((res.data?.content as string) || "No response returned.");
@@ -167,8 +169,8 @@ export default function AiPanel({ open, onClose, displayName, username, bio, pro
                           {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                         </button>
                       </div>
-                      <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="glass rounded-xl p-4 text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed">
-                        {output}
+                      <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="glass rounded-xl p-4 text-sm leading-relaxed">
+                        <Markdown content={output} />
                       </motion.div>
                     </div>
                   )}

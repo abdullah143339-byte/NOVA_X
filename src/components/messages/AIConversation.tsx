@@ -4,6 +4,8 @@ import { useState, useRef, useEffect } from "react";
 import { ArrowLeft, Bot, Loader2, Send, Trash2 } from "lucide-react";
 import api from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { NOVAX_AI_RULES } from "@/lib/ai";
+import Markdown from "@/components/ui/Markdown";
 
 const WEBSITE_KNOWLEDGE = `You are NOVAX, the intelligent assistant of the NOVAX platform.
 You have complete knowledge of the entire website and its features.
@@ -73,7 +75,7 @@ It combines Social Media, AI, Learning, Portfolio, Community, and Collaboration 
 - User reputation system
 - AI-powered recommendations
 
-Answer questions helpfully about any part of the website. Guide users to the right pages and features based on their needs. Keep responses concise and actionable.`;
+Answer questions helpfully about any part of the website. Guide users to the right pages and features based on their needs. Keep responses concise and actionable.${NOVAX_AI_RULES}`;
 
 interface AIConversationProps {
   onBack: () => void;
@@ -159,7 +161,7 @@ export default function AIConversation({ onBack }: AIConversationProps) {
                   msg.role === "user" ? "message-sent rounded-br-md" : "message-received rounded-bl-md"
                 )}
               >
-                <p className="whitespace-pre-wrap break-words">{msg.content}</p>
+                <Markdown content={msg.content} />
                 <div className="message-meta justify-end mt-1">{now}</div>
               </div>
             </div>

@@ -6,6 +6,8 @@ import { Sparkles, X, FileText, Languages, Zap, PenLine, Code, ListTodo } from "
 import api from "@/lib/api";
 import type { Conversation, ChatMessage } from "./types";
 import { cn } from "@/lib/utils";
+import { NOVAX_AI_RULES } from "@/lib/ai";
+import Markdown from "@/components/ui/Markdown";
 
 export function extractAiText(res: { data?: unknown }): string {
   const raw = res?.data;
@@ -88,7 +90,10 @@ export default function AiPanel({ messages, currentUserId, open, onClose, onUseS
     }
 
     try {
-      const res = await api.aiChat([{ role: "user", content: prompt }], 0.4);
+      const res = await api.aiChat([
+        { role: "system", content: NOVAX_AI_RULES },
+        { role: "user", content: prompt },
+      ], 0.4);
       const text = extractAiText(res);
       if (!text) throw new Error("empty");
       if (key === "suggest") {
@@ -166,7 +171,7 @@ export default function AiPanel({ messages, currentUserId, open, onClose, onUseS
 
             {output && !loading && (
               <div className="message-received message-tactile rounded-2xl p-3 mb-3">
-                <p className="text-sm whitespace-pre-wrap leading-relaxed">{output}</p>
+                <Markdown content={output} />
               </div>
             )}
 
