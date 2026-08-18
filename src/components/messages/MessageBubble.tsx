@@ -35,7 +35,7 @@ function urlize(text: string): React.ReactNode[] {
     }
     if (/^https?:\/\//.test(part)) {
       return (
-        <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 break-all font-medium text-[#8b5a2b] dark:text-[#7fb2e8]">
+        <a key={i} href={part} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 break-all font-medium text-[#8b5a2b]">
           {part}
         </a>
       );
@@ -60,6 +60,7 @@ interface MessageBubbleProps {
   message: ChatMessage;
   isMe: boolean;
   currentUserId: string | null;
+  groupStart?: boolean;
   onReply: (m: ChatMessage) => void;
   onForward: (m: ChatMessage) => void;
   onOpenMedia: (m: ChatMessage) => void;
@@ -72,6 +73,7 @@ export default function MessageBubble({
   message: m,
   isMe,
   currentUserId,
+  groupStart = false,
   onReply,
   onForward,
   onOpenMedia,
@@ -100,19 +102,19 @@ export default function MessageBubble({
       initial={{ opacity: 0, y: 8, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ type: "spring", damping: 26, stiffness: 320 }}
-      className={cn("flex flex-col group", isMe ? "items-end" : "items-start")}
+      className={cn("flex flex-col group", isMe ? "items-end" : "items-start", groupStart ? "message-group-break" : "message-group")}
     >
-      <div className={cn("flex items-end gap-2 max-w-[82%] sm:max-w-[70%]", isMe && "flex-row-reverse")}>
+      <div className={cn("flex items-end gap-2", isMe ? "max-w-[80%] sm:max-w-[58%] flex-row-reverse" : "max-w-[82%] sm:max-w-[62%]")}>
         {!isMe && (
-          <div className="w-7 h-7 rounded-lg bg-gradient-primary flex items-center justify-center text-white text-[10px] font-bold shrink-0 overflow-hidden mb-1">
+          <div className="w-7 h-7 rounded-full bg-gradient-primary flex items-center justify-center text-white text-[10px] font-bold shrink-0 overflow-hidden mb-1 shadow-md ring-1 ring-black/5">
             {m.sender?.avatar ? <img src={m.sender.avatar} alt="" className="w-full h-full object-cover" /> : senderName.slice(0, 2).toUpperCase()}
           </div>
         )}
 
         <div
           className={cn(
-            "relative rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed max-w-full",
-            isMe ? "msg-sent rounded-br-md" : "msg-received rounded-bl-md"
+            "relative text-sm leading-relaxed max-w-full px-3.5 py-2.5 message-tactile",
+            isMe ? "message-sent rounded-br-md" : "message-received rounded-bl-md"
           )}
         >
           {!isMe && m.conversationId && (
@@ -124,17 +126,14 @@ export default function MessageBubble({
               onClick={() => {
                 if (onQuoteClick && quoted?.id) onQuoteClick(quoted.id);
               }}
-              className={cn(
-                "flex items-center gap-2 w-full max-w-[240px] rounded-lg px-2.5 py-1.5 mb-1.5 border-l-2 border-accent/60 text-left",
-                isMe ? "bg-white/15" : "bg-[#2b2417]/10"
-              )}
+              className="flex items-center gap-2 w-full max-w-[240px] rounded-lg px-2.5 py-1.5 mb-1.5 border-l-2 border-[#8b5a2b]/60 bg-black/5 text-left"
             >
-              <MessageSquareReply className="w-3.5 h-3.5 shrink-0 opacity-80" />
+              <MessageSquareReply className="w-3.5 h-3.5 shrink-0 opacity-70" />
               <div className="min-w-0">
-                <p className={cn("text-[10px] font-medium truncate", isMe ? "text-white/80" : "text-[#8b5a2b]")}>
+                <p className="text-[10px] font-medium truncate text-[#8b5a2b]">
                   {quoted.sender?.id === currentUserId ? "You" : quoted.sender?.displayName || quoted.sender?.username || "User"}
                 </p>
-                <p className={cn("text-[11px] truncate", isMe ? "text-white/75" : "text-[#2b2417]/70")}>{replyPreview}</p>
+                <p className="text-[11px] truncate text-black/55">{replyPreview}</p>
               </div>
             </button>
           )}
@@ -163,7 +162,7 @@ export default function MessageBubble({
           )}
 
           {isAudio && media?.url && (
-            <div className={cn("flex items-center gap-2 rounded-xl px-2 py-1.5 mb-1 min-w-[200px]", isMe ? "bg-white/15" : "bg-[#2b2417]/10")}>
+            <div className="flex items-center gap-2 rounded-xl px-2 py-1.5 mb-1 min-w-[200px] bg-black/5">
               <button
                 onClick={() => {
                   const el = voiceRef.current;
@@ -172,16 +171,16 @@ export default function MessageBubble({
                   else { el.play().then(() => setPlayingVoice(true)).catch(() => {}); }
                 }}
                 aria-label={playingVoice ? "Pause" : "Play"}
-                className="w-9 h-9 rounded-full bg-white/90 text-[#0B0D12] flex items-center justify-center shrink-0"
+                className="w-9 h-9 rounded-full bg-white/90 text-[#0B0D12] flex items-center justify-center shrink-0 shadow-sm"
               >
                 {playingVoice ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current" />}
               </button>
               <div className="flex-1 flex items-center gap-2">
-                <Volume2 className="w-3.5 h-3.5 opacity-70" />
-                <div className={cn("flex-1 h-1 rounded-full", isMe ? "bg-white/30" : "bg-[#2b2417]/20")}>
+                <Volume2 className="w-3.5 h-3.5 opacity-60" />
+                <div className="flex-1 h-1 rounded-full bg-black/20">
                   <div className="h-full w-0 rounded-full bg-current" />
                 </div>
-                <span className={cn("text-[11px] tabular-nums", isMe ? "text-white/85" : "text-[#2b2417]/70")}>
+                <span className="text-[11px] tabular-nums text-black/70">
                   {media.duration ? formatDuration(media.duration) : formatDuration(0)}
                 </span>
               </div>
@@ -190,13 +189,13 @@ export default function MessageBubble({
           )}
 
           {isFile && media?.url && (
-            <div className={cn("flex items-center gap-2.5 rounded-xl px-2.5 py-2 mb-1 min-w-[220px]", isMe ? "bg-white/15" : "bg-[#2b2417]/10")}>
+            <div className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 mb-1 min-w-[220px] bg-black/5">
               {fileIcon(m)}
               <div className="flex-1 min-w-0">
-                <p className={cn("text-[13px] font-medium truncate", isMe ? "text-white" : "text-[#2b2417]")}>
+                <p className="text-[13px] font-medium truncate text-[#2b2417]">
                   {media.name || media.url.split("/").pop()}
                 </p>
-                <p className={cn("text-[11px]", isMe ? "text-white/75" : "text-[#2b2417]/70")}>
+                <p className="text-[11px] text-black/60">
                   {formatBytes(media.size) || "File"}
                 </p>
               </div>
@@ -206,7 +205,7 @@ export default function MessageBubble({
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Download file"
-                className={cn("w-8 h-8 rounded-lg flex items-center justify-center transition-colors", isMe ? "hover:bg-white/20" : "hover:bg-[#2b2417]/15")}
+                className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors hover:bg-black/10"
               >
                 <Download className="w-4 h-4" />
               </a>
@@ -214,11 +213,11 @@ export default function MessageBubble({
           )}
 
           {m.type === "CODE" && m.content && (
-            <pre className={cn("mt-1 mb-1 rounded-lg p-2.5 overflow-x-auto text-[12px] leading-relaxed font-mono border", isMe ? "bg-[#101216]/70 border-white/10 text-white/90" : "bg-[#2b2417]/10 border-[#2b2417]/15 text-[#2b2417]")}>{m.content}</pre>
+            <pre className="mt-1 mb-1 rounded-lg p-2.5 overflow-x-auto text-[12px] leading-relaxed font-mono border bg-[#101216]/90 border-white/10 text-white/90">{m.content}</pre>
           )}
 
           {m.isForwarded && (
-            <p className={cn("text-[10px] flex items-center gap-1 mb-0.5", isMe ? "text-white/70" : "text-[#2b2417]/60")}>
+            <p className="text-[10px] flex items-center gap-1 mb-0.5 text-black/55">
               <Forward className="w-3 h-3" /> Forwarded
             </p>
           )}
@@ -229,9 +228,9 @@ export default function MessageBubble({
             </div>
           )}
 
-          <div className={cn("flex items-center justify-end gap-1 mt-1", isMe ? "text-white/70" : "text-[#2b2417]/60")}>
-            <span className="text-[10px] leading-none">{formatTime(m.createdAt)}</span>
-            {m.isEdited && <span className="text-[10px] leading-none">· edited</span>}
+          <div className="message-meta justify-end mt-1">
+            <span>{formatTime(m.createdAt)}</span>
+            {m.isEdited && <span>· edited</span>}
             {isMe && m.status === "sent" && (
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" className="opacity-80">
                 <path d="M20 6L9 17l-5-5" />
@@ -239,7 +238,7 @@ export default function MessageBubble({
             )}
             {isMe && m.status === "sending" && <Loader2 className="w-3 h-3 animate-spin" />}
             {isMe && m.status === "error" && (
-              <button onClick={() => onRetry(m)} aria-label="Retry send" className="text-red-400 hover:text-red-300">
+              <button onClick={() => onRetry(m)} aria-label="Retry send" className="text-red-500 hover:text-red-700">
                 <AlertTriangle className="w-3 h-3" />
               </button>
             )}

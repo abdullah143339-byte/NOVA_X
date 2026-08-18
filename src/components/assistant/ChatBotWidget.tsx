@@ -135,10 +135,10 @@ export default function ChatBotWidget() {
           <div className="p-3 overflow-y-auto no-scrollbar space-y-3 chat-canvas" style={{ height: "340px" }}>
             {messages.filter(m => m.role !== "system").map((msg, i) => (
               <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-[85%] px-3 py-2 rounded-2xl text-sm ${
+                <div className={`max-w-[85%] px-3 py-2 text-sm message-tactile ${
                   msg.role === "user"
-                    ? "msg-sent rounded-br-md"
-                    : "msg-received rounded-bl-md"
+                    ? "message-sent rounded-br-md"
+                    : "message-received rounded-bl-md"
                 }`}>
                   <p className="whitespace-pre-wrap break-words">{msg.content}</p>
                 </div>
@@ -146,7 +146,7 @@ export default function ChatBotWidget() {
             ))}
             {loading && (
               <div className="flex justify-start">
-                <div className="msg-received rounded-2xl rounded-bl-md px-4 py-3">
+                <div className="message-received message-tactile rounded-bl-md px-4 py-3">
                   <div className="flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#2b2417]/50 animate-bounce [animation-delay:0ms]" />
                     <span className="w-1.5 h-1.5 rounded-full bg-[#2b2417]/50 animate-bounce [animation-delay:140ms]" />

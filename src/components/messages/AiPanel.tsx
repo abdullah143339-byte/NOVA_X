@@ -165,8 +165,8 @@ export default function AiPanel({ messages, currentUserId, open, onClose, onUseS
             {error && <p className="text-xs text-red-500 py-2">{error}</p>}
 
             {output && !loading && (
-              <div className="msg-received rounded-2xl p-3 mb-3">
-                <p className="text-sm text-[#2b2417] whitespace-pre-wrap leading-relaxed">{output}</p>
+              <div className="message-received message-tactile rounded-2xl p-3 mb-3">
+                <p className="text-sm whitespace-pre-wrap leading-relaxed">{output}</p>
               </div>
             )}
 

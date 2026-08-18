@@ -98,6 +98,7 @@ export default function MessageList({
 
   const rendered: React.ReactNode[] = [];
   let prevDate: string | null = null;
+  let prevKey: string | null = null;
 
   messages.forEach((m) => {
     const day = m.createdAt;
@@ -110,13 +111,19 @@ export default function MessageList({
         </div>
       );
       prevDate = day;
+      prevKey = null;
     }
+    const isMe = m.senderId === currentUserId;
+    const key = `${isMe}:${m.senderId || ""}`;
+    const groupStart = prevKey !== null && prevKey !== key;
+    prevKey = key;
     rendered.push(
       <MessageBubble
         key={m.id}
         message={m}
-        isMe={m.senderId === currentUserId}
+        isMe={isMe}
         currentUserId={currentUserId}
+        groupStart={groupStart}
         onReply={onReply}
         onForward={onForward}
         onOpenMedia={onOpenMedia}
@@ -148,11 +155,11 @@ export default function MessageList({
         </div>
       )}
 
-      <div className="space-y-1.5">
+      <div>
         {rendered}
         {typingName && (
-          <div className="flex items-end gap-2">
-            <div className="msg-received rounded-2xl rounded-bl-md px-4 py-3">
+          <div className="flex items-end gap-2 mt-2.5">
+            <div className="message-received message-tactile rounded-bl-md px-4 py-3">
               <div className="flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#2b2417]/50 animate-bounce [animation-delay:0ms]" />
                 <span className="w-1.5 h-1.5 rounded-full bg-[#2b2417]/50 animate-bounce [animation-delay:140ms]" />

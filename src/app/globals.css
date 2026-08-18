@@ -414,23 +414,64 @@ html.dark .tactile-icon-btn:active {
     inset -2px -2px 6px rgba(255, 255, 255, 0.03);
 }
 
-/* Message bubbles */
-.msg-received {
-  background: linear-gradient(150deg, #f5efe0 0%, #ece3cc 100%);
-  color: #2b2417;
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.85) inset,
-    0 2px 6px rgba(0, 0, 0, 0.14),
-    0 8px 20px rgba(0, 0, 0, 0.08);
+/* ============================================
+   MESSAGE BUBBLES — tactile / plush (Design.txt)
+   Reusable: .message-tactile .message-received
+   .message-sent .message-meta .message-group
+   ============================================ */
+
+/* Shared tactile base for every bubble */
+.message-tactile {
+  position: relative;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-.msg-sent {
-  background: linear-gradient(150deg, #4a6f95 0%, #3b5876 100%);
-  color: #f6f9fc;
+/* Received — warm cream/off-white, dark text, left aligned */
+.message-received {
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 45%),
+    linear-gradient(150deg, #eee6cf 0%, #e2d6b8 100%);
+  color: #2b2417;
   box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.18) inset,
-    0 2px 6px rgba(0, 0, 0, 0.28),
-    0 8px 20px rgba(20, 40, 70, 0.28);
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.06),
+    0 1px 2px rgba(0, 0, 0, 0.25),
+    0 4px 12px rgba(0, 0, 0, 0.22);
+}
+
+/* Sent — muted dusty blue, dark readable text, right aligned */
+.message-sent {
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 45%),
+    linear-gradient(150deg, #a9c1db 0%, #8fa9c6 100%);
+  color: #202b36;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.08),
+    0 1px 2px rgba(0, 0, 0, 0.3),
+    0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+/* Compact subtle timestamp / read-status row */
+.message-meta {
+  font-size: 10px;
+  line-height: 1;
+  color: rgba(43, 36, 23, 0.55);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+html.dark .message-meta {
+  color: rgba(43, 36, 23, 0.55);
+}
+
+/* Grouping — tight within same sender, breathing room on change */
+.message-group {
+  margin-top: 0.125rem;
+}
+.message-group-break {
+  margin-top: 0.625rem;
 }
 
 /* Tactile badge (unread count) */
@@ -461,9 +502,10 @@ html.dark .tactile-icon-btn:active {
 
 html.dark .chat-canvas {
   background:
-    radial-gradient(120% 80% at 20% -10%, rgba(108, 99, 255, 0.1) 0%, transparent 55%),
-    radial-gradient(120% 90% at 90% 110%, rgba(124, 58, 237, 0.08) 0%, transparent 55%),
-    radial-gradient(100% 100% at 50% 50%, #171a21 0%, #101216 100%);
+    radial-gradient(120% 80% at 20% -10%, rgba(108, 99, 255, 0.07) 0%, transparent 55%),
+    radial-gradient(120% 90% at 90% 110%, rgba(124, 58, 237, 0.05) 0%, transparent 55%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.045'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    radial-gradient(100% 100% at 50% 50%, #15181f 0%, #0e1013 100%);
 }
 
 /* AI assistant glow avatar */
