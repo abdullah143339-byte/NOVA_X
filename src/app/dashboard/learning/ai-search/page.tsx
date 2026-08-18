@@ -6,7 +6,6 @@ import GlassCard from "@/components/ui/GlassCard";
 import api from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { PageHeader, LearningNav } from "@/components/learning/LearningShared";
-import Markdown from "@/components/ui/Markdown";
 import {
   Brain,
   Search,
@@ -212,7 +211,6 @@ ${styleInstruction}
 ${langInstruction}
 Write in a simple, easy-to-understand way. Use short sentences and clear examples.
 For important terms and headings, use **bold** like this (**important term**). Do NOT use # or * symbols for formatting.
-Do NOT use decorative separators or symbols (---, ***, ===).
 Structure your answer with clear sections. Each section heading should be wrapped in ** ** like **What is it?**.
 After the explanation, list 4-6 key points each on a new line starting with "KEY:".
 Then list 3-4 related topics each on a new line starting with "RELATED:".`;
@@ -423,9 +421,14 @@ Then list 3-4 related topics each on a new line starting with "RELATED:".`;
                     <p className="text-xs text-muted-foreground">AI Search Result</p>
                   </div>
                 </div>
-                <div className="text-sm leading-relaxed mb-6">
-                  <Markdown content={aiResult.summary} />
-                </div>
+                <div
+                  className="text-sm text-muted-foreground leading-relaxed mb-6"
+                  dangerouslySetInnerHTML={{
+                    __html: aiResult.summary
+                      .replace(/\*\*(.*?)\*\*/g, '<strong style="color:#1E3A5F">$1</strong>')
+                      .replace(/\n/g, '<br />')
+                  }}
+                />
               </GlassCard>
 
               {aiResult.imageUrl && (
