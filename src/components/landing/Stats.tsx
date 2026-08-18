@@ -5,9 +5,9 @@ import BlurText from "@/components/ui/BlurText";
 import VideoBackdrop from "@/components/landing/VideoBackdrop";
 
 const stats = [
-  { value: "10+", label: "AI Models" },
-  { value: "6", label: "Core Pillars" },
-  { value: "100%", label: "Encrypted" },
+  { value: "5", label: "AI Tasks — Chat, Code, Images, Translate & Deep Search" },
+  { value: "12", label: "Core Modules" },
+  { value: "2FA", label: "JWT · Google OAuth · Rate Limiting" },
   { value: "24/7", label: "AI Assistant" },
 ];
 
