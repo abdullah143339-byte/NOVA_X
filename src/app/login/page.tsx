@@ -16,6 +16,10 @@ import {
   ArrowRight,
   Loader2,
   CheckCircle2,
+  ShieldCheck,
+  BrainCircuit,
+  Zap,
+  Globe,
   ShieldQuestion,
   X,
 } from "lucide-react";
@@ -29,7 +33,8 @@ interface AuthError extends Error {
 }
 
 const FIELD_CLASS =
-  "login-input h-12 text-slate-800 placeholder:text-slate-400 focus:ring-[#6C63FF]/40";
+  "bg-[#1D222C] border border-white/10 text-white placeholder:text-white/35 " +
+  "focus:ring-[#6C63FF]/60 focus:border-[#6C63FF] focus:bg-[#1D222C]";
 
 function GoogleIcon() {
   return (
@@ -50,19 +55,12 @@ function GithubIcon() {
   );
 }
 
-const PRIMARY_BTN =
-  "w-full h-12 rounded-xl font-semibold text-white transition-all duration-200 " +
-  "shadow-[0_12px_28px_-10px_rgba(108,99,255,0.65),0_4px_12px_-4px_rgba(0,0,0,0.12)] " +
-  "hover:shadow-[0_16px_34px_-10px_rgba(108,99,255,0.78)] hover:-translate-y-0.5 " +
-  "active:translate-y-0 active:shadow-[inset_0_2px_6px_rgba(0,0,0,0.18),0_4px_10px_-6px_rgba(108,99,255,0.5)] " +
-  "disabled:shadow-none disabled:hover:translate-y-0";
-
-const socialButtonCls =
-  "flex items-center justify-center gap-2.5 h-11 rounded-xl text-sm font-medium text-slate-700 " +
-  "bg-[#F3F5FA] shadow-[6px_6px_14px_rgba(163,172,188,0.35),-6px_-6px_14px_rgba(255,255,255,0.95)] " +
-  "hover:bg-white hover:shadow-[8px_8px_18px_rgba(163,172,188,0.4),-8px_-8px_18px_rgba(255,255,255,1)] hover:-translate-y-0.5 " +
-  "active:translate-y-0 active:shadow-[inset_3px_3px_8px_rgba(163,172,188,0.35),inset_-3px_-3px_8px_rgba(255,255,255,0.9)] " +
-  "transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#6C63FF]/40";
+const FEATURES = [
+  { icon: BrainCircuit, title: "AI-First Intelligence", desc: "Personalised assistant built into every corner of your feed." },
+  { icon: Zap, title: "Blazing Fast", desc: "Optimised for speed from login to the very first pixel." },
+  { icon: ShieldCheck, title: "Secure by Design", desc: "Encrypted sessions, 2FA ready and granular controls." },
+  { icon: Globe, title: "Connect Everywhere", desc: "One tap sign in with Google and GitHub." },
+];
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -160,313 +158,380 @@ export default function LoginPage() {
     window.location.href = `${API_URL}/auth/${provider}`;
   };
 
+  const socialButtonCls =
+    "flex items-center justify-center gap-2.5 h-11 rounded-xl bg-[#1D222C] border border-white/10 " +
+    "text-sm font-medium text-white hover:bg-[#232936] hover:border-white/20 " +
+    "transition-all duration-200 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-[#6C63FF]/50";
+
   return (
-    <div
-      className="login-light min-h-dvh relative overflow-hidden flex"
-      style={{ background: "#EEF0F4" }}
-    >
+    <div className="min-h-screen bg-[#0F1115] text-white overflow-hidden relative flex">
       <div
         aria-hidden
-        className="absolute -top-40 -left-40 w-[42rem] h-[42rem] rounded-full blur-3xl opacity-40 pointer-events-none"
-        style={{ background: "radial-gradient(circle, rgba(108,99,255,0.20) 0%, transparent 65%)" }}
+        className="absolute top-[-10%] left-[-5%] w-[45vw] h-[45vw] rounded-full blur-[140px] opacity-30 pointer-events-none"
+        style={{ background: "radial-gradient(circle, #6C63FF 0%, transparent 70%)" }}
       />
       <div
         aria-hidden
-        className="absolute -bottom-48 -right-40 w-[44rem] h-[44rem] rounded-full blur-3xl opacity-30 pointer-events-none"
-        style={{ background: "radial-gradient(circle, rgba(124,58,237,0.18) 0%, transparent 65%)" }}
+        className="absolute bottom-[-15%] right-[-5%] w-[40vw] h-[40vw] rounded-full blur-[140px] opacity-25 pointer-events-none"
+        style={{ background: "radial-gradient(circle, #7C3AED 0%, transparent 70%)" }}
       />
       <div
         aria-hidden
-        className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[46rem] h-[46rem] max-w-[130vw] rounded-full pointer-events-none opacity-25"
-        style={{ background: "radial-gradient(circle, rgba(255,255,255,0.9) 0%, transparent 60%)" }}
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage:
+            "linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)",
+          backgroundSize: "56px 56px",
+          maskImage: "radial-gradient(ellipse at center, black 30%, transparent 75%)",
+          WebkitMaskImage: "radial-gradient(ellipse at center, black 30%, transparent 75%)",
+        }}
       />
 
-      <div className="relative z-10 flex-1 flex p-4 sm:p-6">
-        <motion.div
-          initial={{ opacity: 0, y: 28, scale: 0.98 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="m-auto w-full max-w-[440px] pt-[calc(env(safe-area-inset-top)+1rem)] pb-[calc(env(safe-area-inset-bottom)+1rem)]"
-        >
-          <div className="login-card rounded-[2rem] sm:rounded-[3rem] p-7 sm:p-10">
-            <div className="text-center mb-8">
+      <div className="relative z-10 flex w-full max-w-[1400px] mx-auto">
+        <aside className="hidden lg:flex w-1/2 flex-col justify-between p-12 xl:p-16">
+          <div>
+            <Link href="/" className="inline-flex items-center gap-3 group" aria-label="NOVAX home">
               <motion.div
-                initial={{ opacity: 0, scale: 0.85 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: 0.15, ease: "easeOut" }}
-                className="login-orb w-16 h-16 sm:w-20 sm:h-20 rounded-full mx-auto flex items-center justify-center"
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.5 }}
+                className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg shadow-[#6C63FF]/30"
               >
-                <Logo size={44} rounded="rounded-full" bgClassName="bg-white" />
+                <Logo size={48} rounded="rounded-2xl" />
               </motion.div>
-              <h1 className="mt-5 text-3xl font-bold tracking-tight text-slate-900">NOVAX</h1>
-              <p className="mt-1.5 text-[11px] font-medium uppercase tracking-[0.22em] text-slate-500">
-                Think Beyond Social
-              </p>
-            </div>
+              <span className="text-2xl font-bold tracking-tight text-white group-hover:text-white/90 transition-colors">
+                NOVAX
+                <span className="block mt-0.5 text-[11px] font-medium tracking-[0.15em] uppercase text-white/40">Think Beyond Social</span>
+              </span>
+            </Link>
+          </div>
 
-            <div className="mb-7 text-center">
-              <h2 className="text-2xl font-semibold text-slate-900">
-                {twoFactorStep ? "Two-factor verification" : "Welcome back"}
-              </h2>
-              <p className="text-sm text-slate-500 mt-1.5">
-                {twoFactorStep
-                  ? "Enter the 6-digit code from your authenticator app"
-                  : "Sign in to your account"}
-              </p>
-            </div>
-
-            <AnimatePresence mode="wait">
-              {error && (
-                <motion.div
-                  key="form-error"
-                  initial={{ opacity: 0, y: -8, height: 0 }}
-                  animate={{ opacity: 1, y: 0, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  role="alert"
-                  className="mb-5 overflow-hidden"
-                >
-                  <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm flex items-start gap-2.5">
-                    <ShieldQuestion className="w-4 h-4 mt-0.5 shrink-0" />
-                    <span>{error}</span>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            <AnimatePresence>
-              {success && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="mb-5 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600 text-sm flex items-center gap-2.5"
-                  role="status"
-                >
-                  <CheckCircle2 className="w-4 h-4 shrink-0" />
-                  <span>Signed in successfully! Redirecting...</span>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            <motion.div
-              key={shakeKey}
-              animate={shakeKey ? { x: [0, -10, 10, -8, 8, -4, 4, 0] } : undefined}
-              transition={{ duration: 0.45 }}
+          <div>
+            <motion.h1
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.1 }}
+              className="text-5xl xl:text-6xl font-bold leading-[1.05] tracking-tight"
             >
-              {twoFactorStep ? (
-                <form className="space-y-4" onSubmit={handle2FA} noValidate>
-                  <div className="p-3 rounded-xl bg-[#6C63FF]/10 border border-[#6C63FF]/25 text-[#5B50C4] text-sm text-center">
-                    A verification code was required for this account.
+              Welcome back to
+              <span className="block mt-2 bg-gradient-to-r from-[#6C63FF] via-[#A78BFA] to-[#7C3AED] bg-clip-text text-transparent">
+                the AI-first network.
+              </span>
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.2 }}
+              className="mt-5 text-lg text-white/60 max-w-md"
+            >
+              Sign in to explore your feed, collaborate on projects and command
+              your personal AI across the NOVAX ecosystem.
+            </motion.p>
+
+            <div className="mt-10 grid grid-cols-1 gap-4 max-w-md">
+              {FEATURES.map((f, i) => (
+                <motion.div
+                  key={f.title}
+                  initial={{ opacity: 0, x: -16 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: 0.3 + i * 0.1 }}
+                  className="flex items-start gap-3.5"
+                >
+                  <div className="w-10 h-10 shrink-0 rounded-xl bg-[#171B22] border border-white/10 flex items-center justify-center">
+                    <f.icon className="w-5 h-5 text-[#6C63FF]" />
                   </div>
                   <div>
-                    <Input
-                      label="Verification Code"
-                      type="text"
-                      placeholder="000000"
-                      inputMode="numeric"
-                      autoComplete="one-time-code"
-                      maxLength={6}
-                      icon={<Lock className="w-4 h-4" />}
-                      className={FIELD_CLASS}
-                      aria-label="Verification code"
-                      aria-invalid={!!twoFactorError}
-                      aria-describedby={twoFactorError ? "2fa-error" : undefined}
-                      value={twoFactorCode}
-                      onChange={(e) => setTwoFactorCode(e.target.value.replace(/\D/g, ""))}
-                      error={twoFactorError}
-                    />
-                    {twoFactorError && (
-                      <p id="2fa-error" className="sr-only">
-                        {twoFactorError}
-                      </p>
-                    )}
+                    <p className="font-semibold text-sm text-white">{f.title}</p>
+                    <p className="text-sm text-white/50 mt-0.5">{f.desc}</p>
                   </div>
-                  <Button
-                    className={PRIMARY_BTN}
-                    style={{ background: "linear-gradient(135deg, #6C63FF, #7C3AED)" }}
-                    size="lg"
-                    type="submit"
-                    disabled={loading}
-                  >
-                    {loading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Verifying...
-                      </>
-                    ) : (
-                      <>
-                        Verify &amp; Sign In
-                        <ArrowRight className="w-4 h-4" />
-                      </>
-                    )}
-                  </Button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setTwoFactorStep(false);
-                      setTwoFactorCode("");
-                      setTwoFactorError("");
-                    }}
-                    className="w-full text-sm text-slate-500 hover:text-slate-800 transition-colors py-1"
-                  >
-                    Back to login
-                  </button>
-                </form>
-              ) : (
-                <form className="space-y-5" onSubmit={handleSubmit} noValidate>
-                  <div>
-                    <div className="relative">
-                      <Input
-                        ref={identifierRef}
-                        label="Email or Username"
-                        type="text"
-                        placeholder="you@example.com or username"
-                        autoComplete="username"
-                        icon={<Mail className="w-4 h-4" />}
-                        className={FIELD_CLASS}
-                        aria-invalid={!!fieldErrors.identifier}
-                        aria-describedby={fieldErrors.identifier ? "identifier-error" : undefined}
-                        value={identifier}
-                        onChange={(e) => {
-                          setIdentifier(e.target.value);
-                          if (fieldErrors.identifier) setFieldErrors((p) => ({ ...p, identifier: undefined }));
-                        }}
-                        error={fieldErrors.identifier}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setIdentifier("")}
-                        aria-label="Clear identifier"
-                        className={`absolute right-3 top-[50px] -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors p-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6C63FF]/50 ${
-                          identifier ? "" : "invisible"
-                        }`}
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                    {fieldErrors.identifier && (
-                      <p id="identifier-error" className="sr-only">
-                        {fieldErrors.identifier}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <div className="relative">
-                      <Input
-                        label="Password"
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Enter your password"
-                        autoComplete="current-password"
-                        icon={<Lock className="w-4 h-4" />}
-                        className={FIELD_CLASS}
-                        aria-invalid={!!fieldErrors.password}
-                        aria-describedby={fieldErrors.password ? "password-error" : undefined}
-                        value={password}
-                        onChange={(e) => {
-                          setPassword(e.target.value);
-                          if (fieldErrors.password) setFieldErrors((p) => ({ ...p, password: undefined }));
-                        }}
-                        error={fieldErrors.password}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword((s) => !s)}
-                        aria-label={showPassword ? "Hide password" : "Show password"}
-                        className="absolute right-3 top-[50px] -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors p-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6C63FF]/50"
-                      >
-                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                    </div>
-                    {fieldErrors.password && (
-                      <p id="password-error" className="sr-only">
-                        {fieldErrors.password}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <label className="flex items-center gap-2.5 text-sm text-slate-600 cursor-pointer select-none">
-                      <input
-                        type="checkbox"
-                        checked={rememberMe}
-                        onChange={(e) => setRememberMe(e.target.checked)}
-                        className="w-4 h-4 rounded border-slate-300 bg-transparent accent-[#6C63FF] cursor-pointer"
-                      />
-                      Remember me
-                    </label>
-                    <Link
-                      href="/forgot-password"
-                      className="text-sm text-[#6C63FF] hover:text-[#7C3AED] font-medium transition-colors"
-                    >
-                      Forgot password?
-                    </Link>
-                  </div>
-
-                  <Button
-                    className={PRIMARY_BTN}
-                    style={{ background: "linear-gradient(135deg, #6C63FF, #7C3AED)" }}
-                    size="lg"
-                    type="submit"
-                    disabled={loading}
-                  >
-                    {loading ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Signing in...
-                      </>
-                    ) : (
-                      <>
-                        Sign In
-                        <ArrowRight className="w-4 h-4" />
-                      </>
-                    )}
-                  </Button>
-                </form>
-              )}
-            </motion.div>
-
-            {!twoFactorStep && (
-              <>
-                <div className="mt-7 relative" aria-hidden>
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-slate-200" />
-                  </div>
-                  <div className="relative flex justify-center">
-                    <span className="px-4 text-xs text-slate-500 bg-[#F4F6FA]">or continue with</span>
-                  </div>
-                </div>
-
-                <div className="mt-6 grid grid-cols-2 gap-3">
-                  <button type="button" onClick={() => oauth("google")} className={socialButtonCls} aria-label="Continue with Google">
-                    <GoogleIcon />
-                    Google
-                  </button>
-                  <button type="button" onClick={() => oauth("github")} className={socialButtonCls} aria-label="Continue with GitHub">
-                    <GithubIcon />
-                    GitHub
-                  </button>
-                </div>
-
-                <p className="text-center text-sm text-slate-500 mt-7">
-                  Don&apos;t have an account?{" "}
-                  <Link href="/signup" className="text-[#6C63FF] hover:text-[#7C3AED] font-semibold transition-colors">
-                    Sign up free
-                  </Link>
-                </p>
-              </>
-            )}
+                </motion.div>
+              ))}
+            </div>
           </div>
 
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.5 }}
-            className="text-center text-xs text-slate-400 mt-6"
+            transition={{ duration: 0.8, delay: 0.6 }}
+            className="text-xs text-white/35"
           >
-            © {new Date().getFullYear()} NOVAX · Think Beyond Social
+            © {new Date().getFullYear()} NOVAX · Think Beyond Social. Crafted with intelligence.
           </motion.p>
-        </motion.div>
+        </aside>
+
+        <main className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-10">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.15 }}
+            className="w-full max-w-md"
+          >
+            <div
+              className="rounded-3xl p-8 sm:p-10 shadow-2xl shadow-black/50 backdrop-blur-xl border border-white/10"
+              style={{ background: "rgba(23, 27, 34, 0.85)" }}
+            >
+              <div className="lg:hidden mb-8 text-center">
+                <Link href="/" className="inline-flex items-center gap-2.5" aria-label="NOVAX home">
+                  <Logo size={40} rounded="rounded-xl" />
+                  <span className="text-xl font-bold tracking-tight text-white">NOVAX</span>
+                </Link>
+              </div>
+
+              <div className="mb-8">
+                <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+                  {twoFactorStep ? "Two-factor verification" : "Sign in"}
+                </h2>
+                <p className="text-sm text-white/50 mt-1.5">
+                  {twoFactorStep
+                    ? "Enter the 6-digit code from your authenticator app"
+                    : "Welcome back — let&apos;s pick up where you left off"}
+                </p>
+              </div>
+
+              <AnimatePresence mode="wait">
+                {error && (
+                  <motion.div
+                    key="form-error"
+                    initial={{ opacity: 0, y: -8, height: 0 }}
+                    animate={{ opacity: 1, y: 0, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    role="alert"
+                    className="mb-5 overflow-hidden"
+                  >
+                    <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/25 text-red-400 text-sm flex items-start gap-2.5">
+                      <ShieldQuestion className="w-4 h-4 mt-0.5 shrink-0" />
+                      <span>{error}</span>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <AnimatePresence>
+                {success && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="mb-5 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-sm flex items-center gap-2.5"
+                    role="status"
+                  >
+                    <CheckCircle2 className="w-4 h-4 shrink-0" />
+                    <span>Signed in successfully! Redirecting...</span>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <motion.div
+                key={shakeKey}
+                animate={shakeKey ? { x: [0, -10, 10, -8, 8, -4, 4, 0] } : undefined}
+                transition={{ duration: 0.45 }}
+              >
+                {twoFactorStep ? (
+                  <form className="space-y-4" onSubmit={handle2FA} noValidate>
+                    <div className="p-3 rounded-xl bg-[#6C63FF]/10 border border-[#6C63FF]/25 text-[#A78BFA] text-sm text-center">
+                      A verification code was required for this account.
+                    </div>
+                    <div>
+                      <Input
+                        label="Verification Code"
+                        type="text"
+                        placeholder="000000"
+                        inputMode="numeric"
+                        autoComplete="one-time-code"
+                        maxLength={6}
+                        icon={<Lock className="w-4 h-4" />}
+                        className={FIELD_CLASS}
+                        aria-label="Verification code"
+                        aria-invalid={!!twoFactorError}
+                        aria-describedby={twoFactorError ? "2fa-error" : undefined}
+                        value={twoFactorCode}
+                        onChange={(e) => setTwoFactorCode(e.target.value.replace(/\D/g, ""))}
+                        error={twoFactorError}
+                      />
+                      {twoFactorError && (
+                        <p id="2fa-error" className="sr-only">
+                          {twoFactorError}
+                        </p>
+                      )}
+                    </div>
+                    <Button
+                      className="w-full h-12 rounded-xl font-semibold"
+                      style={{ background: "linear-gradient(135deg, #6C63FF, #7C3AED)" }}
+                      size="lg"
+                      type="submit"
+                      disabled={loading}
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Verifying...
+                        </>
+                      ) : (
+                        <>
+                          Verify &amp; Sign In
+                          <ArrowRight className="w-4 h-4" />
+                        </>
+                      )}
+                    </Button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTwoFactorStep(false);
+                        setTwoFactorCode("");
+                        setTwoFactorError("");
+                      }}
+                      className="w-full text-sm text-white/50 hover:text-white transition-colors py-1"
+                    >
+                      Back to login
+                    </button>
+                  </form>
+                ) : (
+                  <form className="space-y-5" onSubmit={handleSubmit} noValidate>
+                    <div>
+                      <div className="relative">
+                        <Input
+                          ref={identifierRef}
+                          label="Email or Username"
+                          type="text"
+                          placeholder="you@example.com or username"
+                          autoComplete="username"
+                          icon={<Mail className="w-4 h-4" />}
+                          className={FIELD_CLASS}
+                          aria-invalid={!!fieldErrors.identifier}
+                          aria-describedby={fieldErrors.identifier ? "identifier-error" : undefined}
+                          value={identifier}
+                          onChange={(e) => {
+                            setIdentifier(e.target.value);
+                            if (fieldErrors.identifier) setFieldErrors((p) => ({ ...p, identifier: undefined }));
+                          }}
+                          error={fieldErrors.identifier}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setIdentifier("")}
+                          aria-label="Clear identifier"
+                          className={`absolute right-3 top-[42px] text-white/40 hover:text-white transition-colors p-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6C63FF]/50 ${
+                            identifier ? "" : "invisible"
+                          }`}
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                      {fieldErrors.identifier && (
+                        <p id="identifier-error" className="sr-only">
+                          {fieldErrors.identifier}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <div className="relative">
+                        <Input
+                          label="Password"
+                          type={showPassword ? "text" : "password"}
+                          placeholder="Enter your password"
+                          autoComplete="current-password"
+                          icon={<Lock className="w-4 h-4" />}
+                          className={FIELD_CLASS}
+                          aria-invalid={!!fieldErrors.password}
+                          aria-describedby={fieldErrors.password ? "password-error" : undefined}
+                          value={password}
+                          onChange={(e) => {
+                            setPassword(e.target.value);
+                            if (fieldErrors.password) setFieldErrors((p) => ({ ...p, password: undefined }));
+                          }}
+                          error={fieldErrors.password}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword((s) => !s)}
+                          aria-label={showPassword ? "Hide password" : "Show password"}
+                          className="absolute right-3 top-[42px] text-white/40 hover:text-white transition-colors p-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6C63FF]/50"
+                        >
+                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                      {fieldErrors.password && (
+                        <p id="password-error" className="sr-only">
+                          {fieldErrors.password}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <label className="flex items-center gap-2.5 text-sm text-white/60 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={rememberMe}
+                          onChange={(e) => setRememberMe(e.target.checked)}
+                          className="w-4 h-4 rounded border-white/20 bg-transparent accent-[#6C63FF] cursor-pointer"
+                        />
+                        Remember me
+                      </label>
+                      <Link
+                        href="/forgot-password"
+                        className="text-sm text-[#6C63FF] hover:text-[#8B84FF] font-medium transition-colors"
+                      >
+                        Forgot password?
+                      </Link>
+                    </div>
+
+                    <Button
+                      className="w-full h-12 rounded-xl font-semibold shadow-lg shadow-[#6C63FF]/25 hover:shadow-[#6C63FF]/40"
+                      style={{ background: "linear-gradient(135deg, #6C63FF, #7C3AED)" }}
+                      size="lg"
+                      type="submit"
+                      disabled={loading}
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Signing in...
+                        </>
+                      ) : (
+                        <>
+                          Sign In
+                          <ArrowRight className="w-4 h-4" />
+                        </>
+                      )}
+                    </Button>
+                  </form>
+                )}
+              </motion.div>
+
+              {!twoFactorStep && (
+                <>
+                  <div className="mt-7 relative" aria-hidden>
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-white/10" />
+                    </div>
+                    <div className="relative flex justify-center">
+                      <span className="px-3 text-xs text-white/40 bg-[#171B22]">or continue with</span>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 grid grid-cols-2 gap-3">
+                    <button type="button" onClick={() => oauth("google")} className={socialButtonCls} aria-label="Continue with Google">
+                      <GoogleIcon />
+                      Google
+                    </button>
+                    <button type="button" onClick={() => oauth("github")} className={socialButtonCls} aria-label="Continue with GitHub">
+                      <GithubIcon />
+                      GitHub
+                    </button>
+                  </div>
+
+                  <p className="text-center text-sm text-white/50 mt-7">
+                    Don&apos;t have an account?{" "}
+                    <Link href="/signup" className="text-[#6C63FF] hover:text-[#8B84FF] font-semibold transition-colors">
+                      Sign up free
+                    </Link>
+                  </p>
+                </>
+              )}
+            </div>
+          </motion.div>
+        </main>
       </div>
     </div>
   );
