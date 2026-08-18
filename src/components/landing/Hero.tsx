@@ -8,7 +8,6 @@ import {
   Sparkles,
   ArrowRight,
   Brain,
-  Zap,
   Shield,
 } from "lucide-react";
 import Link from "next/link";
@@ -40,9 +39,9 @@ export default function Hero() {
           </motion.div>
 
           <BlurText 
-            text="The Future Begins With You"
+            text="Think Beyond Social"
             className="text-5xl sm:text-6xl lg:text-8xl font-bold tracking-tight mb-6"
-            highlightWords={["With", "You"]}
+            highlightWords={["Beyond", "Social"]}
             highlightClassName="text-gradient"
           />
 
@@ -52,9 +51,8 @@ export default function Hero() {
             transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
             className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10"
           >
-            AI deeply integrated into every feature. Voice-first interactions,
-            intelligent feeds, community learning, and creator economy — all in one
-            platform.
+            NOVAX brings social networking, AI, communication, learning,
+            marketplace, and community together in one platform.
           </motion.p>
 
           <motion.div
@@ -90,19 +88,19 @@ export default function Hero() {
                   {
                     icon: <Brain className="w-5 h-5" />,
                     title: "AI Router",
-                    desc: "Intelligent model routing for every task",
+                    desc: "AI for chat, coding, images, translation, and deep search",
                     color: "from-purple-500 to-blue-500",
                   },
                   {
-                    icon: <Zap className="w-5 h-5" />,
-                    title: "Voice-First",
-                    desc: "Publish with voice, AI handles the rest",
+                    icon: <Sparkles className="w-5 h-5" />,
+                    title: "AI Assistant",
+                    desc: "Chat with NOVAX AI directly inside the app",
                     color: "from-amber-500 to-orange-500",
                   },
                   {
                     icon: <Shield className="w-5 h-5" />,
-                    title: "Zero Trust",
-                    desc: "Enterprise-grade security, end-to-end",
+                    title: "Secure by Default",
+                    desc: "JWT auth, Google OAuth, and two-factor authentication",
                     color: "from-green-500 to-emerald-500",
                   },
                 ].map((feature, i) => (
@@ -122,21 +120,6 @@ export default function Hero() {
                     <p className="text-sm text-muted-foreground">{feature.desc}</p>
                   </motion.div>
                 ))}
-              </div>
-
-              <div className="mt-6 glass rounded-xl p-4 flex items-center gap-3">
-                <Sparkles className="w-5 h-5 text-primary shrink-0" />
-                <div className="flex-1 bg-muted rounded-lg h-3 overflow-hidden">
-                  <motion.div
-                    className="h-full bg-gradient-primary rounded-lg"
-                    initial={{ width: "0%" }}
-                    animate={{ width: "72%" }}
-                    transition={{ duration: 2, delay: 1 }}
-                  />
-                </div>
-                <span className="text-xs text-muted-foreground whitespace-nowrap">
-                  AI Loading...
-                </span>
               </div>
             </div>
           </div>

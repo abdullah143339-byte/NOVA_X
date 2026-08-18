@@ -20,22 +20,20 @@ const productLinks = [
 
 const companyLinks = [
   { label: "About", href: "/" },
-  { label: "Blog", href: "/" },
-  { label: "Careers", href: "/signup" },
-  { label: "Contact", href: "/dashboard/messages" },
+  { label: "Communities", href: "/dashboard/communities" },
+  { label: "Projects", href: "/dashboard/projects" },
+  { label: "Reels", href: "/dashboard/reels" },
 ];
 
-const legalLinks = [
-  { label: "Privacy", href: "/dashboard/settings" },
-  { label: "Terms", href: "/dashboard/settings" },
-  { label: "Security", href: "/dashboard/settings" },
-  { label: "Cookies", href: "/dashboard/settings" },
+const platformLinks = [
+  { label: "Settings", href: "/dashboard/settings" },
+  { label: "Notifications", href: "/dashboard/notifications" },
+  { label: "Search", href: "/dashboard/search" },
+  { label: "AI Router", href: "/dashboard/ai-router" },
 ];
 
 const socialLinks = [
   { label: "GitHub", href: "https://github.com/abdullah143339-byte/NOVA_X", external: true },
-  { label: "Twitter", href: "/signup", external: false },
-  { label: "Discord", href: "/dashboard/communities", external: false },
 ];
 
 export default function Footer() {
@@ -56,7 +54,7 @@ export default function Footer() {
               </div>
             </div>
             <p className="text-sm text-muted-foreground max-w-xs">
-              The future generation of social media — AI-first, voice-first, community-driven.
+              The future generation of social media — AI-first, community-driven.
             </p>
           </motion.div>
           <motion.div
@@ -93,9 +91,9 @@ export default function Footer() {
             {...fade}
             transition={{ duration: 0.8, delay: 0.45, ease: "easeOut" }}
           >
-            <h3 className="text-sm font-semibold text-foreground mb-3">Legal</h3>
+            <h3 className="text-sm font-semibold text-foreground mb-3">Platform</h3>
             <ul className="space-y-2">
-              {legalLinks.map((item) => (
+              {platformLinks.map((item) => (
                 <li key={item.label}>
                   <Link href={item.href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                     {item.label}

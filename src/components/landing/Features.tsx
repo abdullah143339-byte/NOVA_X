@@ -7,89 +7,89 @@ import VideoBackdrop from "@/components/landing/VideoBackdrop";
 import {
   Users,
   Brain,
-  Mic,
-  Trophy,
   MessageSquare,
   BookOpen,
   ShoppingCart,
-  Layout,
+  Newspaper,
   Search,
   Shield,
-  BarChart3,
   Sparkles,
+  FolderGit2,
+  Clapperboard,
+  Trophy,
 } from "lucide-react";
 
 const features = [
   {
     icon: <Brain className="w-6 h-6" />,
     title: "AI Router",
-    description: "Intelligent routing to the best model for every task — coding, chat, translation, images, and more.",
+    description: "Route AI requests for chat, coding, image generation, translation, and deep search.",
     color: "from-violet-500 to-purple-600",
   },
   {
-    icon: <Users className="w-6 h-6" />,
-    title: "Dynamic Profiles",
-    description: "AI personalizes what visitors see — devs see repos, designers see portfolios, recruiters see experience.",
-    color: "from-blue-500 to-cyan-500",
+    icon: <Sparkles className="w-6 h-6" />,
+    title: "AI Assistant",
+    description: "Chat with the NOVAX AI assistant directly inside the platform, anytime.",
+    color: "from-amber-500 to-orange-500",
   },
   {
-    icon: <Mic className="w-6 h-6" />,
-    title: "Voice-First Social",
-    description: "Publish voice posts, stories, and blogs. AI generates captions, transcripts, and translations.",
-    color: "from-amber-500 to-orange-500",
+    icon: <Users className="w-6 h-6" />,
+    title: "Communities",
+    description: "Join communities around AI, programming, security, design, gaming, and business.",
+    color: "from-blue-500 to-cyan-500",
   },
   {
     icon: <Trophy className="w-6 h-6" />,
     title: "Reputation System",
-    description: "Meaningful scores — Helpful, Trust, Skill, Community, Contribution — not just likes and followers.",
+    description: "Reputation scores for skills, helpfulness, projects, community, and trust — not just likes and followers.",
     color: "from-green-500 to-emerald-500",
   },
   {
     icon: <MessageSquare className="w-6 h-6" />,
-    title: "Smart Messaging",
-    description: "Encrypted chats with AI summarization, reply suggestions, voice/video calls, and smart search.",
+    title: "Messaging",
+    description: "Real-time chats with voice notes, file sharing, and voice and video calls.",
     color: "from-pink-500 to-rose-500",
   },
   {
     icon: <BookOpen className="w-6 h-6" />,
     title: "Learning Platform",
-    description: "Daily plans, weekly challenges, skill trees, coding challenges, XP, levels, and certificates.",
+    description: "Lectures, notes, subjects, tasks, bookmarks, and AI-powered search for your studies.",
     color: "from-teal-500 to-cyan-500",
   },
   {
     icon: <ShoppingCart className="w-6 h-6" />,
     title: "Marketplace",
-    description: "Sell courses, templates, prompts, designs, AI agents, digital products, and services.",
+    description: "Browse and sell courses, templates, code, AI models, digital products, and services.",
     color: "from-indigo-500 to-blue-500",
   },
   {
-    icon: <Layout className="w-6 h-6" />,
-    title: "AI Portfolio",
-    description: "Auto-generated portfolios from your activity — projects, skills, timeline, achievements.",
+    icon: <FolderGit2 className="w-6 h-6" />,
+    title: "Projects",
+    description: "Showcase your projects with descriptions, links, and ways for people to reach you.",
     color: "from-fuchsia-500 to-pink-500",
   },
   {
     icon: <Search className="w-6 h-6" />,
-    title: "AI Search",
-    description: "Natural language search — find people, projects, skills, and content effortlessly.",
+    title: "Global Search",
+    description: "Search people, projects, communities, and content across NOVAX.",
     color: "from-cyan-500 to-blue-500",
   },
   {
     icon: <Shield className="w-6 h-6" />,
-    title: "Enterprise Security",
-    description: "RBAC, 2FA, E2E encryption, OWASP Top 10, audit logs, brute-force protection.",
+    title: "Security",
+    description: "JWT authentication, Google OAuth, two-factor authentication, and rate limiting.",
     color: "from-red-500 to-orange-500",
   },
   {
-    icon: <BarChart3 className="w-6 h-6" />,
-    title: "Smart Analytics",
-    description: "AI-powered insights on your content, engagement, learning progress, and reputation.",
+    icon: <Clapperboard className="w-6 h-6" />,
+    title: "Reels & Stories",
+    description: "Watch short-form reels and share temporary stories with the community.",
     color: "from-emerald-500 to-green-500",
   },
   {
-    icon: <Sparkles className="w-6 h-6" />,
-    title: "AI Companion",
-    description: "Create personalized AI friends — teacher, coach, mentor, or professional companion.",
+    icon: <Newspaper className="w-6 h-6" />,
+    title: "Feed",
+    description: "A timeline of posts and updates from the NOVAX community.",
     color: "from-violet-500 to-indigo-500",
   },
 ];
@@ -140,7 +140,7 @@ export default function Features() {
             transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
             className="text-lg text-muted-foreground max-w-2xl mx-auto"
           >
-            A complete platform combining social media, AI, learning, creator economy, and collaboration.
+            A complete platform combining social networking, AI, communication, learning, marketplace, and community.
           </motion.p>
         </motion.div>
 

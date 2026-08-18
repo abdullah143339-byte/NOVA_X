@@ -42,8 +42,8 @@ export default function CTA() {
             transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
             className="text-lg text-muted-foreground max-w-xl mx-auto mb-10"
           >
-            Join thousands of creators, developers, and learners who are already building
-            the future of social media.
+            Create your account and explore social networking, AI, communication,
+            learning, marketplace, and community in one place.
           </motion.p>
 
           <motion.div
@@ -61,7 +61,7 @@ export default function CTA() {
             </Link>
             <Link href="/dashboard">
               <Button variant="secondary" size="lg">
-                See Demo
+                Explore Platform
               </Button>
             </Link>
           </motion.div>
