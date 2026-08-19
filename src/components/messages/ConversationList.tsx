@@ -221,7 +221,7 @@ export default function ConversationList({
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-foreground flex items-center gap-1.5 truncate">
-                NOVAX AI Assistant
+                ZARYA AI Assistant
                 <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[#6C63FF]/15 text-accent font-bold uppercase tracking-wide shrink-0">AI</span>
               </p>
               <p className="text-xs text-muted-foreground truncate">Ask anything, get instant answers</p>

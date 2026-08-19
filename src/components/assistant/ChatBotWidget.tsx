@@ -3,14 +3,14 @@
 import { useState, useRef, useEffect } from "react";
 import { MessageCircle, X, Send, Loader2, Bot, Sparkles } from "lucide-react";
 import api from "@/lib/api";
-import { NOVAX_AI_RULES } from "@/lib/ai";
+import { ZARYA_AI_RULES } from "@/lib/ai";
 import Markdown from "@/components/ui/Markdown";
 
-const WEBSITE_KNOWLEDGE = `You are NOVAX, the intelligent assistant of the NOVAX platform.
+const WEBSITE_KNOWLEDGE = `You are ZARYA, the intelligent assistant of the ZARYA platform.
 You have complete knowledge of the entire website and its features.
 
 == PLATFORM OVERVIEW ==
-NOVAX is a premium AI-powered social ecosystem where users can Connect, Learn, Build, Collaborate, and Grow.
+ZARYA is a premium AI-powered social ecosystem where users can Connect, Learn, Build, Collaborate, and Grow.
 It combines Social Media, AI, Learning, Portfolio, Community, and Collaboration in one platform.
 
 == PAGES & FEATURES ==
@@ -74,7 +74,7 @@ It combines Social Media, AI, Learning, Portfolio, Community, and Collaboration 
 - User reputation system
 - AI-powered recommendations
 
-Answer questions helpfully about any part of the website. Guide users to the right pages and features based on their needs. Keep responses concise and actionable.${NOVAX_AI_RULES}`;
+Answer questions helpfully about any part of the website. Guide users to the right pages and features based on their needs. Keep responses concise and actionable.${ZARYA_AI_RULES}`;
 
 export default function ChatBotWidget() {
   const [open, setOpen] = useState(false);
@@ -86,7 +86,7 @@ export default function ChatBotWidget() {
 
   useEffect(() => {
     if (open && messages.length === 0) {
-      setMessages([{ role: "system", content: WEBSITE_KNOWLEDGE }, { role: "assistant", content: "Hi! I'm NOVAX. Ask me anything about the platform." }]);
+      setMessages([{ role: "system", content: WEBSITE_KNOWLEDGE }, { role: "assistant", content: "Hi! I'm ZARYA. Ask me anything about the platform." }]);
     }
   }, [open]);
 
