@@ -29,7 +29,7 @@ const features = [
   {
     icon: <Sparkles className="w-6 h-6" />,
     title: "AI Assistant",
-    description: "Chat with the NOVAX AI assistant directly inside the platform, anytime.",
+    description: "Chat with the ZARYA AI assistant directly inside the platform, anytime.",
     color: "from-amber-500 to-orange-500",
   },
   {
@@ -71,7 +71,7 @@ const features = [
   {
     icon: <Search className="w-6 h-6" />,
     title: "Global Search",
-    description: "Search people, projects, communities, and content across NOVAX.",
+    description: "Search people, projects, communities, and content across ZARYA.",
     color: "from-cyan-500 to-blue-500",
   },
   {
@@ -89,7 +89,7 @@ const features = [
   {
     icon: <Newspaper className="w-6 h-6" />,
     title: "Feed",
-    description: "A timeline of posts and updates from the NOVAX community.",
+    description: "A timeline of posts and updates from the ZARYA community.",
     color: "from-violet-500 to-indigo-500",
   },
 ];

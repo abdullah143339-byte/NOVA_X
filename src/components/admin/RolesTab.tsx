@@ -268,7 +268,7 @@ export default function RolesTab() {
           <div className="space-y-3">
             <p className="text-sm text-muted-foreground">{detailRole.description}</p>
             {detailRole.permissions.includes("*") ? (
-              <div className="p-4 rounded-xl bg-gradient-primary/10 text-primary font-medium">Full access to the entire NOVAX platform.</div>
+              <div className="p-4 rounded-xl bg-gradient-primary/10 text-primary font-medium">Full access to the entire ZARYA platform.</div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {detailRole.permissions.map((p) => (

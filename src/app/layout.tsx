@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NOVAX — Think Beyond Social",
-  description: "NOVAX · Think Beyond Social — an AI-first platform combining social networking, messaging, reels, learning, marketplace, and community.",
+  title: "ZARYA — Think Beyond Social",
+  description: "ZARYA · Think Beyond Social — an AI-first platform combining social networking, messaging, reels, learning, marketplace, and community.",
   icons: {
     icon: "/favicon.ico?v=2",
     apple: "/apple-touch-icon.png",

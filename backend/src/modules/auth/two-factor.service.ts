@@ -7,7 +7,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
 export class TwoFactorService {
-  private readonly APP_NAME = 'NOVA AI';
+  private readonly APP_NAME = 'ZARYA';
 
   constructor(
     private prisma: PrismaService,

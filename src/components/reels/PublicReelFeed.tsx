@@ -259,7 +259,7 @@ export default function PublicReelFeed() {
             href="/signup"
             className="pointer-events-auto inline-flex items-center gap-1.5 h-9 px-4 rounded-full bg-gradient-primary text-white text-xs font-medium hover:shadow-lg hover:shadow-primary/40 transition-all"
           >
-            <LogIn className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Join NOVAX</span>
+            <LogIn className="w-3.5 h-3.5" /> <span className="hidden sm:inline">Join ZARYA</span>
           </Link>
         )}
       </div>

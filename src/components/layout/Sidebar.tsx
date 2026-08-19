@@ -118,7 +118,7 @@ export default function Sidebar() {
         <Link href="/" className="flex items-center gap-2.5">
           <Logo size={36} />
           <div className="min-w-0">
-            <span className="block text-lg font-bold text-gradient leading-none">NOVAX</span>
+            <span className="block text-lg font-bold text-gradient leading-none">ZARYA</span>
             <span className="block text-[9px] text-muted-foreground tracking-wide truncate">Think Beyond Social</span>
           </div>
         </Link>

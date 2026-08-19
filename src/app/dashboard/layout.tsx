@@ -45,7 +45,7 @@ export default function DashboardLayout({
       <div className="min-h-dvh bg-background flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-8 h-8 text-primary animate-spin mx-auto mb-4" />
-          <p className="text-sm text-muted-foreground">Loading NOVAX...</p>
+          <p className="text-sm text-muted-foreground">Loading ZARYA...</p>
         </div>
       </div>
     );
@@ -63,7 +63,7 @@ export default function DashboardLayout({
           <div className="flex items-center gap-3">
             <Link href="/dashboard/search" className="flex items-center gap-2 px-4 py-2 rounded-xl bg-muted/50 text-muted-foreground text-sm hover:bg-muted transition-all">
               <Search className="w-4 h-4" />
-              Search NOVAX...
+              Search ZARYA...
               <kbd className="hidden sm:inline px-1.5 py-0.5 rounded-md bg-background text-[10px] text-muted-foreground border border-border">
                 ⌘K
               </kbd>

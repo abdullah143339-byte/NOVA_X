@@ -123,7 +123,7 @@ export default function ChatBotWidget() {
                 <Bot className="w-4 h-4 text-white" />
               </div>
               <div>
-                <span className="text-sm font-semibold text-foreground block">NOVAX</span>
+                <span className="text-sm font-semibold text-foreground block">ZARYA</span>
                 <span className="text-[10px] text-accent flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" /> Online · AI Assistant
                 </span>
@@ -166,8 +166,8 @@ export default function ChatBotWidget() {
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={e => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), handleSend())}
-                placeholder="Ask me about NOVAX..."
-                aria-label="Ask NOVAX AI"
+                placeholder="Ask me about ZARYA..."
+                aria-label="Ask ZARYA AI"
                 className="flex-1 rounded-2xl tactile-inset px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-[#6C63FF]/40 transition-all"
               />
               <button

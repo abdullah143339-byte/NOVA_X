@@ -49,7 +49,7 @@ export default function Footer() {
             <div className="flex items-center gap-2.5 mb-4">
               <Logo size={32} />
               <div>
-                <span className="text-lg font-bold text-gradient block leading-none">NOVAX</span>
+                <span className="text-lg font-bold text-gradient block leading-none">ZARYA</span>
                 <span className="text-[10px] text-muted-foreground tracking-wide">Think Beyond Social</span>
               </div>
             </div>
@@ -109,7 +109,7 @@ export default function Footer() {
           className="mt-8 pt-8 border-t border-border flex flex-col sm:flex-row justify-between items-center gap-4"
         >
           <p className="text-sm text-muted-foreground">
-            &copy; 2026 NOVAX. All rights reserved.
+            &copy; 2026 ZARYA. All rights reserved.
           </p>
           <div className="flex items-center gap-4">
             {socialLinks.map((item) =>

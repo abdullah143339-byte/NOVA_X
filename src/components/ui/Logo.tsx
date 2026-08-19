@@ -15,8 +15,8 @@ export default function Logo({ size = 36, className, rounded = "rounded-xl", bgC
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/novax.png"
-        alt="NOVAX"
+        src="/zarya.png"
+        alt="ZARYA"
         width={size}
         height={size}
         className="object-contain w-full h-full"

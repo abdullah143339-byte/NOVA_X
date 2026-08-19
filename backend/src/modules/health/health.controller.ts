@@ -11,7 +11,7 @@ export class HealthController {
   check() {
     return {
       status: 'ok',
-      service: 'NOVA AI Backend',
+      service: 'ZARYA Backend',
       version: '1.0.0',
       timestamp: new Date().toISOString(),
       uptime: process.uptime(),

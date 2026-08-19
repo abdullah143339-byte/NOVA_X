@@ -7,7 +7,7 @@ import { Sparkles, Loader2, ArrowRight } from "lucide-react";
 import api from "@/lib/api";
 
 const TIPS = [
-  "Ask NOVAX to draft, summarize, or translate any text — it's all in one place.",
+  "Ask ZARYA to draft, summarize, or translate any text — it's all in one place.",
   "Use the AI Router to pick the best model for every task automatically.",
   "Turn long articles into key takeaways with a single AI conversation.",
   "You can attach AI-generated images directly to your posts.",
@@ -37,7 +37,7 @@ export default function AIWidget() {
       <div className="relative">
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-sm font-bold text-foreground flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-accent" /> NOVAX
+            <Sparkles className="w-4 h-4 text-accent" /> ZARYA
           </h2>
           {loading ? <Loader2 className="w-4 h-4 text-muted-foreground animate-spin" /> : null}
         </div>
@@ -61,7 +61,7 @@ export default function AIWidget() {
           onClick={() => router.push("/dashboard/learning/ai-search")}
           className="mt-3 w-full h-9 rounded-xl bg-gradient-primary text-white text-xs font-medium flex items-center justify-center gap-1.5 hover:scale-[1.02] transition-all"
         >
-          Ask NOVAX <ArrowRight className="w-3.5 h-3.5" />
+          Ask ZARYA <ArrowRight className="w-3.5 h-3.5" />
         </button>
       </div>
     </section>

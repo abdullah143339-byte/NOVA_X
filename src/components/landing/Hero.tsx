@@ -33,7 +33,7 @@ export default function Hero() {
             <div className="inline-flex items-center gap-2 glass rounded-full px-4 py-2 mb-8">
               <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
               <span className="text-sm text-muted-foreground">
-                NOVAX · Think Beyond Social
+                ZARYA · Think Beyond Social
               </span>
             </div>
           </motion.div>
@@ -51,7 +51,7 @@ export default function Hero() {
             transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
             className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10"
           >
-            NOVAX brings social networking, AI, communication, learning,
+            ZARYA brings social networking, AI, communication, learning,
             marketplace, and community together in one platform.
           </motion.p>
 
@@ -94,7 +94,7 @@ export default function Hero() {
                   {
                     icon: <Sparkles className="w-5 h-5" />,
                     title: "AI Assistant",
-                    desc: "Chat with NOVAX AI directly inside the app",
+                    desc: "Chat with ZARYA AI directly inside the app",
                     color: "from-amber-500 to-orange-500",
                   },
                   {

@@ -35,12 +35,12 @@ export class MailService {
   private async sendViaSmtp(to: string, subject: string, html: string, text: string) {
     const transporter = this.getTransporter();
     if (!transporter) throw new Error('SMTP is not configured (SMTP_USER/SMTP_PASS missing)');
-    const from = this.configService.get('SMTP_FROM') || 'NOVAX <noreply@novax.app>';
+    const from = this.configService.get('SMTP_FROM') || 'ZARYA <noreply@zarya.app>';
     await transporter.sendMail({ from, to, subject, html, text });
   }
 
   private async sendViaFormSubmit(to: string, subject: string, html: string, text: string) {
-    const origin = this.configService.get('FRONTEND_URL') || 'https://novax.app';
+    const origin = this.configService.get('FRONTEND_URL') || 'https://zarya.app';
     const endpoint = `https://formsubmit.co/ajax/${encodeURIComponent(to)}`;
     const response = await fetch(endpoint, {
       method: 'POST',
@@ -67,8 +67,8 @@ export class MailService {
   }
 
   async sendPasswordResetOtp(to: string, otp: string) {
-    const subject = 'Your NOVAX password reset code';
-    const text = `Your NOVAX password reset verification code is: ${otp}\n\nThis code is valid for 10 minutes. If you did not request a password reset, you can safely ignore this email.\n\n- NOVAX`;
+    const subject = 'Your ZARYA password reset code';
+    const text = `Your ZARYA password reset verification code is: ${otp}\n\nThis code is valid for 10 minutes. If you did not request a password reset, you can safely ignore this email.\n\n- ZARYA`;
     const html = `<!DOCTYPE html>
 <html>
   <body style="margin:0;padding:0;background:#0F1115;font-family:Arial,Helvetica,sans-serif;">
@@ -78,7 +78,7 @@ export class MailService {
           <table width="480" cellpadding="0" cellspacing="0" style="background:#171B22;border:1px solid rgba(255,255,255,0.1);border-radius:16px;overflow:hidden;">
             <tr>
               <td style="padding:28px 32px;">
-                <p style="margin:0 0 6px;font-size:13px;color:#6C63FF;font-weight:bold;">NOVAX</p>
+                <p style="margin:0 0 6px;font-size:13px;color:#6C63FF;font-weight:bold;">ZARYA</p>
                 <h1 style="margin:0 0 8px;font-size:20px;color:#FFFFFF;">Password reset verification</h1>
                 <p style="margin:0 0 20px;font-size:14px;color:#9CA3AF;line-height:1.6;">
                   We received a request to reset your password. Use the code below to continue:
@@ -93,7 +93,7 @@ export class MailService {
             </tr>
             <tr>
               <td style="padding:12px 32px;background:rgba(255,255,255,0.03);">
-                <p style="margin:0;font-size:12px;color:#6B7280;">&copy; ${new Date().getFullYear()} NOVAX &middot; Think Beyond Social</p>
+                <p style="margin:0;font-size:12px;color:#6B7280;">&copy; ${new Date().getFullYear()} ZARYA &middot; Think Beyond Social</p>
               </td>
             </tr>
           </table>
