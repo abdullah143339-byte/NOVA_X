@@ -102,7 +102,7 @@ export default function ChatBotWidget() {
     setLoading(true);
 
     try {
-      const chatHistory = [...messages, userMsg].filter(m => m.role !== "system");
+      const chatHistory = [...messages, userMsg];
       const res = await api.aiChat(chatHistory) as any;
       const reply = res?.data?.content || "I'm not sure about that. Try asking differently!";
       setMessages(prev => [...prev, { role: "assistant", content: reply }]);
