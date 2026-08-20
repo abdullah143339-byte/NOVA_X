@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { MessageCircle, X, Send, Loader2, Bot, Sparkles } from "lucide-react";
+import { X, Send, Loader2 } from "lucide-react";
 import api from "@/lib/api";
 import { ZARYA_AI_RULES } from "@/lib/ai";
 import Markdown from "@/components/ui/Markdown";
@@ -119,8 +119,8 @@ export default function ChatBotWidget() {
         <div className="fixed bottom-[calc(env(safe-area-inset-bottom)+8rem)] md:bottom-24 right-4 md:right-6 left-4 md:left-auto z-50 sm:w-96 max-h-[60dvh] md:max-h-[500px] tactile-raised rounded-3xl shadow-elevated overflow-hidden animate-scale-in flex flex-col">
           <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-[#6C63FF]/10">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#6C63FF] to-[#7C3AED] flex items-center justify-center ai-glow">
-                <Bot className="w-4 h-4 text-white" />
+              <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center ai-glow overflow-hidden">
+                <img src="/zarya.png" alt="ZARYA" className="w-full h-full object-cover" />
               </div>
               <div>
                 <span className="text-sm font-semibold text-foreground block">ZARYA</span>
@@ -189,7 +189,7 @@ export default function ChatBotWidget() {
         className="fixed bottom-[calc(env(safe-area-inset-bottom)+5.5rem)] md:bottom-6 right-4 md:right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-br from-[#6C63FF] to-[#7C3AED] shadow-lg shadow-[#6C63FF]/40 ai-glow flex items-center justify-center hover:scale-105 active:scale-95 transition-all animate-float"
         style={{ animationDuration: "4s" }}
       >
-        {open ? <X className="w-6 h-6 text-white" /> : <MessageCircle className="w-6 h-6 text-white" />}
+        {open ? <X className="w-6 h-6 text-white" /> : <img src="/zarya.png" alt="ZARYA" className="w-11 h-11 rounded-full object-cover" />}
       </button>
     </>
   );

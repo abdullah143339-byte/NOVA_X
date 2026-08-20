@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { ArrowLeft, Bot, Loader2, Send, Trash2 } from "lucide-react";
+import { ArrowLeft, Loader2, Send, Trash2 } from "lucide-react";
 import api from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { ZARYA_AI_RULES } from "@/lib/ai";
@@ -132,8 +132,8 @@ export default function AIConversation({ onBack }: AIConversationProps) {
           >
             <ArrowLeft className="w-4 h-4" />
           </button>
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#6C63FF] to-[#7C3AED] flex items-center justify-center ai-glow shrink-0">
-            <Bot className="w-5 h-5 text-white" />
+          <div className="w-10 h-10 rounded-2xl bg-white flex items-center justify-center ai-glow overflow-hidden shrink-0">
+            <img src="/zarya.png" alt="ZARYA" className="w-full h-full object-cover" />
           </div>
           <div className="min-w-0">
             <h3 className="text-sm font-semibold text-foreground truncate flex items-center gap-1.5">

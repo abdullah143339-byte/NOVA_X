@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { Bell, BellOff, Pin, Search, Users, Sparkles, Plus, ChevronRight } from "lucide-react";
+import { Bell, BellOff, Pin, Search, Users, Plus, ChevronRight } from "lucide-react";
 import type { Conversation } from "./types";
 import { isVerifiedUser } from "./types";
 import { formatConversationTime } from "./format";
@@ -216,8 +216,8 @@ export default function ConversationList({
                 "linear-gradient(120deg, rgba(108,99,255,0.14), rgba(124,58,237,0.08)), linear-gradient(150deg, var(--surface), var(--muted))",
             }}
           >
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#6C63FF] to-[#7C3AED] flex items-center justify-center ai-glow shrink-0">
-              <Sparkles className="w-5 h-5 text-white" />
+            <div className="w-11 h-11 rounded-2xl bg-white flex items-center justify-center ai-glow overflow-hidden shrink-0">
+              <img src="/zarya.png" alt="ZARYA" className="w-full h-full object-cover" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-foreground flex items-center gap-1.5 truncate">
